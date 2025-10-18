@@ -17,9 +17,6 @@ const notFound = require('./src/middleware/notFound');
 const ipWhitelist = require('./src/middleware/ipWhitelist');
 
 const app = express();
-const http = require('http');
-const server = http.createServer(app);
-let io; // socket.io instance
 
 // Trust proxy for accurate IP detection
 app.set('trust proxy', true);
@@ -27,8 +24,8 @@ app.set('trust proxy', true);
 // Security middleware
 app.use(helmet());
 
-// IP Whitelist middleware (only allow specific IP)
-app.use(ipWhitelist);
+// IP Whitelist middleware (only allow specific IP) - Disabled for Vercel
+// app.use(ipWhitelist);
 
 // CORS configuration - Allow multiple websites
 const corsOrigins = [
@@ -39,7 +36,7 @@ const corsOrigins = [
     'https://www.yourwebsite.com',
     'https://bliss-portal.com',
     'https://www.bliss-portal.com',
-    "https://the-bliss-portal-backend.vercel.app/"
+    'https://the-bliss-portal-backend.vercel.app'
 ];
 
 app.use(cors({
@@ -76,40 +73,8 @@ app.use('/api', routes);
 app.use(notFound);
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 3000;
-
-// Setup Socket.IO
-try {
-    const { Server } = require('socket.io');
-    io = new Server(server, {
-        cors: {
-            origin: corsOrigins,
-            methods: ['GET', 'POST']
-        }
-    });
-
-    io.on('connection', (socket) => {
-        console.log('🧩 Socket connected:', socket.id);
-        // allow rooms per task for scoped chat
-        socket.on('joinTask', (taskId) => {
-            socket.join(String(taskId));
-        });
-
-        socket.on('disconnect', () => {
-            console.log('🔌 Socket disconnected:', socket.id);
-        });
-    });
-} catch (e) {
-    console.warn('Socket.IO not initialized (module not installed). Run: npm i socket.io');
-}
-
 // Connect to MongoDB
 connectDB();
 
-server.listen(PORT, () => {
-    console.log(`🚀 Server is running on port ${PORT}`);
-    console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`🌐 Health check: http://localhost:${PORT}/health`);
-});
-
+// Export for Vercel
 module.exports = app;
