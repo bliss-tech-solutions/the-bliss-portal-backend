@@ -24,6 +24,9 @@ router.put('/addtaskassign/:taskId/archive', addTaskAssignController.archive);
 // PUT /api/addtaskassign/:taskId/unarchive - unarchive task
 router.put('/addtaskassign/:taskId/unarchive', addTaskAssignController.unarchive);
 
+// PUT /api/addtaskassign/:taskId/status - update task status
+router.put('/addtaskassign/:taskId/status', addTaskAssignController.updateStatus);
+
 module.exports = router;
 
 

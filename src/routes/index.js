@@ -7,6 +7,8 @@ const userDetailsRoutes = require('../components/UserDetails');
 const addTaskAssignRoutes = require('../components/AddTaskAssign');
 const chatRoutes = require('../components/Chat');
 const checkInCheckOutRoutes = require('../components/CheckInCheckOutApi');
+const festiveCalendarRoutes = require('../components/FestiveCalendarApi');
+const leavesRoutes = require('../components/LeavesApi');
 
 // Register all routes
 // router.use('/testdummyapi', testDummyApiRoutes);
@@ -14,6 +16,8 @@ router.use('/', userDetailsRoutes); // Direct access without /userdetails/
 router.use('/', addTaskAssignRoutes);
 router.use('/', chatRoutes);
 router.use('/', checkInCheckOutRoutes);
+router.use('/', festiveCalendarRoutes);
+router.use('/', leavesRoutes);
 
 // API Info endpoint
 router.get('/', (req, res) => {

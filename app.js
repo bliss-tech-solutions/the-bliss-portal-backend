@@ -95,6 +95,20 @@ try {
             socket.join(String(taskId));
         });
 
+        // allow clients to subscribe to a specific festive date room
+        socket.on('joinFestiveDate', (date) => {
+            if (typeof date === 'string' && date.trim()) {
+                socket.join(`festive:${date.trim()}`);
+            }
+        });
+
+        // allow clients to subscribe to specific user updates
+        socket.on('joinUser', (userId) => {
+            if (typeof userId === 'string' && userId.trim()) {
+                socket.join(`user:${userId.trim()}`);
+            }
+        });
+
         socket.on('disconnect', () => {
             console.log('🔌 Socket disconnected:', socket.id);
         });

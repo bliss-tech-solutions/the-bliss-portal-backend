@@ -130,6 +130,40 @@ const addTaskAssignController = {
         } catch (error) {
             next(error);
         }
+    },
+
+    // PUT /api/addtaskassign/:taskId/status - update task status
+    updateStatus: async (req, res, next) => {
+        try {
+            const { taskId } = req.params;
+            const { taskStatus } = req.body;
+
+            // Validate status
+            if (!taskStatus || !['pending', 'completed'].includes(taskStatus)) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'Invalid status. Must be "pending" or "completed"' 
+                });
+            }
+
+            const updated = await AddTaskAssignModel.findByIdAndUpdate(
+                taskId,
+                { taskStatus },
+                { new: true, runValidators: true }
+            );
+
+            if (!updated) {
+                return res.status(404).json({ success: false, message: 'Task not found' });
+            }
+
+            res.status(200).json({ 
+                success: true, 
+                message: `Task status updated to ${taskStatus}`, 
+                data: updated 
+            });
+        } catch (error) {
+            next(error);
+        }
     }
 };
 

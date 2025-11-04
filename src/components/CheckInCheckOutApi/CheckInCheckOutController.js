@@ -4,54 +4,107 @@ const checkInCheckOutController = {
     // POST /api/checkin - Check in for the day
     checkIn: async (req, res, next) => {
         try {
-            const { userId, time, location, device, notes } = req.body;
-            
-            if (!userId || !time) {
+            const { userId, checkInReason, reason, status } = req.body;
+
+            if (!userId) {
                 return res.status(400).json({
                     success: false,
-                    message: 'userId and time are required'
+                    message: 'userId is required'
                 });
             }
 
-            // Get today's date in YYYY-MM-DD format
             const today = new Date().toISOString().split('T')[0];
-            const checkInTimestamp = new Date();
+            const now = new Date();
 
-            // Check if user already checked in today
-            const existingRecord = await CheckInCheckOutModel.findOne({ userId, date: today });
-            
-            if (existingRecord && existingRecord.checkIn.timestamp) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'User already checked in today'
+            let doc = await CheckInCheckOutModel.findOne({ userId });
+
+            if (!doc) {
+                const newEntry = { date: today, checkInAt: now };
+                if (typeof checkInReason === 'string' && checkInReason.trim()) newEntry.checkInReason = checkInReason.trim();
+                else if (typeof reason === 'string' && reason.trim()) newEntry.checkInReason = reason.trim();
+                if (typeof status === 'string' && status.trim()) newEntry.checkInStatus = status.trim();
+                doc = new CheckInCheckOutModel({
+                    userId,
+                    CheckInCheckOutTime: [newEntry]
                 });
+                await doc.save();
+            } else {
+                const entry = doc.CheckInCheckOutTime.find(e => e.date === today);
+                if (entry && entry.checkInAt) {
+                    return res.status(400).json({ success: false, message: 'User already checked in today' });
+                }
+                if (entry) {
+                    entry.checkInAt = now;
+                    if (typeof checkInReason === 'string' && checkInReason.trim()) entry.checkInReason = checkInReason.trim();
+                    else if (typeof reason === 'string' && reason.trim()) entry.checkInReason = reason.trim();
+                    if (typeof status === 'string' && status.trim()) entry.checkInStatus = status.trim();
+                } else {
+                    const newEntry = { date: today, checkInAt: now };
+                    if (typeof checkInReason === 'string' && checkInReason.trim()) newEntry.checkInReason = checkInReason.trim();
+                    else if (typeof reason === 'string' && reason.trim()) newEntry.checkInReason = reason.trim();
+                    if (typeof status === 'string' && status.trim()) newEntry.checkInStatus = status.trim();
+                    doc.CheckInCheckOutTime.push(newEntry);
+                }
+                await doc.save();
             }
-
-            // Create or update record
-            const checkInData = {
-                userId,
-                date: today,
-                checkIn: {
-                    time,
-                    timestamp: checkInTimestamp,
-                    location: location || null,
-                    device: device || null
-                },
-                status: 'checked-in',
-                notes: notes || null
-            };
-
-            const record = await CheckInCheckOutModel.findOneAndUpdate(
-                { userId, date: today },
-                checkInData,
-                { upsert: true, new: true }
-            );
 
             res.status(201).json({
                 success: true,
                 message: 'Check-in successful',
-                data: record
+                data: doc
             });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    // GET /api/checkin/status?userId=USER_ID - Is user checked in today (server local date)
+    getCheckInStatus: async (req, res, next) => {
+        try {
+            const { userId } = req.query;
+            if (!userId) {
+                return res.status(400).json({ success: false, message: 'userId is required' });
+            }
+
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = String(now.getMonth() + 1).padStart(2, '0');
+            const d = String(now.getDate()).padStart(2, '0');
+            const todayLocal = `${y}-${m}-${d}`; // server-local YYYY-MM-DD
+
+            const doc = await CheckInCheckOutModel.findOne({ userId });
+            const entry = doc ? (doc.CheckInCheckOutTime || []).find(e => e.date === todayLocal) : null;
+
+            if (entry && entry.checkInAt) {
+                return res.status(200).json({ checkedIn: true, timestamp: entry.checkInAt.toISOString() });
+            }
+            return res.status(200).json({ checkedIn: false });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    // GET /api/checkout/status?userId=USER_ID - Is user checked out today (server local date)
+    getCheckOutStatus: async (req, res, next) => {
+        try {
+            const { userId } = req.query;
+            if (!userId) {
+                return res.status(400).json({ success: false, message: 'userId is required' });
+            }
+
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = String(now.getMonth() + 1).padStart(2, '0');
+            const d = String(now.getDate()).padStart(2, '0');
+            const todayLocal = `${y}-${m}-${d}`; // server-local YYYY-MM-DD
+
+            const doc = await CheckInCheckOutModel.findOne({ userId });
+            const entry = doc ? (doc.CheckInCheckOutTime || []).find(e => e.date === todayLocal) : null;
+
+            if (entry && entry.checkOutAt) {
+                return res.status(200).json({ checkedOut: true, timestamp: entry.checkOutAt.toISOString() });
+            }
+            return res.status(200).json({ checkedOut: false });
         } catch (error) {
             next(error);
         }
@@ -60,62 +113,41 @@ const checkInCheckOutController = {
     // POST /api/checkout - Check out for the day
     checkOut: async (req, res, next) => {
         try {
-            const { userId, time, location, device, notes } = req.body;
-            
-            if (!userId || !time) {
+            const { userId, checkOutReason, reason: checkoutReasonLegacy, status } = req.body;
+
+            if (!userId) {
                 return res.status(400).json({
                     success: false,
-                    message: 'userId and time are required'
+                    message: 'userId is required'
                 });
             }
 
-            // Get today's date in YYYY-MM-DD format
             const today = new Date().toISOString().split('T')[0];
-            const checkOutTimestamp = new Date();
+            const now = new Date();
 
-            // Find today's record
-            const existingRecord = await CheckInCheckOutModel.findOne({ userId, date: today });
-            
-            if (!existingRecord || !existingRecord.checkIn.timestamp) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'User must check in before checking out'
-                });
+            const doc = await CheckInCheckOutModel.findOne({ userId });
+            if (!doc) {
+                return res.status(400).json({ success: false, message: 'User must check in before checking out' });
             }
 
-            if (existingRecord.checkOut.timestamp) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'User already checked out today'
-                });
+            const entry = doc.CheckInCheckOutTime.find(e => e.date === today);
+            if (!entry || !entry.checkInAt) {
+                return res.status(400).json({ success: false, message: 'User must check in before checking out' });
+            }
+            if (entry.checkOutAt) {
+                return res.status(400).json({ success: false, message: 'User already checked out today' });
             }
 
-            // Calculate total hours
-            const checkInTime = existingRecord.checkIn.timestamp;
-            const totalHours = (checkOutTimestamp - checkInTime) / (1000 * 60 * 60); // Convert to hours
+            entry.checkOutAt = now;
+            entry.totalHours = Math.round(((now - entry.checkInAt) / (1000 * 60 * 60)) * 100) / 100;
+            if (typeof checkOutReason === 'string' && checkOutReason.trim()) entry.checkOutReason = checkOutReason.trim();
+            else if (typeof checkoutReasonLegacy === 'string' && checkoutReasonLegacy.trim()) entry.checkOutReason = checkoutReasonLegacy.trim();
+            // keep backward-compatible field if legacy 'reason' provided
+            if (typeof checkoutReasonLegacy === 'string' && checkoutReasonLegacy.trim()) entry.reason = checkoutReasonLegacy.trim();
+            if (typeof status === 'string' && status.trim()) entry.checkOutStatus = status.trim();
+            await doc.save();
 
-            // Update record with check-out data
-            const updatedRecord = await CheckInCheckOutModel.findOneAndUpdate(
-                { userId, date: today },
-                {
-                    checkOut: {
-                        time,
-                        timestamp: checkOutTimestamp,
-                        location: location || null,
-                        device: device || null
-                    },
-                    totalHours: Math.round(totalHours * 100) / 100, // Round to 2 decimal places
-                    status: 'checked-out',
-                    notes: notes || existingRecord.notes
-                },
-                { new: true }
-            );
-
-            res.status(200).json({
-                success: true,
-                message: 'Check-out successful',
-                data: updatedRecord
-            });
+            res.status(200).json({ success: true, message: 'Check-out successful', data: doc });
         } catch (error) {
             next(error);
         }
@@ -127,20 +159,16 @@ const checkInCheckOutController = {
             const { userId } = req.params;
             const today = new Date().toISOString().split('T')[0];
 
-            const record = await CheckInCheckOutModel.findOne({ userId, date: today });
-
-            if (!record) {
-                return res.status(200).json({
-                    success: true,
-                    message: 'No record found for today',
-                    data: null
-                });
+            const doc = await CheckInCheckOutModel.findOne({ userId });
+            if (!doc) {
+                return res.status(200).json({ success: true, message: 'No record found for today', data: null });
             }
+            const entry = doc.CheckInCheckOutTime.find(e => e.date === today) || null;
 
-            res.status(200).json({
+            return res.status(200).json({
                 success: true,
-                message: 'Today\'s record retrieved successfully',
-                data: record
+                message: entry ? 'Today\'s record retrieved successfully' : 'No record found for today',
+                data: entry
             });
         } catch (error) {
             next(error);
@@ -153,28 +181,24 @@ const checkInCheckOutController = {
             const { userId } = req.params;
             const { startDate, endDate, limit = 30 } = req.query;
 
-            let filter = { userId };
-            
-            // Add date range filter if provided
-            if (startDate && endDate) {
-                filter.date = { $gte: startDate, $lte: endDate };
-            } else if (startDate) {
-                filter.date = { $gte: startDate };
-            } else if (endDate) {
-                filter.date = { $lte: endDate };
+            const doc = await CheckInCheckOutModel.findOne({ userId });
+            if (!doc) {
+                return res.status(200).json({ success: true, message: 'User history retrieved successfully', data: [], count: 0 });
             }
 
-            const records = await CheckInCheckOutModel
-                .find(filter)
-                .sort({ date: -1 }) // Most recent first
-                .limit(parseInt(limit));
+            let entries = doc.CheckInCheckOutTime || [];
+            if (startDate && endDate) {
+                entries = entries.filter(e => e.date >= startDate && e.date <= endDate);
+            } else if (startDate) {
+                entries = entries.filter(e => e.date >= startDate);
+            } else if (endDate) {
+                entries = entries.filter(e => e.date <= endDate);
+            }
 
-            res.status(200).json({
-                success: true,
-                message: 'User history retrieved successfully',
-                data: records,
-                count: records.length
-            });
+            entries.sort((a, b) => (a.date < b.date ? 1 : -1));
+            const limited = entries.slice(0, parseInt(limit));
+
+            res.status(200).json({ success: true, message: 'User history retrieved successfully', data: limited, count: limited.length });
         } catch (error) {
             next(error);
         }
@@ -185,22 +209,19 @@ const checkInCheckOutController = {
         try {
             const { date, limit = 50 } = req.query;
 
-            let filter = {};
-            if (date) {
-                filter.date = date;
+            const docs = await CheckInCheckOutModel.find({}).limit(1000);
+            let flattened = [];
+            for (const d of docs) {
+                for (const e of (d.CheckInCheckOutTime || [])) {
+                    if (!date || e.date === date) {
+                        flattened.push({ userId: d.userId, ...e });
+                    }
+                }
             }
+            flattened.sort((a, b) => (a.date < b.date ? 1 : -1));
+            const limited = flattened.slice(0, parseInt(limit));
 
-            const records = await CheckInCheckOutModel
-                .find(filter)
-                .sort({ date: -1, createdAt: -1 })
-                .limit(parseInt(limit));
-
-            res.status(200).json({
-                success: true,
-                message: 'All records retrieved successfully',
-                data: records,
-                count: records.length
-            });
+            res.status(200).json({ success: true, message: 'All records retrieved successfully', data: limited, count: limited.length });
         } catch (error) {
             next(error);
         }

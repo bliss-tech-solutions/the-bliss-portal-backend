@@ -1,4 +1,5 @@
 const UserDetailsModel = require('./UserDetailsSchema/UserDetailsSchema');
+const { getIO } = require('../../utils/socket');
 
 const userDetailsController = {
     // GET /api/userdetails/getUserDetails - Get all user details
@@ -276,6 +277,89 @@ const userDetailsController = {
                     userEmail: updatedUser.userEmail
                 }
             });
+        } catch (error) {
+            next(error);
+        }
+    }
+    ,
+
+    // PUT /api/updateUserDetails/:userId - Update user's profile fields
+    updateUserDetails: async (req, res, next) => {
+        try {
+            const paramUserId = req.params.userId; // custom userId (not _id)
+            const {
+                firstName,
+                lastName,
+                email,
+                number,
+                role,
+                position,
+                details,
+                maritalStatus,
+                birthDate,
+                address,
+                pincode,
+                languages,
+                skills
+            } = req.body;
+
+            if (!paramUserId) {
+                return res.status(400).json({ success: false, message: 'userId is required in the URL' });
+            }
+
+            const user = await UserDetailsModel.findOne({ userId: paramUserId });
+            if (!user) {
+                return res.status(404).json({ success: false, message: 'User not found' });
+            }
+
+            // If email is changing, ensure uniqueness
+            if (typeof email === 'string' && email !== user.email) {
+                const existingEmail = await UserDetailsModel.findOne({ email });
+                if (existingEmail) {
+                    return res.status(400).json({ success: false, message: 'Email already exists' });
+                }
+            }
+
+            // If number is changing, ensure uniqueness
+            if (typeof number === 'string' && number !== user.number) {
+                const existingNumber = await UserDetailsModel.findOne({ number });
+                if (existingNumber) {
+                    return res.status(400).json({ success: false, message: 'Mobile number already exists' });
+                }
+            }
+
+            const updatePayload = {};
+            if (typeof firstName === 'string') updatePayload.firstName = firstName;
+            if (typeof lastName === 'string') updatePayload.lastName = lastName;
+            if (typeof email === 'string') updatePayload.email = email;
+            if (typeof number === 'string') updatePayload.number = number;
+            if (typeof role === 'string') updatePayload.role = role;
+            if (typeof position === 'string') updatePayload.position = position;
+            if (typeof details === 'string') updatePayload.details = details;
+            if (typeof maritalStatus === 'string') updatePayload.maritalStatus = maritalStatus;
+            if (typeof birthDate === 'string') updatePayload.birthDate = birthDate;
+            if (typeof address === 'string') updatePayload.address = address;
+            if (typeof pincode === 'string') updatePayload.pincode = pincode;
+            if (Array.isArray(languages)) updatePayload.languages = languages;
+            if (Array.isArray(skills)) updatePayload.skills = skills;
+
+            const updated = await UserDetailsModel.findByIdAndUpdate(
+                user._id,
+                updatePayload,
+                { new: true }
+            );
+
+            // Emit real-time update via Socket.IO
+            try {
+                const io = getIO && getIO();
+                if (io) {
+                    const payload = { userId: updated.userId, _id: String(updated._id), data: updated };
+                    io.emit('user:updated', payload);
+                    io.to(`user:${updated.userId}`).emit('user:updated', payload);
+                }
+            } catch (_) { /* ignore socket errors */ }
+
+            return res.status(200).json({ success: true, message: 'User details updated', data: updated });
         } catch (error) {
             next(error);
         }

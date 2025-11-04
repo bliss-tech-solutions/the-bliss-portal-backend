@@ -20,4 +20,7 @@ router.post('/signIn', userDetailsController.signIn);
 // POST /api/updatePassword - Update user password
 router.post('/updatePassword', userDetailsController.updatePassword);
 
+// PUT /api/updateUserDetails/:userId - Update user profile fields
+router.put('/updateUserDetails/:userId', userDetailsController.updateUserDetails);
+
 module.exports = router;

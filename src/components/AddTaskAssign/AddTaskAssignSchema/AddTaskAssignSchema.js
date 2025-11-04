@@ -12,6 +12,7 @@ const AddTaskAssignSchema = new Schema(
         priority: { type: String },
         timeSpend: { type: String }, // e.g., "12:45:00"
         description: { type: String },
+        taskStatus: { type: String, enum: ['pending', 'completed'], default: 'pending' },
         // Archive controls
         isArchived: { type: Boolean, default: false },
         archivedAt: { type: Date },
