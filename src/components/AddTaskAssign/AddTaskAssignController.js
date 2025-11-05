@@ -112,7 +112,7 @@ const addTaskAssignController = {
     // POST /api/addtaskassign - create a task
     create: async (req, res, next) => {
         try {
-            const { userId, receiverUserId, taskName, clientName, category, priority, timeSpend, description } = req.body;
+            const { userId, receiverUserId, taskName, clientName, category, priority, timeSpend, description, taskImages } = req.body;
 
             const newTask = new AddTaskAssignModel({
                 userId,
@@ -122,7 +122,8 @@ const addTaskAssignController = {
                 category,
                 priority,
                 timeSpend,
-                description
+                description,
+                taskImages: Array.isArray(taskImages) ? taskImages : []
             });
 
             const saved = await newTask.save();
