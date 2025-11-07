@@ -81,12 +81,16 @@ const PORT = process.env.PORT || 3000;
 // Setup Socket.IO
 try {
     const { Server } = require('socket.io');
+    const { setIO } = require('./src/utils/socket');
     io = new Server(server, {
         cors: {
             origin: corsOrigins,
             methods: ['GET', 'POST']
         }
     });
+
+    // Set IO instance for use in controllers
+    setIO(io);
 
     io.on('connection', (socket) => {
         console.log('🧩 Socket connected:', socket.id);
@@ -106,6 +110,27 @@ try {
         socket.on('joinUser', (userId) => {
             if (typeof userId === 'string' && userId.trim()) {
                 socket.join(`user:${userId.trim()}`);
+            }
+        });
+
+        // allow clients to subscribe to slot updates for a specific user
+        socket.on('joinUserSlots', (userId) => {
+            if (typeof userId === 'string' && userId.trim()) {
+                socket.join(`userSlots:${userId.trim()}`);
+            }
+        });
+
+        // allow assigners to subscribe to their task updates
+        socket.on('joinAssigner', (assignerId) => {
+            if (typeof assignerId === 'string' && assignerId.trim()) {
+                socket.join(`assigner:${assignerId.trim()}`);
+            }
+        });
+
+        // allow receivers to subscribe to their task updates
+        socket.on('joinReceiver', (receiverId) => {
+            if (typeof receiverId === 'string' && receiverId.trim()) {
+                socket.join(`receiver:${receiverId.trim()}`);
             }
         });
 
