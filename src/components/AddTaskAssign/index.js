@@ -27,6 +27,21 @@ router.put('/addtaskassign/:taskId/unarchive', addTaskAssignController.unarchive
 // PUT /api/addtaskassign/:taskId/status - update task status
 router.put('/addtaskassign/:taskId/status', addTaskAssignController.updateStatus);
 
+// GET /api/availability - compute suggestions and bookings for a user
+router.get('/availability', addTaskAssignController.getAvailability);
+
+// POST /api/addtaskassign/:taskId/slots/:slotId/request-extension - request extra time
+router.post(
+    '/addtaskassign/:taskId/slots/:slotId/request-extension',
+    addTaskAssignController.requestSlotExtension
+);
+
+// PUT /api/addtaskassign/:taskId/slots/:slotId/extensions/:extensionId/respond - approve/reject extension
+router.put(
+    '/addtaskassign/:taskId/slots/:slotId/extensions/:extensionId/respond',
+    addTaskAssignController.respondToSlotExtension
+);
+
 module.exports = router;
 
 
