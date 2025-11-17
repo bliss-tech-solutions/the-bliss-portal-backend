@@ -1,41 +1,65 @@
 const ipWhitelist = (req, res, next) => {
-    // Skip IP whitelisting in production or on Render
-    const isRender = process.env.RENDER === 'true' || process.env.RENDER_EXTERNAL_URL;
-    if (process.env.NODE_ENV === 'production' || isRender) {
-        console.log('🌐 Production/Render mode: IP whitelisting disabled');
+    // Check if IP whitelisting is enabled (via ALLOW_IP_WHITELIST env var)
+    const enableWhitelist = process.env.ALLOW_IP_WHITELIST === 'true';
+    
+    // If whitelisting is not explicitly enabled, skip it
+    if (!enableWhitelist) {
         return next();
     }
 
-    // Only apply IP whitelisting in development
-    const allowedIP = process.env.IP_ADDRESS;
+    // Get allowed IPs from environment variable
+    // Can be single IP or comma-separated list: "192.168.1.1,10.0.0.1"
+    const allowedIPsString = process.env.ALLOWED_IPS || process.env.IP_ADDRESS;
 
-    if (!allowedIP) {
-        console.warn('⚠️  IP_ADDRESS not configured in .env file - allowing all IPs in development');
+    if (!allowedIPsString) {
+        console.warn('⚠️  ALLOWED_IPS not configured - allowing all IPs');
         return next();
     }
+
+    // Parse allowed IPs (support comma-separated list)
+    const allowedIPs = allowedIPsString.split(',').map(ip => ip.trim()).filter(Boolean);
 
     // Get client IP address
-    const clientIP = req.ip ||
+    // On Render/proxied environments, use x-forwarded-for header
+    const clientIP = req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+        req.headers['x-real-ip'] ||
+        req.ip ||
         req.connection.remoteAddress ||
         req.socket.remoteAddress ||
         (req.connection.socket ? req.connection.socket.remoteAddress : null) ||
-        req.headers['x-forwarded-for']?.split(',')[0]?.trim();
+        'unknown';
 
-    console.log(`🔍 Client IP: ${clientIP}, Allowed IP: ${allowedIP}`);
+    console.log(`🔍 Client IP: ${clientIP}, Allowed IPs: ${allowedIPs.join(', ')}`);
 
-    // Check if client IP matches allowed IP (only in development)
-    // Allow both the specific IP and localhost for development
-    if (clientIP === allowedIP || clientIP === `::ffff:${allowedIP}` || clientIP === '::1' || clientIP === '127.0.0.1') {
-        console.log(`✅ Development mode: IP ${clientIP} is whitelisted`);
+    // Check if client IP matches any allowed IP
+    // Support IPv4, IPv6, and localhost variations
+    const isAllowed = allowedIPs.some(allowedIP => {
+        // Exact match
+        if (clientIP === allowedIP) return true;
+        
+        // IPv6 mapped IPv4 (::ffff:192.168.1.1)
+        if (clientIP === `::ffff:${allowedIP}`) return true;
+        
+        // Localhost variations
+        if ((clientIP === '::1' || clientIP === '127.0.0.1') && 
+            (allowedIP === '127.0.0.1' || allowedIP === 'localhost')) return true;
+        
+        // CIDR notation support (basic - for single IP, just check exact match)
+        // For full CIDR support, you'd need a library like ipaddr.js
+        return false;
+    });
+
+    if (isAllowed) {
+        console.log(`✅ IP ${clientIP} is whitelisted`);
         next();
     } else {
-        console.log(`❌ Development mode: IP ${clientIP} is not whitelisted`);
+        console.log(`❌ IP ${clientIP} is not whitelisted`);
         res.status(403).json({
             success: false,
-            message: 'Access denied. Your IP address is not authorized in development mode.',
+            message: 'Access denied. Your IP address is not authorized.',
             clientIP: clientIP,
-            allowedIP: allowedIP,
-            environment: 'development'
+            allowedIPs: allowedIPs,
+            environment: process.env.NODE_ENV || 'development'
         });
     }
 };
