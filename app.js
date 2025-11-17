@@ -10,6 +10,7 @@ const connectDB = require('./src/config/database');
 
 // Import routes
 const routes = require('./src/routes');
+const { setIO } = require('./src/utils/socket');
 
 // Import middleware
 const errorHandler = require('./src/middleware/errorHandler');
@@ -105,6 +106,7 @@ try {
             methods: ['GET', 'POST']
         }
     });
+    setIO(io);
 
     io.on('connection', (socket) => {
         console.log('🧩 Socket connected:', socket.id);
