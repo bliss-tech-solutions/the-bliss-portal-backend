@@ -112,7 +112,21 @@ try {
         console.log('🧩 Socket connected:', socket.id);
         // allow rooms per task for scoped chat
         socket.on('joinTask', (taskId) => {
+            if (!taskId) return;
             socket.join(String(taskId));
+        });
+
+        // backward-compatible event name used by older clients
+        socket.on('join-task-room', (payload = {}) => {
+            const { taskId } = payload;
+            if (!taskId) return;
+            socket.join(String(taskId));
+        });
+
+        socket.on('leave-task-room', (payload = {}) => {
+            const { taskId } = payload;
+            if (!taskId) return;
+            socket.leave(String(taskId));
         });
 
         // allow clients to subscribe to a specific festive date room
