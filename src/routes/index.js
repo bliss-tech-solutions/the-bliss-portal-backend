@@ -9,7 +9,7 @@ const chatRoutes = require('../components/Chat');
 const checkInCheckOutRoutes = require('../components/CheckInCheckOutApi');
 const festiveCalendarRoutes = require('../components/FestiveCalendarApi');
 const leavesRoutes = require('../components/LeavesApi');
-const salaryRoutes = require('../components/salaryCalculations');
+// const salaryRoutes = require('../components/salaryCalculations');
 
 // Register all routes
 // router.use('/testdummyapi', testDummyApiRoutes);
@@ -19,7 +19,7 @@ router.use('/', chatRoutes);
 router.use('/', checkInCheckOutRoutes);
 router.use('/', festiveCalendarRoutes);
 router.use('/', leavesRoutes);
-router.use('/', salaryRoutes);
+// router.use('/', salaryRoutes);
 
 // API Info endpoint
 router.get('/', (req, res) => {

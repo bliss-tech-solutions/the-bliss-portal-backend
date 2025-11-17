@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: the-bliss-portal-backend
+    env: node
+    plan: free  # Change to 'starter' or 'standard' for production
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000  # Render uses PORT 10000 by default, but it's auto-set
+      # Add your MongoDB URI and other env vars in Render Dashboard
+      # - key: MONGODB_URI
+      #   value: your-mongodb-connection-string
+      # - key: FRONTEND_URL
+      #   value: https://your-frontend-domain.com
+

@@ -39,8 +39,10 @@ const corsOrigins = [
     'https://www.yourwebsite.com',
     'https://bliss-portal.com',
     'https://www.bliss-portal.com',
-    "https://the-bliss-portal-backend.vercel.app/"
-];
+    // Render deployment URLs (add your actual Render domain)
+    process.env.RENDER_EXTERNAL_URL || null,
+    process.env.FRONTEND_URL || null
+].filter(Boolean);
 
 app.use(cors({
     origin: corsOrigins,
