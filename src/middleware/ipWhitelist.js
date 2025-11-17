@@ -1,7 +1,8 @@
 const ipWhitelist = (req, res, next) => {
-    // Skip IP whitelisting in production
-    if (process.env.NODE_ENV === 'production') {
-        console.log('🌐 Production mode: IP whitelisting disabled');
+    // Skip IP whitelisting in production or on Render
+    const isRender = process.env.RENDER === 'true' || process.env.RENDER_EXTERNAL_URL;
+    if (process.env.NODE_ENV === 'production' || isRender) {
+        console.log('🌐 Production/Render mode: IP whitelisting disabled');
         return next();
     }
 
