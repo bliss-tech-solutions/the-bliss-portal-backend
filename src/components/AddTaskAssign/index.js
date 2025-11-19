@@ -12,6 +12,9 @@ router.get('/getTaskAssign/archived', addTaskAssignController.getArchived);
 // GET /api/addtaskassign/:userId - list tasks for a user
 router.get('/getTaskAssign/:userId', addTaskAssignController.getByUserId);
 
+// GET /api/getTaskAssignByDate?userId=&date=
+router.get('/getTaskAssignByDate', addTaskAssignController.getByUserIdAndDate);
+
 // POST /api/addtaskassign - create task
 router.post('/addtaskassign', addTaskAssignController.create);
 
@@ -28,7 +31,7 @@ router.put('/addtaskassign/:taskId/unarchive', addTaskAssignController.unarchive
 router.put('/addtaskassign/:taskId/status', addTaskAssignController.updateStatus);
 
 // GET /api/availability - compute suggestions and bookings for a user
-router.get('/availability', addTaskAssignController.getAvailability);
+// router.get('/availability', addTaskAssignController.getAvailability);
 
 // POST /api/addtaskassign/:taskId/slots/:slotId/request-extension - request extra time
 router.post(

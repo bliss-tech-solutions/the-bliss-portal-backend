@@ -289,6 +289,121 @@ const addTaskAssignController = {
         }
     },
 
+    // GET /api/getTaskAssignByDate?userId=&date=
+    getByUserIdAndDate: async (req, res, next) => {
+        try {
+            const { userId, date } = req.query;
+
+            if (!userId || !date) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'userId and date query parameters are required'
+                });
+            }
+
+            const targetDate = new Date(date);
+            if (Number.isNaN(targetDate.getTime())) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid date value. Expected YYYY-MM-DD'
+                });
+            }
+
+            const dayStart = toUTCStartOfDay(targetDate);
+            if (!dayStart) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Unable to normalize provided date'
+                });
+            }
+            const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60000);
+
+            const tasks = await AddTaskAssignModel.find({
+                $or: [{ userId }, { receiverUserId: userId }],
+                slots: { $exists: true, $ne: [] }
+            }).lean();
+
+            const results = [];
+            tasks.forEach((task) => {
+                const filteredSlots = (task.slots || [])
+                    .map((slot) => {
+                        const interval = resolveSlotInterval(slot);
+                        let overlaps = false;
+                        if (interval) {
+                            overlaps = interval.startDate < dayEnd && interval.endDate > dayStart;
+                        } else if (slot.slotDate) {
+                            const slotDate = new Date(slot.slotDate);
+                            overlaps =
+                                !Number.isNaN(slotDate.getTime()) &&
+                                slotDate >= dayStart &&
+                                slotDate < dayEnd;
+                        }
+                        if (!overlaps) return null;
+
+                        const startDate = parseSlotTimestamp(slot, 'start');
+                        const endDate = parseSlotTimestamp(slot, 'end');
+                        let derivedDuration = slot.durationMinutes;
+                        if ((!derivedDuration || derivedDuration <= 0) && startDate && endDate) {
+                            derivedDuration = Math.max(
+                                0,
+                                Math.round((endDate.getTime() - startDate.getTime()) / 60000)
+                            );
+                        }
+
+                        return {
+                            slotId: slot._id,
+                            start: startDate ? startDate.toISOString() : slot.start || null,
+                            end: endDate ? endDate.toISOString() : slot.end || null,
+                            slotDate: slot.slotDate
+                                ? new Date(slot.slotDate).toISOString().split('T')[0]
+                                : startDate
+                                ? startDate.toISOString().split('T')[0]
+                                : null,
+                            status: slot.status || 'scheduled',
+                            durationMinutes: derivedDuration || null,
+                            extensionMinutes: slot.extensionMinutes || 0
+                        };
+                    })
+                    .filter(Boolean);
+
+                if (filteredSlots.length) {
+                    results.push({
+                        taskId: task._id,
+                        taskName: task.taskName,
+                        userId: task.userId,
+                        receiverUserId: task.receiverUserId,
+                        taskStatus: task.taskStatus,
+                        category: task.category,
+                        priority: task.priority,
+                        clientName: task.clientName,
+                        slots: filteredSlots
+                    });
+                }
+            });
+
+            const totalSlots = results.reduce(
+                (count, task) => count + (task.slots ? task.slots.length : 0),
+                0
+            );
+
+            res.status(200).json({
+                success: true,
+                message: totalSlots
+                    ? 'Tasks and slots retrieved for the selected date'
+                    : 'No slots found for the selected date',
+                data: {
+                    userId,
+                    date: dayStart.toISOString().split('T')[0],
+                    totalTasks: results.length,
+                    totalSlots,
+                    tasks: results
+                }
+            });
+        } catch (error) {
+            next(error);
+        }
+    },
+
     // POST /api/addtaskassign - create a task
     create: async (req, res, next) => {
         try {
@@ -662,16 +777,14 @@ const addTaskAssignController = {
         }
     },
 
-    // GET /api/availability - provide schedule bookings and suggested free slots
+    // GET /api/availability - provide a day's bookings and free intervals for a user
     getAvailability: async (req, res, next) => {
         try {
             const {
                 receiverUserId,
                 userId,
                 date,
-                durationMinutes,
-                maxSuggestions,
-                days
+                durationMinutes
             } = req.query;
 
             const targetUserId = receiverUserId || userId;
@@ -682,7 +795,14 @@ const addTaskAssignController = {
                 });
             }
 
-            const baseDate = date ? new Date(date) : new Date();
+            if (!date) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'date query parameter is required (YYYY-MM-DD)'
+                });
+            }
+
+            const baseDate = new Date(date);
             if (Number.isNaN(baseDate.getTime())) {
                 return res.status(400).json({
                     success: false,
@@ -690,29 +810,13 @@ const addTaskAssignController = {
                 });
             }
 
-            const normalizedDuration = coerceMinutes(durationMinutes) || 30;
-            if (normalizedDuration <= 0) {
+            const normalizedDuration = durationMinutes ? coerceMinutes(durationMinutes) : undefined;
+            if (durationMinutes && (!normalizedDuration || normalizedDuration <= 0)) {
                 return res.status(400).json({
                     success: false,
                     message: 'durationMinutes must be a positive number'
                 });
             }
-
-            const suggestionCap = (() => {
-                const parsed = Number(maxSuggestions);
-                if (Number.isFinite(parsed) && parsed > 0) {
-                    return Math.min(Math.floor(parsed), 10);
-                }
-                return 5;
-            })();
-
-            const lookaheadDays = (() => {
-                const parsed = Number(days);
-                if (Number.isFinite(parsed) && parsed > 0) {
-                    return Math.min(Math.floor(parsed), 7);
-                }
-                return 3;
-            })();
 
             const dayStart = toUTCStartOfDay(baseDate);
             if (!dayStart) {
@@ -721,12 +825,12 @@ const addTaskAssignController = {
                     message: 'Unable to normalize provided date'
                 });
             }
-            const rangeEnd = new Date(dayStart.getTime() + lookaheadDays * 24 * 60 * 60000);
+            const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60000);
 
             const scheduleEntries = await UserScheduleModel.find({
                 userId: targetUserId,
                 end: { $gt: dayStart },
-                start: { $lt: rangeEnd }
+                start: { $lt: dayEnd }
             })
                 .sort({ start: 1 })
                 .lean();
@@ -768,83 +872,67 @@ const addTaskAssignController = {
                 };
             });
 
-            const now = new Date();
-            const suggestions = [];
-
-            let currentDayStart = new Date(dayStart);
-            for (let dayIndex = 0; dayIndex < lookaheadDays && suggestions.length < suggestionCap; dayIndex += 1) {
-                const currentDayEnd = new Date(currentDayStart.getTime() + 24 * 60 * 60000);
-                const dayEntries = scheduleEntries
-                    .filter((entry) => {
-                        const entryStart = new Date(entry.start);
-                        const entryEnd = new Date(entry.end);
-                        return entryEnd > currentDayStart && entryStart < currentDayEnd;
-                    })
-                    .sort((a, b) => new Date(a.start) - new Date(b.start));
-
-                let cursor = new Date(currentDayStart);
-                if (currentDayStart <= now && now < currentDayEnd) {
-                    cursor = new Date(now.getTime());
-                }
-
-                dayEntries.forEach((entry) => {
-                    if (suggestions.length >= suggestionCap) {
-                        return;
-                    }
+            const normalizedIntervals = scheduleEntries
+                .map((entry) => {
                     const entryStart = new Date(entry.start);
                     const entryEnd = new Date(entry.end);
-                    if (entryEnd <= cursor) {
-                        return;
-                    }
+                    if (Number.isNaN(entryStart.getTime()) || Number.isNaN(entryEnd.getTime())) return null;
+                    const start = entryStart < dayStart ? new Date(dayStart) : entryStart;
+                    const end = entryEnd > dayEnd ? new Date(dayEnd) : entryEnd;
+                    if (end <= start) return null;
+                    return { start, end };
+                })
+                .filter(Boolean)
+                .sort((a, b) => a.start - b.start);
 
-                    if (entryStart > cursor) {
-                        const gapStart = new Date(cursor);
-                        const gapEnd = new Date(Math.min(entryStart.getTime(), currentDayEnd.getTime()));
-                        const gapMinutes = Math.round((gapEnd.getTime() - gapStart.getTime()) / 60000);
-
-                        if (gapMinutes >= normalizedDuration) {
-                            const suggestionStart = new Date(gapStart);
-                            const suggestionEnd = addMinutesToDate(suggestionStart, normalizedDuration);
-                            suggestions.push({
-                                start: suggestionStart.toISOString(),
-                                end: suggestionEnd.toISOString(),
-                                slotDate: suggestionStart.toISOString().split('T')[0]
-                            });
-                        }
-                    }
-
-                    if (entryEnd > cursor) {
-                        cursor = new Date(Math.max(cursor.getTime(), entryEnd.getTime()));
-                    }
-                });
-
-                if (suggestions.length < suggestionCap) {
-                    if (cursor < currentDayEnd) {
-                        const remainingMinutes = Math.round((currentDayEnd.getTime() - cursor.getTime()) / 60000);
-                        if (remainingMinutes >= normalizedDuration) {
-                            const suggestionStart = new Date(cursor);
-                            const suggestionEnd = addMinutesToDate(suggestionStart, normalizedDuration);
-                            suggestions.push({
-                                start: suggestionStart.toISOString(),
-                                end: suggestionEnd.toISOString(),
-                                slotDate: suggestionStart.toISOString().split('T')[0]
-                            });
-                        }
+            const freeSlots = [];
+            let cursor = new Date(dayStart);
+            normalizedIntervals.forEach((interval) => {
+                if (interval.start > cursor) {
+                    const freeStart = new Date(cursor);
+                    const freeEnd = new Date(Math.min(interval.start.getTime(), dayEnd.getTime()));
+                    if (!normalizedDuration || ((freeEnd - freeStart) / 60000) >= normalizedDuration) {
+                        freeSlots.push({
+                            start: freeStart.toISOString(),
+                            end: freeEnd.toISOString(),
+                            slotDate: freeStart.toISOString().split('T')[0]
+                        });
                     }
                 }
+                if (interval.end > cursor) {
+                    cursor = new Date(interval.end);
+                }
+            });
 
-                currentDayStart = currentDayEnd;
+            if (cursor < dayEnd) {
+                if (!normalizedDuration || ((dayEnd - cursor) / 60000) >= normalizedDuration) {
+                    freeSlots.push({
+                        start: cursor.toISOString(),
+                        end: dayEnd.toISOString(),
+                        slotDate: cursor.toISOString().split('T')[0]
+                    });
+                }
             }
+
+            const hasBookings = bookings.length > 0;
+            const message = hasBookings
+                ? 'Availability computed for the selected date'
+                : 'All slots are free for the selected date';
 
             res.status(200).json({
                 success: true,
-                message: 'Availability computed',
+                message,
                 data: {
                     userId: targetUserId,
-                    baseDate: dayStart.toISOString(),
-                    durationMinutes: normalizedDuration,
-                    suggestions: suggestions.slice(0, suggestionCap),
-                    bookings
+                    date: dayStart.toISOString().split('T')[0],
+                    durationFilterMinutes: normalizedDuration || null,
+                    bookings,
+                    freeSlots,
+                    summary: {
+                        totalBookedSlots: bookings.length,
+                        totalFreeSlots: freeSlots.length,
+                        fullyFreeDay: !hasBookings
+                    }
                 }
             });
         } catch (error) {

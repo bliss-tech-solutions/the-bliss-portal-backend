@@ -7,9 +7,20 @@ const chatController = {
         try {
             const { taskId, senderId, receiverId, userName, message, time } = req.body;
 
+            const createdAt = new Date();
             const update = {
-                $push: { messages: { senderId, receiverId, userId: senderId, userName, message, time } },
-                $set: { updatedAt: new Date() }
+                $push: {
+                    messages: {
+                        senderId,
+                        receiverId,
+                        userId: senderId,
+                        userName,
+                        message,
+                        time,
+                        createdAt
+                    }
+                },
+                $set: { updatedAt: createdAt }
             };
             const options = { upsert: true, new: true, setDefaultsOnInsert: true };
             const thread = await ChatThreadModel.findOneAndUpdate({ taskId }, update, options);
@@ -25,10 +36,24 @@ const chatController = {
             try {
                 const { getIO } = require('../../utils/socket');
                 const io = getIO && getIO();
-                if (io) io.to(String(taskId)).emit('chat:new', {
-                    taskId,
-                    message: { senderId, receiverId, userId: senderId, userName, message, time }
-                });
+                if (io && thread?.messages?.length) {
+                    const newMessage = thread.messages[thread.messages.length - 1];
+                    const payload = {
+                        taskId: String(taskId),
+                        message: {
+                            _id: newMessage._id,
+                            senderId,
+                            receiverId,
+                            userId: senderId,
+                            userName,
+                            message,
+                            time,
+                            createdAt
+                        }
+                    };
+
+                    io.to(String(taskId)).emit('chat:new', payload);
+                }
             } catch (e) { }
 
             res.status(201).json({ success: true, message: 'Message created', data: thread });
