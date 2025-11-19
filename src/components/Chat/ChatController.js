@@ -6,8 +6,8 @@ const chatController = {
     createMessage: async (req, res, next) => {
         try {
             const { taskId, senderId, receiverId, userName, message, time } = req.body;
-
             const createdAt = new Date();
+
             const update = {
                 $push: {
                     messages: {
@@ -28,7 +28,7 @@ const chatController = {
             // Update task metadata
             await AddTaskAssignModel.findByIdAndUpdate(taskId, {
                 lastMessage: message,
-                lastMessageAt: new Date(),
+                lastMessageAt: createdAt,
                 chatCount: thread.messages.length
             });
 
@@ -41,17 +41,15 @@ const chatController = {
                     const payload = {
                         taskId: String(taskId),
                         message: {
-                            _id: newMessage._id,
-                            senderId,
-                            receiverId,
-                            userId: senderId,
-                            userName,
-                            message,
-                            time,
-                            createdAt
+                            senderId: newMessage?.senderId || senderId,
+                            receiverId: newMessage?.receiverId || receiverId,
+                            userId: newMessage?.userId || senderId,
+                            userName: newMessage?.userName || userName,
+                            message: newMessage?.message || message,
+                            time: newMessage?.time || time,
+                            createdAt: newMessage?.createdAt || createdAt
                         }
                     };
-
                     io.to(String(taskId)).emit('chat:new', payload);
                 }
             } catch (e) { }
