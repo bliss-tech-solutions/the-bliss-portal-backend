@@ -437,10 +437,6 @@ const addTaskAssignController = {
                     ? [attachments]
                     : [];
 
-            const mergedAttachments = Array.from(
-                new Set([...(normalizedTaskImages || []), ...normalizedAttachments])
-            );
-
             const normalizeSlot = (slotPayload = {}) => {
                 if (!slotPayload) return undefined;
 
@@ -563,7 +559,7 @@ const addTaskAssignController = {
                 timeSpend,
                 description,
                 taskImages: normalizedTaskImages,
-                attachments: mergedAttachments,
+                attachments: normalizedAttachments,
                 slots: normalizedSlots,
                 timeTracking: {
                     originalSlotMinutes,
