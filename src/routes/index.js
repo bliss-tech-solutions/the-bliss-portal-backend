@@ -9,6 +9,8 @@ const chatRoutes = require('../components/Chat');
 const checkInCheckOutRoutes = require('../components/CheckInCheckOutApi');
 const festiveCalendarRoutes = require('../components/FestiveCalendarApi');
 const leavesRoutes = require('../components/LeavesApi');
+const userVerificationDocumentsRoutes = require('../components/UserVerificationDocuments');
+const createAccountSignInApiRoutes = require('../components/CreateAccountSignInApi');
 // const salaryRoutes = require('../components/salaryCalculations');
 
 // Register all routes
@@ -19,6 +21,8 @@ router.use('/', chatRoutes);
 router.use('/', checkInCheckOutRoutes);
 router.use('/', festiveCalendarRoutes);
 router.use('/', leavesRoutes);
+router.use('/', userVerificationDocumentsRoutes);
+router.use('/', createAccountSignInApiRoutes);
 // router.use('/', salaryRoutes);
 
 // API Info endpoint
@@ -42,7 +46,12 @@ router.get('/', (req, res) => {
             checkOut: '/api/checkout',
             getTodayRecord: '/api/checkin/:userId/today',
             getUserHistory: '/api/checkin/:userId/history',
-            getAllRecords: '/api/checkin/all'
+            getAllRecords: '/api/checkin/all',
+            createUserVerificationDocument: '/api/userverificationdocuments/create',
+            getAllUserVerificationDocuments: '/api/userverificationdocuments/getAll',
+            getUserVerificationDocumentByUserId: '/api/userverificationdocuments/getByUserId/:userId',
+            createAccountSignInCheck: '/api/createaccountsignin/check',
+            createAccountSignIn: '/api/createaccountsignin/signin'
         }
     });
 });
