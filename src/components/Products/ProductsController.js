@@ -83,8 +83,18 @@ const productsController = {
                 categoriesName
             } = req.body;
 
+            // Normalize categoriesName - handle both string and array
+            let normalizedCategoryName = categoriesName;
+            if (Array.isArray(categoriesName)) {
+                normalizedCategoryName = categoriesName.length > 0 ? categoriesName[0] : null;
+            } else if (typeof categoriesName === 'string') {
+                normalizedCategoryName = categoriesName.trim();
+            } else {
+                normalizedCategoryName = null;
+            }
+
             // Validate required fields
-            if (!productTitle || !categoriesName || productPrice === undefined) {
+            if (!productTitle || !normalizedCategoryName || productPrice === undefined) {
                 return res.status(400).json({
                     success: false,
                     message: 'Missing required fields: productTitle, productPrice, and categoriesName are required'
@@ -141,7 +151,7 @@ const productsController = {
                 productDescription: productDescription || undefined,
                 productQuantity: quantity,
                 productPrice: price,
-                categoriesName
+                categoriesName: normalizedCategoryName
             });
 
             const savedProduct = await newProduct.save();
@@ -227,7 +237,14 @@ const productsController = {
                 }
                 updateData.productPrice = price;
             }
-            if (categoriesName !== undefined) updateData.categoriesName = categoriesName;
+            if (categoriesName !== undefined) {
+                // Normalize categoriesName - handle both string and array
+                if (Array.isArray(categoriesName)) {
+                    updateData.categoriesName = categoriesName.length > 0 ? categoriesName[0] : product.categoriesName;
+                } else if (typeof categoriesName === 'string') {
+                    updateData.categoriesName = categoriesName.trim();
+                }
+            }
 
             const updatedProduct = await ProductsModel.findByIdAndUpdate(
                 productId,
