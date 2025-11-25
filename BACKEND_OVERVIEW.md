@@ -19,6 +19,8 @@
 | **User Details** | `components/UserDetails` | CRUD for employee profiles, credential generation, sign-in, password updates. |
 | **Task Assignment** | `components/AddTaskAssign` | Create/update tasks, slots, time-tracking, extensions, schedule sync, archived views. |
 | **Chat** | `components/Chat` | Task-scoped chat threads with REST + Socket.IO realtime emissions. |
+| **User Verification Documents** | `components/UserVerificationDocuments` | Store employee verification documents (Aadhar card, passport photo, offer letter), salary history (before/after Bliss), bank details, address, experience, and job information. |
+| **Create Account Sign-In** | `components/CreateAccountSignInApi` | Admin authentication API with hardcoded credentials (CodeNo, Email, Password) for HR panel access control. |
 | **Check-in/Check-out, Leaves, Festive Calendar, Salary Calculations** | respective folders | Business vertical APIs (attendance, leave management, calendar, payroll). |
 | **User Schedule** | `components/UserSchedule/UserScheduleSchema.js` | Mirrors task slots to prevent double-booking and power availability lookups. |
 
@@ -65,7 +67,27 @@
 ### 9. Environment Configuration
 - `.env` (local) and Render dashboard store secrets:
   - `MONGODB_URI`, `NODE_ENV`, `FRONTEND_URL`, `ALLOW_IP_WHITELIST`, etc.
-- CORS/IP whitelist logic reads from these to enable/disable restrictions.
+  - CORS/IP whitelist logic reads from these to enable/disable restrictions.
+
+### 10. API Endpoints Summary
+
+#### User Verification Documents
+- `POST /api/userverificationdocuments/create` - Create new verification document
+- `GET /api/userverificationdocuments/getAll` - Get all verification documents
+- `GET /api/userverificationdocuments/getByUserId/:userId` - Get documents by userId
+
+**Fields**: name, department, position, jobType, beforeBlissSalary, blissSalary, joiningDate, currentAddress, permanentAddress, experience, bankDetails (object), aadharCardImage, passportPhoto, offerLetter
+
+#### Create Account Sign-In (Admin)
+- `POST /api/createaccountsignin/signin` - Admin sign-in validation
+- `GET /api/createaccountsignin/check` - Check API availability
+
+**Credentials** (hardcoded):
+- CodeNo: `BMMPK`
+- Email: `HR@bliss.com`
+- Password: `HR@Bliss0123`
+
+**Response**: Returns success with `authenticated: true` if all credentials match, otherwise returns 401 with error details.
 
 ---
 This document summarizes how the backend is structured, where each major feature lives, and how Socket.IO integrates with the REST controllers to deliver realtime updates.

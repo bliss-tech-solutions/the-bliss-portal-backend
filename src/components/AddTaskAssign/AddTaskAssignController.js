@@ -570,6 +570,45 @@ const addTaskAssignController = {
 
             const saved = await newTask.save();
             await syncTaskSchedule(saved);
+
+            // Emit socket event for real-time updates
+            try {
+                const { getIO } = require('../../utils/socket');
+                const io = getIO && getIO();
+                if (io) {
+                    // Emit to task-specific room
+                    io.to(String(saved._id)).emit('task:created', {
+                        taskId: String(saved._id),
+                        task: saved
+                    });
+
+                    // Emit to receiver user room (if assigned to someone)
+                    if (saved.receiverUserId) {
+                        io.to(`user:${saved.receiverUserId}`).emit('task:assigned', {
+                            taskId: String(saved._id),
+                            task: saved
+                        });
+                    }
+
+                    // Emit to creator user room
+                    if (saved.userId) {
+                        io.to(`user:${saved.userId}`).emit('task:created', {
+                            taskId: String(saved._id),
+                            task: saved
+                        });
+                    }
+
+                    // Emit to global tasks room for task list updates
+                    io.emit('task:new', {
+                        taskId: String(saved._id),
+                        task: saved
+                    });
+                }
+            } catch (e) {
+                // Ignore socket errors, don't break the API response
+                console.warn('Socket emission failed:', e.message);
+            }
+
             res.status(201).json({ success: true, message: 'Task created successfully', data: saved });
         } catch (error) {
             next(error);
@@ -598,6 +637,47 @@ const addTaskAssignController = {
 
             if (!updated) {
                 return res.status(404).json({ success: false, message: 'Task not found' });
+            }
+
+            // Emit socket event for real-time status updates
+            try {
+                const { getIO } = require('../../utils/socket');
+                const io = getIO && getIO();
+                if (io) {
+                    // Emit to task-specific room
+                    io.to(String(taskId)).emit('task:statusUpdated', {
+                        taskId: String(taskId),
+                        taskStatus,
+                        task: updated
+                    });
+
+                    // Emit to receiver user room
+                    if (updated.receiverUserId) {
+                        io.to(`user:${updated.receiverUserId}`).emit('task:statusUpdated', {
+                            taskId: String(taskId),
+                            taskStatus,
+                            task: updated
+                        });
+                    }
+
+                    // Emit to creator user room
+                    if (updated.userId) {
+                        io.to(`user:${updated.userId}`).emit('task:statusUpdated', {
+                            taskId: String(taskId),
+                            taskStatus,
+                            task: updated
+                        });
+                    }
+
+                    // Emit to global for task list updates
+                    io.emit('task:updated', {
+                        taskId: String(taskId),
+                        taskStatus,
+                        task: updated
+                    });
+                }
+            } catch (e) {
+                console.warn('Socket emission failed:', e.message);
             }
 
             res.status(200).json({

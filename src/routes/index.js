@@ -11,6 +11,7 @@ const festiveCalendarRoutes = require('../components/FestiveCalendarApi');
 const leavesRoutes = require('../components/LeavesApi');
 const userVerificationDocumentsRoutes = require('../components/UserVerificationDocuments');
 const createAccountSignInApiRoutes = require('../components/CreateAccountSignInApi');
+const productsRoutes = require('../components/Products');
 // const salaryRoutes = require('../components/salaryCalculations');
 
 // Register all routes
@@ -23,6 +24,7 @@ router.use('/', festiveCalendarRoutes);
 router.use('/', leavesRoutes);
 router.use('/', userVerificationDocumentsRoutes);
 router.use('/', createAccountSignInApiRoutes);
+router.use('/', productsRoutes);
 // router.use('/', salaryRoutes);
 
 // API Info endpoint
@@ -51,7 +53,13 @@ router.get('/', (req, res) => {
             getAllUserVerificationDocuments: '/api/userverificationdocuments/getAll',
             getUserVerificationDocumentByUserId: '/api/userverificationdocuments/getByUserId/:userId',
             createAccountSignInCheck: '/api/createaccountsignin/check',
-            createAccountSignIn: '/api/createaccountsignin/signin'
+            createAccountSignIn: '/api/createaccountsignin/signin',
+            getAllProducts: '/api/products/getAll',
+            getProductById: '/api/products/getById/:productId',
+            getProductsByCategory: '/api/products/getByCategory/:categoryName',
+            createProduct: '/api/products/create',
+            updateProduct: '/api/products/update/:productId',
+            deleteProduct: '/api/products/delete/:productId'
         }
     });
 });

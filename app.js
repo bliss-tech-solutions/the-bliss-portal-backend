@@ -34,6 +34,7 @@ app.use(ipWhitelist);
 // CORS configuration - Allow multiple websites
 const corsOrigins = [
     'http://localhost:3000',
+    "http://localhost:5173",
     'http://localhost:2711',
     'http://localhost:3001',
     'https://yourwebsite.com',
