@@ -12,6 +12,7 @@ const leavesRoutes = require('../components/LeavesApi');
 const userVerificationDocumentsRoutes = require('../components/UserVerificationDocuments');
 const createAccountSignInApiRoutes = require('../components/CreateAccountSignInApi');
 const productsRoutes = require('../components/Products');
+const clientManagementRoutes = require('../components/ClientManagement');
 // const salaryRoutes = require('../components/salaryCalculations');
 
 // Register all routes
@@ -25,6 +26,7 @@ router.use('/', leavesRoutes);
 router.use('/', userVerificationDocumentsRoutes);
 router.use('/', createAccountSignInApiRoutes);
 router.use('/', productsRoutes);
+router.use('/', clientManagementRoutes);
 // router.use('/', salaryRoutes);
 
 // API Info endpoint
@@ -59,7 +61,12 @@ router.get('/', (req, res) => {
             getProductsByCategory: '/api/products/getByCategory/:categoryName',
             createProduct: '/api/products/create',
             updateProduct: '/api/products/update/:productId',
-            deleteProduct: '/api/products/delete/:productId'
+            deleteProduct: '/api/products/delete/:productId',
+            getAllClients: '/api/clientmanagement/getAllClientsData',
+            getClientById: '/api/clientmanagement/getById/:clientId',
+            createClient: '/api/clientmanagement/create',
+            updateClient: '/api/clientmanagement/update/:clientId',
+            deleteClient: '/api/clientmanagement/delete/:clientId'
         }
     });
 });
