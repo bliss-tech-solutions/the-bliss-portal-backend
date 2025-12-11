@@ -148,6 +148,34 @@ try {
             }
         });
 
+        // allow clients to subscribe to specific client updates
+        socket.on('joinClient', (clientId) => {
+            if (typeof clientId === 'string' && clientId.trim()) {
+                socket.join(`client:${clientId.trim()}`);
+            }
+        });
+
+        socket.on('leaveClient', (clientId) => {
+            if (typeof clientId === 'string' && clientId.trim()) {
+                socket.leave(`client:${clientId.trim()}`);
+            }
+        });
+
+        // allow clients to subscribe to specific client-user combination for filtered attachment views
+        socket.on('joinClientUser', (payload) => {
+            const { clientId, userId } = payload || {};
+            if (typeof clientId === 'string' && clientId.trim() && typeof userId === 'string' && userId.trim()) {
+                socket.join(`client:${clientId.trim()}:user:${userId.trim()}`);
+            }
+        });
+
+        socket.on('leaveClientUser', (payload) => {
+            const { clientId, userId } = payload || {};
+            if (typeof clientId === 'string' && clientId.trim() && typeof userId === 'string' && userId.trim()) {
+                socket.leave(`client:${clientId.trim()}:user:${userId.trim()}`);
+            }
+        });
+
         socket.on('disconnect', () => {
             console.log('🔌 Socket disconnected:', socket.id);
         });

@@ -19,6 +19,7 @@
 | **User Details** | `components/UserDetails` | CRUD for employee profiles, credential generation, sign-in, password updates. |
 | **Task Assignment** | `components/AddTaskAssign` | Create/update tasks, slots, time-tracking, extensions, schedule sync, archived views. |
 | **Chat** | `components/Chat` | Task-scoped chat threads with REST + Socket.IO realtime emissions. |
+| **Client Management** | `components/ClientManagement` | Client onboarding, assignment to users, status tracking. Includes attachment management system for content writers to upload documents/links by month, visible to assigners in real-time. |
 | **User Verification Documents** | `components/UserVerificationDocuments` | Store employee verification documents (Aadhar card, passport photo, offer letter), salary history (before/after Bliss), bank details, address, experience, and job information. |
 | **Create Account Sign-In** | `components/CreateAccountSignInApi` | Admin authentication API with hardcoded credentials (CodeNo, Email, Password) for HR panel access control. |
 | **Check-in/Check-out, Leaves, Festive Calendar, Salary Calculations** | respective folders | Business vertical APIs (attendance, leave management, calendar, payroll). |
@@ -41,11 +42,11 @@
    - `const io = new Server(server, { cors: {...} })`
    - `setIO(io)`
    - `io.on('connection', socket => { … })`
-     - Handles `joinTask`, `joinFestiveDate`, `joinUser`.
+     - Handles `joinTask`, `joinFestiveDate`, `joinUser`, `joinClient`, `joinClientUser`.
 
 2. **Controllers emit events**
    - Example: `ChatController.createMessage` saves chat then `io.to(taskId).emit('chat:new', payload)`
-   - Task extension approvals, user updates, etc., can broadcast similarly by calling `getIO()`.
+   - Task extension approvals, user updates, client management (create/update/delete), attachment operations can broadcast similarly by calling `getIO()`.
 
 3. **Client pattern (expected)**
    - Fetch history once via REST.
@@ -70,6 +71,60 @@
   - CORS/IP whitelist logic reads from these to enable/disable restrictions.
 
 ### 10. API Endpoints Summary
+
+#### Client Management
+- `GET /api/clientmanagement/getAllClientsData` - Get all clients (optional filters: `status`, `city`)
+- `GET /api/clientmanagement/getById/:clientId` - Get client by ID
+- `GET /api/clientmanagement/getClientsByUserId/:userId` - Get clients assigned to a specific user
+- `GET /api/clientmanagement/getClientsSortedByUserId` - Get all clients sorted/grouped by assigned userId
+- `POST /api/clientmanagement/create` - Create new client
+- `PUT /api/clientmanagement/update/:clientId` - Update client
+- `DELETE /api/clientmanagement/delete/:clientId` - Delete client
+
+**Client Schema Fields**: clientName, city, onboardDate, status (active/inactive), itsDataReceived (boolean), assignedUsers (array of {userId, name}), attachments (array)
+
+**Socket Events**:
+- `client:created` - Emitted when a client is created
+- `client:assigned` - Emitted to assigned users when a client is created/updated with assignments
+- `client:updated` - Emitted when a client is updated
+- `client:deleted` - Emitted when a client is deleted
+
+**Socket Rooms**: 
+- `client:{clientId}` - Join with `socket.emit('joinClient', clientId)`
+- `user:{userId}` - Join with `socket.emit('joinUser', userId)`
+
+#### Client Attachments
+- `POST /api/clientmanagement/:clientId/attachments` - Add attachment to client
+- `GET /api/clientmanagement/:clientId/attachments` - Get all attachments for a client (optional filter: `month`)
+- `GET /api/clientmanagement/:clientId/attachments/sortedByUserId` - Get attachments sorted/grouped by userId
+- `GET /api/clientmanagement/:clientId/attachments/byUserId/:userId` - Get attachments filtered by clientId + userId
+- `PUT /api/clientmanagement/:clientId/attachments/:attachmentId` - Update attachment
+- `DELETE /api/clientmanagement/:clientId/attachments/:attachmentId` - Delete attachment
+
+**Attachment Schema Fields**: link (required), notes (optional), month (Jan-Dec, required), uploadedBy ({userId, name})
+
+**Socket Events**:
+- `client:attachment:added` - Emitted when an attachment is added
+- `client:attachment:updated` - Emitted when an attachment is updated
+- `client:attachment:deleted` - Emitted when an attachment is deleted
+
+**Socket Rooms for Attachments**:
+- `client:{clientId}` - All attachments for a client
+- `user:{userId}` - Attachments uploaded by a specific user
+- `client:{clientId}:user:{userId}` - Join with `socket.emit('joinClientUser', {clientId, userId})` for filtered views
+
+**Attachment Payload**:
+```json
+{
+  "link": "https://docs.google.com/document/...",
+  "notes": "Content writing work for January",
+  "month": "Jan",
+  "uploadedBy": {
+    "userId": "user123",
+    "name": "Content Writer Name"
+  }
+}
+```
 
 #### User Verification Documents
 - `POST /api/userverificationdocuments/create` - Create new verification document

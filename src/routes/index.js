@@ -13,6 +13,7 @@ const userVerificationDocumentsRoutes = require('../components/UserVerificationD
 const createAccountSignInApiRoutes = require('../components/CreateAccountSignInApi');
 const productsRoutes = require('../components/Products');
 const clientManagementRoutes = require('../components/ClientManagement');
+const teamManagementRoutes = require('../components/TeamManagement');
 // const salaryRoutes = require('../components/salaryCalculations');
 
 // Register all routes
@@ -27,6 +28,7 @@ router.use('/', userVerificationDocumentsRoutes);
 router.use('/', createAccountSignInApiRoutes);
 router.use('/', productsRoutes);
 router.use('/', clientManagementRoutes);
+router.use('/', teamManagementRoutes);
 // router.use('/', salaryRoutes);
 
 // API Info endpoint
@@ -64,9 +66,16 @@ router.get('/', (req, res) => {
             deleteProduct: '/api/products/delete/:productId',
             getAllClients: '/api/clientmanagement/getAllClientsData',
             getClientById: '/api/clientmanagement/getById/:clientId',
+            getClientsByUserId: '/api/clientmanagement/getClientsByUserId/:userId',
             createClient: '/api/clientmanagement/create',
             updateClient: '/api/clientmanagement/update/:clientId',
-            deleteClient: '/api/clientmanagement/delete/:clientId'
+            deleteClient: '/api/clientmanagement/delete/:clientId',
+            getAllTeams: '/api/teammanagement/getAllTeams',
+            getTeamById: '/api/teammanagement/getTeamById/:teamId',
+            getTeamsByUserId: '/api/teammanagement/getTeamsByUserId/:userId',
+            createTeam: '/api/teammanagement/createTeam',
+            updateTeam: '/api/teammanagement/updateTeam/:teamId',
+            deleteTeam: '/api/teammanagement/deleteTeam/:teamId'
         }
     });
 });
