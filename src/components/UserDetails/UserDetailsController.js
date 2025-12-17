@@ -95,6 +95,36 @@ const userDetailsController = {
 
             const savedData = await newUserDetails.save();
 
+            // Emit real-time analytics update via Socket.IO
+            try {
+                const io = getIO && getIO();
+                if (io) {
+                    const totalEmployees = await UserDetailsModel.countDocuments();
+                    // Emit to analytics room for real-time updates
+                    io.to('analytics').emit('analytics:totalEmployees', {
+                        totalEmployees,
+                        timestamp: new Date().toISOString()
+                    });
+                    // Emit departments updated (new user added affects department counts)
+                    io.to('analytics').emit('analytics:departmentsUpdated', {
+                        timestamp: new Date().toISOString()
+                    });
+                    // Emit growth rate updated (new user added affects growth)
+                    io.to('analytics').emit('analytics:growthRateUpdated', {
+                        timestamp: new Date().toISOString()
+                    });
+                    // Emit overview updated (affects all analytics)
+                    io.to('analytics').emit('analytics:overviewUpdated', {
+                        timestamp: new Date().toISOString()
+                    });
+                    // Also emit user created event
+                    io.emit('user:created', { userId: savedData.userId, _id: String(savedData._id), data: savedData });
+                }
+            } catch (socketError) {
+                // Ignore socket errors, don't fail the API
+                console.error('Socket.IO error in addUserDetails:', socketError.message);
+            }
+
             res.status(201).json({
                 success: true,
                 message: 'User details created successfully',
@@ -356,8 +386,22 @@ const userDetailsController = {
                     const payload = { userId: updated.userId, _id: String(updated._id), data: updated };
                     io.emit('user:updated', payload);
                     io.to(`user:${updated.userId}`).emit('user:updated', payload);
+                    // Emit analytics updates if role changed (affects departments)
+                    if (updatePayload.role) {
+                        const totalEmployees = await UserDetailsModel.countDocuments();
+                        io.to('analytics').emit('analytics:totalEmployees', {
+                            totalEmployees,
+                            timestamp: new Date().toISOString()
+                        });
+                        io.to('analytics').emit('analytics:departmentsUpdated', {
+                            timestamp: new Date().toISOString()
+                        });
+                    }
                 }
-            } catch (_) { /* ignore socket errors */ }
+            } catch (socketError) {
+                // Ignore socket errors, don't fail the API
+                console.error('Socket.IO error in updateUserDetails:', socketError.message);
+            }
 
             return res.status(200).json({ success: true, message: 'User details updated', data: updated });
         } catch (error) {

@@ -1,4 +1,5 @@
 const CheckInCheckOutModel = require('./CheckInCheckOutSchema/CheckInCheckOutSchema');
+const { getIO } = require('../../utils/socket');
 
 const checkInCheckOutController = {
     // POST /api/checkin - Check in for the day
@@ -46,6 +47,23 @@ const checkInCheckOutController = {
                     doc.CheckInCheckOutTime.push(newEntry);
                 }
                 await doc.save();
+            }
+
+            // Emit real-time analytics update for active members
+            try {
+                const io = getIO && getIO();
+                if (io) {
+                    io.to('analytics').emit('analytics:activeMembersUpdated', {
+                        userId,
+                        timestamp: new Date().toISOString()
+                    });
+                    io.to('analytics').emit('analytics:overviewUpdated', {
+                        timestamp: new Date().toISOString()
+                    });
+                }
+            } catch (socketError) {
+                // Ignore socket errors, don't fail the API
+                console.error('Socket.IO error in checkIn:', socketError.message);
             }
 
             res.status(201).json({
@@ -146,6 +164,19 @@ const checkInCheckOutController = {
             if (typeof checkoutReasonLegacy === 'string' && checkoutReasonLegacy.trim()) entry.reason = checkoutReasonLegacy.trim();
             if (typeof status === 'string' && status.trim()) entry.checkOutStatus = status.trim();
             await doc.save();
+
+            // Emit real-time analytics update for active members (check-out doesn't change active status, but emit for consistency)
+            try {
+                const io = getIO && getIO();
+                if (io) {
+                    io.to('analytics').emit('analytics:overviewUpdated', {
+                        timestamp: new Date().toISOString()
+                    });
+                }
+            } catch (socketError) {
+                // Ignore socket errors, don't fail the API
+                console.error('Socket.IO error in checkOut:', socketError.message);
+            }
 
             res.status(200).json({ success: true, message: 'Check-out successful', data: doc });
         } catch (error) {

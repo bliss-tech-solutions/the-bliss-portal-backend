@@ -1,5 +1,6 @@
 const ChatThreadModel = require('./ChatSchema/ChatThreadSchema');
 const AddTaskAssignModel = require('../AddTaskAssign/AddTaskAssignSchema/AddTaskAssignSchema');
+const { cacheHelper } = require('../../config/redis');
 
 const chatController = {
     // POST /api/chat/messages - create or append to thread
@@ -31,6 +32,12 @@ const chatController = {
                 lastMessageAt: createdAt,
                 chatCount: thread.messages.length
             });
+
+            // Invalidate cache for this task's messages
+            await cacheHelper.delete(`chat:messages:task:${taskId}`);
+            // Invalidate cache for both sender and receiver user messages
+            if (senderId) await cacheHelper.deletePattern(`chat:messages:user:${senderId}*`);
+            if (receiverId) await cacheHelper.deletePattern(`chat:messages:user:${receiverId}*`);
 
             // Emit socket event if available
             try {
@@ -64,9 +71,41 @@ const chatController = {
     listByTask: async (req, res, next) => {
         try {
             const { taskId } = req.query;
+
+            if (!taskId) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'taskId query parameter is required'
+                });
+            }
+
+            // Build cache key
+            const cacheKey = `chat:messages:task:${taskId}`;
+
+            // Try to get from cache first
+            const cachedData = await cacheHelper.get(cacheKey);
+            if (cachedData) {
+                return res.status(200).json({
+                    success: true,
+                    data: cachedData.messages,
+                    count: cachedData.messages.length,
+                    cached: true
+                });
+            }
+
+            // Query database
             const thread = await ChatThreadModel.findOne({ taskId });
             const messages = thread ? thread.messages : [];
-            res.status(200).json({ success: true, data: messages, count: messages.length });
+
+            // Cache the result for 60 seconds
+            await cacheHelper.set(cacheKey, { messages }, 60);
+
+            res.status(200).json({
+                success: true,
+                data: messages,
+                count: messages.length,
+                cached: false
+            });
         } catch (error) {
             next(error);
         }
@@ -76,6 +115,20 @@ const chatController = {
     listByUser: async (req, res, next) => {
         try {
             const { userId } = req.params;
+
+            // Build cache key
+            const cacheKey = `chat:messages:user:${userId}`;
+
+            // Try to get from cache first
+            const cachedData = await cacheHelper.get(cacheKey);
+            if (cachedData) {
+                return res.status(200).json({
+                    success: true,
+                    data: cachedData,
+                    count: cachedData.length,
+                    cached: true
+                });
+            }
 
             // Find threads where user is either sender or receiver
             const threads = await ChatThreadModel.find({
@@ -97,7 +150,16 @@ const chatController = {
 
             // sort by createdAt desc
             all.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-            res.status(200).json({ success: true, data: all, count: all.length });
+
+            // Cache the result for 60 seconds
+            await cacheHelper.set(cacheKey, all, 60);
+
+            res.status(200).json({
+                success: true,
+                data: all,
+                count: all.length,
+                cached: false
+            });
         } catch (error) {
             next(error);
         }

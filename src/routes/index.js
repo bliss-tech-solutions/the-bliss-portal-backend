@@ -11,9 +11,10 @@ const festiveCalendarRoutes = require('../components/FestiveCalendarApi');
 const leavesRoutes = require('../components/LeavesApi');
 const userVerificationDocumentsRoutes = require('../components/UserVerificationDocuments');
 const createAccountSignInApiRoutes = require('../components/CreateAccountSignInApi');
-const productsRoutes = require('../components/Products');
 const clientManagementRoutes = require('../components/ClientManagement');
 const teamManagementRoutes = require('../components/TeamManagement');
+const globalChatRoutes = require('../components/GlobalChat');
+const analyticsRoutes = require('../components/Analytics');
 // const salaryRoutes = require('../components/salaryCalculations');
 
 // Register all routes
@@ -26,9 +27,10 @@ router.use('/', festiveCalendarRoutes);
 router.use('/', leavesRoutes);
 router.use('/', userVerificationDocumentsRoutes);
 router.use('/', createAccountSignInApiRoutes);
-router.use('/', productsRoutes);
 router.use('/', clientManagementRoutes);
 router.use('/', teamManagementRoutes);
+router.use('/', globalChatRoutes);
+router.use('/analytics', analyticsRoutes);
 // router.use('/', salaryRoutes);
 
 // API Info endpoint
@@ -58,12 +60,6 @@ router.get('/', (req, res) => {
             getUserVerificationDocumentByUserId: '/api/userverificationdocuments/getByUserId/:userId',
             createAccountSignInCheck: '/api/createaccountsignin/check',
             createAccountSignIn: '/api/createaccountsignin/signin',
-            getAllProducts: '/api/products/getAll',
-            getProductById: '/api/products/getById/:productId',
-            getProductsByCategory: '/api/products/getByCategory/:categoryName',
-            createProduct: '/api/products/create',
-            updateProduct: '/api/products/update/:productId',
-            deleteProduct: '/api/products/delete/:productId',
             getAllClients: '/api/clientmanagement/getAllClientsData',
             getClientById: '/api/clientmanagement/getById/:clientId',
             getClientsByUserId: '/api/clientmanagement/getClientsByUserId/:userId',
@@ -75,7 +71,22 @@ router.get('/', (req, res) => {
             getTeamsByUserId: '/api/teammanagement/getTeamsByUserId/:userId',
             createTeam: '/api/teammanagement/createTeam',
             updateTeam: '/api/teammanagement/updateTeam/:teamId',
-            deleteTeam: '/api/teammanagement/deleteTeam/:teamId'
+            deleteTeam: '/api/teammanagement/deleteTeam/:teamId',
+            createGlobalChatMessage: '/api/globalchat/messages',
+            getGlobalChatMessages: '/api/globalchat/messages',
+            getRecentGlobalChatMessages: '/api/globalchat/messages/recent',
+            analytics: {
+                totalEmployees: '/api/analytics/total-employees',
+                activeMembers: '/api/analytics/active-members?daysThreshold=4',
+                departments: '/api/analytics/departments',
+                growthRate: '/api/analytics/growth-rate?period=month&compareMonths=1',
+                overview: '/api/analytics/overview',
+                userWise: {
+                    getUserWiseData: '/api/analytics/userwise/:userId',
+                    getUserTasks: '/api/analytics/userwise/:userId/tasks?status=&limit=50&skip=0',
+                    getUserStats: '/api/analytics/userwise/:userId/stats'
+                }
+            }
         }
     });
 });

@@ -8,6 +8,9 @@ require('dotenv').config();
 // Import database connection
 const connectDB = require('./src/config/database');
 
+// Import Redis
+const { initRedis, closeRedis } = require('./src/config/redis');
+
 // Import routes
 const routes = require('./src/routes');
 const { setIO } = require('./src/utils/socket');
@@ -16,6 +19,7 @@ const { setIO } = require('./src/utils/socket');
 const errorHandler = require('./src/middleware/errorHandler');
 const notFound = require('./src/middleware/notFound');
 const ipWhitelist = require('./src/middleware/ipWhitelist');
+const { redisCache } = require('./src/middleware/redisCache');
 
 const app = express();
 const http = require('http');
@@ -68,6 +72,23 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Static files
 app.use('/public', express.static(path.join(__dirname, 'public')));
+
+// Redis Cache Middleware (applied globally to API routes)
+// Exclude authentication, real-time endpoints, and routes with manual caching
+app.use('/api', redisCache({
+    duration: 300, // 5 minutes default cache duration
+    excludedRoutes: [
+        /\/signin/i,
+        /\/signIn/i,
+        /\/auth/i,
+        /\/checkin/i,
+        /\/checkout/i,
+        /\/socket/i,
+        /\/globalchat\/messages/i, // Has manual caching in controller
+        /\/chat\/messages/i // Has manual caching in controller
+    ],
+    excludedMethods: [] // Cache all GET requests
+}));
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -176,6 +197,28 @@ try {
             }
         });
 
+        // allow clients to subscribe to global chat room
+        socket.on('joinGlobalChat', () => {
+            socket.join('global-chat');
+            console.log('✅ Socket joined global-chat room:', socket.id);
+        });
+
+        socket.on('leaveGlobalChat', () => {
+            socket.leave('global-chat');
+            console.log('👋 Socket left global-chat room:', socket.id);
+        });
+
+        // Analytics room subscriptions
+        socket.on('joinAnalytics', () => {
+            socket.join('analytics');
+            console.log('📊 Client joined analytics room:', socket.id);
+        });
+
+        socket.on('leaveAnalytics', () => {
+            socket.leave('analytics');
+            console.log('👋 Client left analytics room:', socket.id);
+        });
+
         socket.on('disconnect', () => {
             console.log('🔌 Socket disconnected:', socket.id);
         });
@@ -186,6 +229,28 @@ try {
 
 // Connect to MongoDB
 connectDB();
+
+// Initialize Redis
+initRedis();
+
+// Graceful shutdown
+process.on('SIGTERM', async () => {
+    console.log('SIGTERM signal received: closing HTTP server and Redis');
+    await closeRedis();
+    server.close(() => {
+        console.log('HTTP server closed');
+        process.exit(0);
+    });
+});
+
+process.on('SIGINT', async () => {
+    console.log('SIGINT signal received: closing HTTP server and Redis');
+    await closeRedis();
+    server.close(() => {
+        console.log('HTTP server closed');
+        process.exit(0);
+    });
+});
 
 server.listen(PORT, () => {
     console.log(`🚀 Server is running on port ${PORT}`);

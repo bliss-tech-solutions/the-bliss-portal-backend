@@ -6,7 +6,7 @@ const clientManagementController = {
     getAllClientsData: async (req, res, next) => {
         try {
             const { status, city } = req.query; // Optional filters
-            
+
             // Build query
             const query = {};
             if (status) {
@@ -15,9 +15,9 @@ const clientManagementController = {
             if (city) {
                 query.city = { $regex: new RegExp(city, 'i') }; // Case-insensitive city search
             }
-            
+
             const clients = await ClientManagementModel.find(query).sort({ createdAt: -1 });
-            
+
             res.status(200).json({
                 success: true,
                 message: 'Clients retrieved successfully',
@@ -33,16 +33,16 @@ const clientManagementController = {
     getById: async (req, res, next) => {
         try {
             const { clientId } = req.params;
-            
+
             const client = await ClientManagementModel.findById(clientId);
-            
+
             if (!client) {
                 return res.status(404).json({
                     success: false,
                     message: 'Client not found'
                 });
             }
-            
+
             res.status(200).json({
                 success: true,
                 message: 'Client retrieved successfully',
@@ -57,12 +57,12 @@ const clientManagementController = {
     getClientsByUserId: async (req, res, next) => {
         try {
             const { userId } = req.params;
-            
+
             // Find all clients where the userId is in the assignedUsers array
             const clients = await ClientManagementModel.find({
                 'assignedUsers.userId': userId
             }).sort({ createdAt: -1 });
-            
+
             if (clients.length === 0) {
                 return res.status(200).json({
                     success: true,
@@ -71,7 +71,7 @@ const clientManagementController = {
                     count: 0
                 });
             }
-            
+
             res.status(200).json({
                 success: true,
                 message: 'Clients retrieved successfully',
@@ -297,7 +297,7 @@ const clientManagementController = {
 
                 const normalizedAssignedUsers = [];
                 const userIds = new Set();
-                
+
                 for (const user of assignedUsers) {
                     if (!user.userId || !user.name) {
                         return res.status(400).json({
@@ -589,11 +589,11 @@ const clientManagementController = {
 
             // Group attachments by userId
             const attachmentsByUserId = {};
-            
+
             attachments.forEach(attachment => {
                 const userId = attachment.uploadedBy.userId;
                 const userName = attachment.uploadedBy.name;
-                
+
                 if (!attachmentsByUserId[userId]) {
                     attachmentsByUserId[userId] = {
                         userId: userId,
@@ -601,7 +601,7 @@ const clientManagementController = {
                         attachments: []
                     };
                 }
-                
+
                 attachmentsByUserId[userId].attachments.push(attachment);
             });
 
@@ -631,7 +631,7 @@ const clientManagementController = {
         }
     },
 
-    // GET /api/clientmanagement/:clientId/attachments/byUserId/:userId - Get attachments for a client filtered by userId
+    // GET /api/clientmanagement/:clientId/attachments/byUserId/:userId - Get attachments for a client (shows all attachments if userId is an assigner)
     getAttachmentsByClientIdAndUserId: async (req, res, next) => {
         try {
             const { clientId, userId } = req.params;
@@ -646,10 +646,20 @@ const clientManagementController = {
                 });
             }
 
-            // Filter attachments by userId
-            let attachments = client.attachments.filter(
-                att => att.uploadedBy.userId === userId
-            ) || [];
+            // Check if userId is an assigner for this client
+            const isAssigned = client.assignedUsers && client.assignedUsers.some(
+                user => user.userId === userId
+            );
+
+            if (!isAssigned) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'User is not assigned to this client. Only assigned users can view attachments.'
+                });
+            }
+
+            // If user is an assigner, show ALL attachments for the client (not just their own)
+            let attachments = client.attachments || [];
 
             // Filter by month if provided
             if (month) {
@@ -670,8 +680,8 @@ const clientManagementController = {
                 return dateB - dateA;
             });
 
-            // Get user info from first attachment if available
-            const userInfo = attachments.length > 0 ? attachments[0].uploadedBy : null;
+            // Get the requesting user's info from assignedUsers
+            const requestingUser = client.assignedUsers.find(user => user.userId === userId);
 
             res.status(200).json({
                 success: true,
@@ -679,7 +689,8 @@ const clientManagementController = {
                 data: {
                     clientId: String(clientId),
                     userId: userId,
-                    userName: userInfo ? userInfo.name : null,
+                    userName: requestingUser ? requestingUser.name : null,
+                    isAssigned: true,
                     attachments: attachments,
                     count: attachments.length
                 }
