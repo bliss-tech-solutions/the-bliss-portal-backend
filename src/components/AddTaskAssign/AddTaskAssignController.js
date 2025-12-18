@@ -357,8 +357,8 @@ const addTaskAssignController = {
                             slotDate: slot.slotDate
                                 ? new Date(slot.slotDate).toISOString().split('T')[0]
                                 : startDate
-                                ? startDate.toISOString().split('T')[0]
-                                : null,
+                                    ? startDate.toISOString().split('T')[0]
+                                    : null,
                             status: slot.status || 'scheduled',
                             durationMinutes: derivedDuration || null,
                             extensionMinutes: slot.extensionMinutes || 0
@@ -727,6 +727,40 @@ const addTaskAssignController = {
             const savedSlot = savedTask.slots.id(slotId);
             const savedExtension = savedSlot.extensionHistory[savedSlot.extensionHistory.length - 1];
 
+            // Emit socket events so clients can update in real time
+            try {
+                const { getIO } = require('../../utils/socket');
+                const io = getIO && getIO();
+                if (io) {
+                    const payload = {
+                        taskId: String(savedTask._id),
+                        slotId: String(savedSlot._id),
+                        extensionRequest: savedExtension
+                    };
+
+                    // Task room
+                    io.to(String(savedTask._id)).emit('task:extensionRequested', payload);
+
+                    // Receiver user room (assignee)
+                    if (savedTask.receiverUserId) {
+                        io.to(`user:${savedTask.receiverUserId}`).emit('task:extensionRequested', payload);
+                    }
+
+                    // Creator user room
+                    if (savedTask.userId) {
+                        io.to(`user:${savedTask.userId}`).emit('task:extensionRequested', payload);
+                    }
+
+                    // Global task updates (optional list refresh)
+                    io.emit('task:updated', {
+                        taskId: String(savedTask._id),
+                        task: savedTask
+                    });
+                }
+            } catch (e) {
+                console.warn('Socket emission failed:', e.message);
+            }
+
             res.status(201).json({
                 success: true,
                 message: 'Extension request submitted',
@@ -838,6 +872,43 @@ const addTaskAssignController = {
             const savedTask = await task.save();
             await syncTaskSchedule(savedTask);
 
+            // Emit socket events for real-time updates
+            try {
+                const { getIO } = require('../../utils/socket');
+                const io = getIO && getIO();
+                if (io) {
+                    const payload = {
+                        taskId: String(savedTask._id),
+                        slotId: String(slotId),
+                        extensionId: String(extensionId),
+                        decision,
+                        adjustmentMinutes,
+                        task: savedTask
+                    };
+
+                    // Task room
+                    io.to(String(savedTask._id)).emit('task:extensionResponded', payload);
+
+                    // Receiver user room (assignee)
+                    if (savedTask.receiverUserId) {
+                        io.to(`user:${savedTask.receiverUserId}`).emit('task:extensionResponded', payload);
+                    }
+
+                    // Creator user room
+                    if (savedTask.userId) {
+                        io.to(`user:${savedTask.userId}`).emit('task:extensionResponded', payload);
+                    }
+
+                    // Global task updates (optional list refresh)
+                    io.emit('task:updated', {
+                        taskId: String(savedTask._id),
+                        task: savedTask
+                    });
+                }
+            } catch (e) {
+                console.warn('Socket emission failed:', e.message);
+            }
+
             res.status(200).json({
                 success: true,
                 message: `Extension ${decision}`,
@@ -917,8 +988,8 @@ const addTaskAssignController = {
 
             const taskDocs = taskIds.length
                 ? await AddTaskAssignModel.find({ _id: { $in: taskIds } })
-                      .select('slots taskStatus')
-                      .lean()
+                    .select('slots taskStatus')
+                    .lean()
                 : [];
 
             const taskMap = taskDocs.reduce((accumulator, task) => {
