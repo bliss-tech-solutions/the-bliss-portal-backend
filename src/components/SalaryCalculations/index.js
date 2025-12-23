@@ -22,5 +22,3 @@ router.get('/salary/history/:userId', salaryController.history);
 router.post('/salary/generate-payslip/:userId/:month/:year', salaryController.generatePayslip);
 
 module.exports = router;
-
-

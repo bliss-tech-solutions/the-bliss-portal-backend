@@ -34,7 +34,8 @@ const userDetailsController = {
                 address,
                 pincode,
                 languages,
-                skills
+                skills,
+                profilePhoto
             } = req.body;
 
             console.log('📝 Creating new user details:', {
@@ -50,7 +51,8 @@ const userDetailsController = {
                 address,
                 pincode,
                 languages,
-                skills
+                skills,
+                profilePhoto
             });
 
             // Check for duplicate email
@@ -90,7 +92,8 @@ const userDetailsController = {
                 address,
                 pincode,
                 languages,
-                skills
+                skills,
+                profilePhoto
             });
 
             const savedData = await newUserDetails.save();
@@ -257,6 +260,7 @@ const userDetailsController = {
                 pincode: user.pincode,
                 languages: user.languages,
                 skills: user.skills,
+                profilePhoto: user.profilePhoto,
                 userEmail: user.userEmail,
                 createdAt: user.createdAt,
                 updatedAt: user.updatedAt
@@ -330,7 +334,9 @@ const userDetailsController = {
                 address,
                 pincode,
                 languages,
-                skills
+                skills,
+                profilePhoto,
+                Password
             } = req.body;
 
             if (!paramUserId) {
@@ -372,6 +378,8 @@ const userDetailsController = {
             if (typeof pincode === 'string') updatePayload.pincode = pincode;
             if (Array.isArray(languages)) updatePayload.languages = languages;
             if (Array.isArray(skills)) updatePayload.skills = skills;
+            if (typeof profilePhoto === 'string') updatePayload.profilePhoto = profilePhoto;
+            if (typeof Password === 'string' && Password.trim() !== '') updatePayload.Password = Password;
 
             const updated = await UserDetailsModel.findByIdAndUpdate(
                 user._id,

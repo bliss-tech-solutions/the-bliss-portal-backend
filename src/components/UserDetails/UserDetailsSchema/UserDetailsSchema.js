@@ -20,6 +20,7 @@ const UserDetailsSchema = new Schema(
         pincode: { type: String },
         languages: { type: [String] }, // array of languages
         skills: { type: [String] }, // array of skills
+        profilePhoto: { type: String }, // URL to uploaded profile photo
         // Generated credentials
         userEmail: { type: String },
         Password: { type: String },

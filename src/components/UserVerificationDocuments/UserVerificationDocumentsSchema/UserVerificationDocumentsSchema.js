@@ -6,27 +6,27 @@ const UserVerificationDocumentsSchema = new Schema(
     {
         // User identification
         userId: { type: String, required: true, index: true },
-        
+
         // Personal Information
         name: { type: String, required: true },
         department: { type: String, required: true },
         position: { type: String, required: true },
         jobType: { type: String, required: true }, // e.g., full-time, part-time, contract
-        
+
         // Salary Information
         beforeBlissSalary: { type: Number }, // Salary before joining Bliss
         blissSalary: { type: Number }, // Current salary at Bliss
-        
+
         // Date Information
         joiningDate: { type: Date, required: true },
-        
+
         // Address Information
         currentAddress: { type: String, required: true },
         permanentAddress: { type: String, required: true },
-        
+
         // Experience
         experience: { type: String }, // Can be years or description
-        
+
         // Bank Details (stored as an object)
         bankDetails: {
             accountHolderName: { type: String },
@@ -36,7 +36,7 @@ const UserVerificationDocumentsSchema = new Schema(
             branchName: { type: String },
             accountType: { type: String } // e.g., savings, current
         },
-        
+
         // Document Uploads (URLs or file paths)
         aadharCardImage: { type: String }, // URL to uploaded Aadhar card image
         passportPhoto: { type: String }, // URL to uploaded passport photo
