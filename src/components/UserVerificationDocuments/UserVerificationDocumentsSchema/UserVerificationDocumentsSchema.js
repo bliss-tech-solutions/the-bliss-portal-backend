@@ -16,6 +16,24 @@ const UserVerificationDocumentsSchema = new Schema(
         // Salary Information
         beforeBlissSalary: { type: Number }, // Salary before joining Bliss
         blissSalary: { type: Number }, // Current salary at Bliss
+        pfFund: { type: Number }, // Automatically calculated (10% of blissSalary)
+
+        // Salary Increment History
+        salaryIncrementHistory: [{
+            incrementPercent: { type: Number },
+            oldSalary: { type: Number },
+            newSalary: { type: Number },
+            incrementAmount: { type: Number },
+            pfAmount: { type: Number },
+            effectiveDate: { type: Date },
+            note: { type: String },
+            status: {
+                type: String,
+                enum: ['pending_approval', 'approved', 'active', 'rejected', 'superseded'],
+                default: 'pending_approval'
+            },
+            createdAt: { type: Date, default: Date.now }
+        }],
 
         // Date Information
         joiningDate: { type: Date, required: true },

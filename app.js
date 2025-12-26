@@ -58,7 +58,7 @@ const corsOrigins = [
 app.use(cors({
     origin: corsOrigins,
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     optionsSuccessStatus: 200
 }));
@@ -76,7 +76,7 @@ app.use('/public', express.static(path.join(__dirname, 'public')));
 // Redis Cache Middleware (applied globally to API routes)
 // Exclude authentication, real-time endpoints, and routes with manual caching
 app.use('/api', redisCache({
-    duration: 300, // 5 minutes default cache duration
+    duration: 120, // 2 minutes default cache duration
     excludedRoutes: [
         /\/signin/i,
         /\/signIn/i,
@@ -85,7 +85,8 @@ app.use('/api', redisCache({
         /\/checkout/i,
         /\/socket/i,
         /\/globalchat\/messages/i, // Has manual caching in controller
-        /\/chat\/messages/i // Has manual caching in controller
+        /\/chat\/messages/i, // Has manual caching in controller
+        /\/userverificationdocuments/i // Exclude to ensure real-time salary updates
     ],
     excludedMethods: [] // Cache all GET requests
 }));
@@ -251,6 +252,32 @@ process.on('SIGINT', async () => {
         process.exit(0);
     });
 });
+
+// Setup Cron Jobs
+try {
+    const cron = require('node-cron');
+    const userVerificationDocumentsController = require('./src/components/UserVerificationDocuments/UserVerificationDocumentsController');
+
+    // Run every day at 00:00 (Midnight)
+    cron.schedule('0 0 * * *', async () => {
+        console.log('⏰ Running Daily Salary Increment Job:', new Date().toISOString());
+        try {
+            const mockRes = {
+                status: (code) => ({
+                    json: (data) => console.log(`✅ Salary Job Result: ${JSON.stringify(data)}`)
+                })
+            };
+            const mockNext = (err) => console.error('❌ Salary Job Error:', err);
+
+            await userVerificationDocumentsController.applyPendingIncrements({}, mockRes, mockNext);
+        } catch (error) {
+            console.error('❌ Critical Cron Job Error:', error);
+        }
+    });
+    console.log('📅 Cron Jobs Initialized');
+} catch (e) {
+    console.warn('Cron setup failed:', e.message);
+}
 
 server.listen(PORT, () => {
     console.log(`🚀 Server is running on port ${PORT}`);
