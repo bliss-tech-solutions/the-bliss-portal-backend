@@ -1,0 +1,363 @@
+/* ClientDetail.css - Styling for Client Detail Component */
+
+.client-detail-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Notification Toast (same as ClientList) */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 16px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    animation: slideIn 0.3s ease-out;
+    font-weight: 500;
+}
+
+.notification-success {
+    background-color: #10b981;
+    color: white;
+}
+
+.notification-info {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.notification-warning {
+    background-color: #f59e0b;
+    color: white;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Loading and Error States */
+.loading-spinner,
+.error-message {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.error-message {
+    color: #ef4444;
+}
+
+.error-message button {
+    margin-top: 16px;
+    padding: 10px 20px;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* Client Info Card */
+.client-info-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    margin-bottom: 24px;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #f3f4f6;
+}
+
+.card-header h1 {
+    margin: 0;
+    font-size: 32px;
+    color: #111827;
+}
+
+.status-badge {
+    padding: 6px 16px;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.status-active {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.status-inactive {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+/* Client Info Grid */
+.client-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.info-item.full-width {
+    grid-column: 1 / -1;
+}
+
+.info-item .label {
+    font-size: 14px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.info-item .value {
+    font-size: 18px;
+    color: #111827;
+    font-weight: 600;
+}
+
+.info-item .value.yes {
+    color: #10b981;
+}
+
+.info-item .value.no {
+    color: #ef4444;
+}
+
+/* User Chips */
+.user-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.user-chip {
+    background-color: #dbeafe;
+    color: #1e40af;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Attachments Section */
+.attachments-section {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    margin-bottom: 24px;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #f3f4f6;
+}
+
+.section-header h2 {
+    margin: 0;
+    font-size: 24px;
+    color: #111827;
+}
+
+.count-badge {
+    background-color: #f3f4f6;
+    color: #6b7280;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* No Attachments */
+.no-attachments {
+    text-align: center;
+    padding: 40px 20px;
+    background-color: #f9fafb;
+    border-radius: 8px;
+    border: 2px dashed #d1d5db;
+}
+
+.no-attachments .hint {
+    font-size: 14px;
+    color: #9ca3af;
+    margin-top: 8px;
+}
+
+/* Attachments Grid */
+.attachments-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+}
+
+/* Attachment Card */
+.attachment-card {
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+    transition: all 0.2s ease;
+}
+
+.attachment-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-color: #3b82f6;
+}
+
+.attachment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.month-badge {
+    background-color: #3b82f6;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.upload-date {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+/* Attachment Body */
+.attachment-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.attachment-link,
+.attachment-notes {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.attachment-link .label,
+.attachment-notes .label {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.link-value {
+    color: #3b82f6;
+    text-decoration: none;
+    font-size: 14px;
+    word-break: break-all;
+}
+
+.link-value:hover {
+    text-decoration: underline;
+}
+
+.notes-value {
+    margin: 0;
+    font-size: 14px;
+    color: #374151;
+    background: white;
+    padding: 8px;
+    border-radius: 4px;
+}
+
+.attachment-footer {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.uploaded-by {
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.uploaded-by strong {
+    color: #111827;
+}
+
+/* Actions */
+.actions {
+    display: flex;
+    justify-content: flex-start;
+    gap: 12px;
+}
+
+.btn-back {
+    padding: 12px 24px;
+    background-color: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-back:hover {
+    background-color: #e5e7eb;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .client-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .attachments-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .card-header h1 {
+        font-size: 24px;
+    }
+
+    .notification {
+        left: 20px;
+        right: 20px;
+    }
+}

@@ -86,7 +86,7 @@ app.use('/api', redisCache({
         /\/socket/i,
         /\/globalchat\/messages/i, // Has manual caching in controller
         /\/chat\/messages/i, // Has manual caching in controller
-        /\/userverificationdocuments/i // Exclude to ensure real-time salary updates
+        /\/userverificationdocuments/i, // Exclude to ensure real-time salary updates
     ],
     excludedMethods: [] // Cache all GET requests
 }));

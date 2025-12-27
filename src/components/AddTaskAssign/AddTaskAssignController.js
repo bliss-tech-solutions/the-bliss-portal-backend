@@ -1,5 +1,6 @@
 const AddTaskAssignModel = require('./AddTaskAssignSchema/AddTaskAssignSchema');
 const UserScheduleModel = require('../UserSchedule/UserScheduleSchema');
+const { invalidateCache } = require('../../middleware/redisCache');
 
 const isFiniteNumber = (value) => Number.isFinite(value) && !Number.isNaN(value);
 
@@ -207,6 +208,11 @@ const addTaskAssignController = {
                 { new: true }
             );
             if (!updated) return res.status(404).json({ success: false, message: 'Task not found' });
+
+            // Invalidate task caches
+            await invalidateCache('cache:*getTaskAssign*');
+            await invalidateCache('cache:*addtaskassign*');
+
             res.status(200).json({ success: true, message: 'Task archived', data: updated });
         } catch (error) {
             next(error);
@@ -223,6 +229,11 @@ const addTaskAssignController = {
                 { new: true }
             );
             if (!updated) return res.status(404).json({ success: false, message: 'Task not found' });
+
+            // Invalidate task caches
+            await invalidateCache('cache:*getTaskAssign*');
+            await invalidateCache('cache:*addtaskassign*');
+
             res.status(200).json({ success: true, message: 'Task unarchived', data: updated });
         } catch (error) {
             next(error);
@@ -259,6 +270,10 @@ const addTaskAssignController = {
             if (!updated) {
                 return res.status(404).json({ success: false, message: 'Task not found' });
             }
+
+            // Invalidate task caches
+            await invalidateCache(`cache:*getTaskAssign*`);
+            await invalidateCache(`cache:*addtaskassign*`);
 
             res.status(200).json({ success: true, message: 'Chat message added', data: updated });
         } catch (error) {
@@ -609,6 +624,10 @@ const addTaskAssignController = {
                 console.warn('Socket emission failed:', e.message);
             }
 
+            // Invalidate task caches
+            await invalidateCache('cache:*getTaskAssign*');
+            await invalidateCache('cache:*addtaskassign*');
+
             res.status(201).json({ success: true, message: 'Task created successfully', data: saved });
         } catch (error) {
             next(error);
@@ -679,6 +698,10 @@ const addTaskAssignController = {
             } catch (e) {
                 console.warn('Socket emission failed:', e.message);
             }
+
+            // Invalidate task caches
+            await invalidateCache('cache:*getTaskAssign*');
+            await invalidateCache('cache:*addtaskassign*');
 
             res.status(200).json({
                 success: true,
@@ -760,6 +783,10 @@ const addTaskAssignController = {
             } catch (e) {
                 console.warn('Socket emission failed:', e.message);
             }
+
+            // Invalidate task caches
+            await invalidateCache('cache:*getTaskAssign*');
+            await invalidateCache('cache:*addtaskassign*');
 
             res.status(201).json({
                 success: true,
@@ -908,6 +935,10 @@ const addTaskAssignController = {
             } catch (e) {
                 console.warn('Socket emission failed:', e.message);
             }
+
+            // Invalidate task caches
+            await invalidateCache('cache:*getTaskAssign*');
+            await invalidateCache('cache:*addtaskassign*');
 
             res.status(200).json({
                 success: true,

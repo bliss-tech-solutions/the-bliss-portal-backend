@@ -1,5 +1,6 @@
 const ClientManagementModel = require('./ClientManagementSchema/ClientManagementSchema');
 const { getIO } = require('../../utils/socket');
+const { invalidateCache } = require('../../middleware/redisCache');
 
 const clientManagementController = {
     // GET /api/clientmanagement/getAllClientsData - Get all clients
@@ -210,6 +211,9 @@ const clientManagementController = {
                 console.warn('Socket emission failed:', e.message);
             }
 
+            // Invalidate client management caches
+            await invalidateCache('cache:*clientmanagement*');
+
             res.status(201).json({
                 success: true,
                 message: 'Client created successfully',
@@ -352,6 +356,9 @@ const clientManagementController = {
                 console.warn('Socket emission failed:', e.message);
             }
 
+            // Invalidate client management caches
+            await invalidateCache('cache:*clientmanagement*');
+
             res.status(200).json({
                 success: true,
                 message: 'Client updated successfully',
@@ -400,6 +407,9 @@ const clientManagementController = {
             } catch (e) {
                 console.warn('Socket emission failed:', e.message);
             }
+
+            // Invalidate client management caches
+            await invalidateCache('cache:*clientmanagement*');
 
             res.status(200).json({
                 success: true,
@@ -505,6 +515,9 @@ const clientManagementController = {
                 console.warn('Socket emission failed:', e.message);
             }
 
+            // Invalidate client management caches
+            await invalidateCache('cache:*clientmanagement*');
+
             res.status(201).json({
                 success: true,
                 message: 'Attachment added successfully',
@@ -530,7 +543,8 @@ const clientManagementController = {
                 });
             }
 
-            let attachments = client.attachments || [];
+            let attachments = (client.attachments || []).filter(att => !att.archived);
+
 
             // Filter by month if provided
             if (month) {
@@ -573,7 +587,8 @@ const clientManagementController = {
                 });
             }
 
-            let attachments = client.attachments || [];
+            let attachments = (client.attachments || []).filter(att => !att.archived);
+
 
             // Filter by month if provided
             if (month) {
@@ -658,8 +673,8 @@ const clientManagementController = {
                 });
             }
 
-            // If user is an assigner, show ALL attachments for the client (not just their own)
-            let attachments = client.attachments || [];
+            // If user is an assigner, show ALL non-archived attachments for the client
+            let attachments = (client.attachments || []).filter(att => !att.archived);
 
             // Filter by month if provided
             if (month) {
@@ -784,6 +799,9 @@ const clientManagementController = {
                 console.warn('Socket emission failed:', e.message);
             }
 
+            // Invalidate client management caches
+            await invalidateCache('cache:*clientmanagement*');
+
             res.status(200).json({
                 success: true,
                 message: 'Attachment updated successfully',
@@ -817,11 +835,12 @@ const clientManagementController = {
                 });
             }
 
-            // Get userId before removing attachment
+            // Get userId before archiving attachment
             const deletedUserId = attachment.uploadedBy.userId;
+            const attachmentName = attachment.notes || 'Attachment';
 
-            // Remove attachment
-            attachment.remove();
+            // Soft delete: set archived to true instead of removing
+            attachment.archived = true;
             await client.save();
 
             // Emit socket event for real-time attachment deletion
@@ -856,6 +875,9 @@ const clientManagementController = {
             } catch (e) {
                 console.warn('Socket emission failed:', e.message);
             }
+
+            // Invalidate client management caches
+            await invalidateCache('cache:*clientmanagement*');
 
             res.status(200).json({
                 success: true,

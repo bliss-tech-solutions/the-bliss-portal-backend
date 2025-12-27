@@ -9,28 +9,32 @@ const AssignedUserSchema = new Schema({
 
 // Attachment Schema (embedded in ClientManagement)
 const AttachmentSchema = new Schema({
-    link: { 
-        type: String, 
+    link: {
+        type: String,
         required: true,
-        trim: true 
+        trim: true
     },
-    notes: { 
-        type: String, 
+    notes: {
+        type: String,
         default: '',
-        trim: true 
+        trim: true
     },
-    month: { 
-        type: String, 
+    month: {
+        type: String,
         enum: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-        required: true 
+        required: true
     },
     uploadedBy: {
         userId: { type: String, required: true },
         name: { type: String, required: true }
+    },
+    archived: {
+        type: Boolean,
+        default: false
     }
-}, { 
+}, {
     timestamps: true,
-    _id: true 
+    _id: true
 });
 
 // Client Management Schema
@@ -39,19 +43,19 @@ const ClientManagementSchema = new Schema(
         clientName: { type: String, required: true },
         city: { type: String, required: true },
         onboardDate: { type: Date, required: true },
-        status: { 
-            type: String, 
-            enum: ['active', 'inactive'], 
+        status: {
+            type: String,
+            enum: ['active', 'inactive'],
             default: 'active',
-            required: true 
+            required: true
         },
-        itsDataReceived: { 
-            type: Boolean, 
-            default: false 
+        itsDataReceived: {
+            type: Boolean,
+            default: false
         },
-        assignedUsers: { 
-            type: [AssignedUserSchema], 
-            default: [] 
+        assignedUsers: {
+            type: [AssignedUserSchema],
+            default: []
         },
         attachments: {
             type: [AttachmentSchema],
