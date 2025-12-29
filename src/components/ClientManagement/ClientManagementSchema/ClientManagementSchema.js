@@ -4,7 +4,8 @@ const { Schema } = mongoose;
 // Assigned User Schema (embedded in ClientManagement)
 const AssignedUserSchema = new Schema({
     userId: { type: String, required: true },
-    name: { type: String, required: true }
+    name: { type: String, required: true },
+    position: { type: String, required: false }
 }, { _id: false });
 
 // Attachment Schema (embedded in ClientManagement)

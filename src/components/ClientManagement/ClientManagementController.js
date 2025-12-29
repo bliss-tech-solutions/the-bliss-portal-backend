@@ -144,7 +144,8 @@ const clientManagementController = {
                         });
                     }
 
-                    // Check for duplicate userIds
+                    // Check for duplicate userIds - removed because same user can have multiple positions
+                    /*
                     if (userIds.has(user.userId)) {
                         return res.status(400).json({
                             success: false,
@@ -152,10 +153,12 @@ const clientManagementController = {
                         });
                     }
                     userIds.add(user.userId);
+                    */
 
                     normalizedAssignedUsers.push({
                         userId: user.userId,
-                        name: user.name.trim()
+                        name: user.name.trim(),
+                        position: user.position ? user.position.trim() : null
                     });
                 }
             }
@@ -310,6 +313,8 @@ const clientManagementController = {
                         });
                     }
 
+                    // Check for duplicate userIds - removed because same user can have multiple positions
+                    /*
                     if (userIds.has(user.userId)) {
                         return res.status(400).json({
                             success: false,
@@ -317,10 +322,12 @@ const clientManagementController = {
                         });
                     }
                     userIds.add(user.userId);
+                    */
 
                     normalizedAssignedUsers.push({
                         userId: user.userId,
-                        name: user.name.trim()
+                        name: user.name.trim(),
+                        position: user.position ? user.position.trim() : null
                     });
                 }
                 updateData.assignedUsers = normalizedAssignedUsers;
