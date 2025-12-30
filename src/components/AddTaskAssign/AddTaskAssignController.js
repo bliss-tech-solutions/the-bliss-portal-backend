@@ -1,6 +1,6 @@
 const AddTaskAssignModel = require('./AddTaskAssignSchema/AddTaskAssignSchema');
 const UserScheduleModel = require('../UserSchedule/UserScheduleSchema');
-const { invalidateCache } = require('../../middleware/redisCache');
+
 
 const isFiniteNumber = (value) => Number.isFinite(value) && !Number.isNaN(value);
 
@@ -126,7 +126,10 @@ const hasScheduleConflict = async ({ userId, startDate, endDate, excludeTaskId }
     const query = {
         userId,
         start: { $lt: endDate },
-        end: { $gt: startDate }
+        end: { $gt: startDate },
+        // Ignore tasks or individual slots that are completed or cancelled (case-insensitive)
+        status: { $nin: [/^completed$/i, /^cancelled$/i] },
+        taskStatus: { $nin: [/^completed$/i, /^cancelled$/i] }
     };
     if (excludeTaskId) {
         query.taskId = { $ne: excludeTaskId };
@@ -136,6 +139,12 @@ const hasScheduleConflict = async ({ userId, startDate, endDate, excludeTaskId }
 
 const syncTaskSchedule = async (taskDoc) => {
     if (!taskDoc || !taskDoc.receiverUserId) return;
+
+    if (taskDoc.isArchived) {
+        await UserScheduleModel.deleteMany({ taskId: taskDoc._id });
+        return;
+    }
+
     const slots = Array.isArray(taskDoc.slots) ? taskDoc.slots : [];
     if (!slots.length) {
         await UserScheduleModel.deleteMany({ taskId: taskDoc._id });
@@ -167,7 +176,9 @@ const syncTaskSchedule = async (taskDoc) => {
                         $set: {
                             userId: taskDoc.receiverUserId,
                             start: interval.startDate,
-                            end: interval.endDate
+                            end: interval.endDate,
+                            status: slot.status || 'scheduled',
+                            taskStatus: taskDoc.taskStatus || 'pending'
                         }
                     },
                     upsert: true
@@ -207,6 +218,12 @@ const addTaskAssignController = {
                 { isArchived: true, archivedAt: new Date(), archivedBy: actorUserId || undefined },
                 { new: true }
             );
+
+            // Sync UserSchedule
+            if (updated) {
+                await syncTaskSchedule(updated);
+            }
+
             // Emit socket event for real-time updates
             try {
                 const { getIO } = require('../../utils/socket');
@@ -242,10 +259,7 @@ const addTaskAssignController = {
             }
 
 
-            // Invalidate task caches
-            await invalidateCache('cache:*getTaskAssign*');
-            await invalidateCache('cache:*addtaskassign*');
-            await invalidateCache('cache:*availability*');
+
 
             res.status(200).json({ success: true, message: 'Task archived', data: updated });
         } catch (error) {
@@ -263,6 +277,9 @@ const addTaskAssignController = {
                 { new: true }
             );
             if (!updated) return res.status(404).json({ success: false, message: 'Task not found' });
+
+            // Sync UserSchedule
+            await syncTaskSchedule(updated);
 
             // Emit socket event for real-time updates
             try {
@@ -298,10 +315,7 @@ const addTaskAssignController = {
                 console.warn('Socket emission failed:', e.message);
             }
 
-            // Invalidate task caches
-            await invalidateCache('cache:*getTaskAssign*');
-            await invalidateCache('cache:*addtaskassign*');
-            await invalidateCache('cache:*availability*');
+
 
             res.status(200).json({ success: true, message: 'Task unarchived', data: updated });
         } catch (error) {
@@ -375,10 +389,7 @@ const addTaskAssignController = {
                 console.warn('Socket emission failed:', e.message);
             }
 
-            // Invalidate task caches
-            await invalidateCache(`cache:*getTaskAssign*`);
-            await invalidateCache(`cache:*addtaskassign*`);
-            await invalidateCache(`cache:*availability*`);
+
 
             res.status(200).json({ success: true, message: 'Chat message added', data: updated });
         } catch (error) {
@@ -440,7 +451,9 @@ const addTaskAssignController = {
 
             const tasks = await AddTaskAssignModel.find({
                 $or: [{ userId }, { receiverUserId: userId }],
-                slots: { $exists: true, $ne: [] }
+                slots: { $exists: true, $ne: [] },
+                taskStatus: { $nin: [/^completed$/i, /^cancelled$/i] },
+                isArchived: { $ne: true }
             }).lean();
 
             const results = [];
@@ -459,6 +472,9 @@ const addTaskAssignController = {
                                 slotDate < dayEnd;
                         }
                         if (!overlaps) return null;
+
+                        const isDone = (s) => (s && ['completed', 'cancelled'].includes(s.toLowerCase()));
+                        if (isDone(slot.status) || isDone(task.taskStatus)) return null;
 
                         const startDate = parseSlotTimestamp(slot, 'start');
                         const endDate = parseSlotTimestamp(slot, 'end');
@@ -529,8 +545,8 @@ const addTaskAssignController = {
         try {
             const {
                 userId,
-                receiverUserId,
-                position,
+                receiverUserId: rootReceiverUserId,
+                position: rootPosition,
                 workParentType,
                 workChildType,
                 taskName,
@@ -542,7 +558,8 @@ const addTaskAssignController = {
                 taskImages,
                 attachments,
                 slots,
-                slot
+                slot,
+                assignees // New: Array of { receiverUserId, position }
             } = req.body;
 
             const normalizedTaskImages = Array.isArray(taskImages)
@@ -612,129 +629,138 @@ const addTaskAssignController = {
                 };
             };
 
-            let normalizedSlots = [];
+            let normalizedSlotsTemplate = [];
             if (Array.isArray(slots) && slots.length) {
-                normalizedSlots = slots
+                normalizedSlotsTemplate = slots
                     .map(normalizeSlot)
                     .filter(Boolean);
             } else if (slot) {
                 const parsed = normalizeSlot(slot);
-                if (parsed) normalizedSlots.push(parsed);
+                if (parsed) normalizedSlotsTemplate.push(parsed);
             }
 
-            const originalSlotMinutes = normalizedSlots.reduce(
+            const originalSlotMinutes = normalizedSlotsTemplate.reduce(
                 (minutes, current) => minutes + (current?.durationMinutes || 0),
                 0
             );
 
-            const totalExtendedMinutes = normalizedSlots.reduce(
+            const totalExtendedMinutes = normalizedSlotsTemplate.reduce(
                 (minutes, current) => minutes + (current?.extensionMinutes || 0),
                 0
             );
 
-            if (receiverUserId && normalizedSlots.length) {
-                for (const slot of normalizedSlots) {
-                    const interval = resolveSlotInterval(slot);
-                    if (!interval) {
-                        return res.status(400).json({
-                            success: false,
-                            message: 'Each slot must include a valid start, end, and slotDate to determine availability'
+            // Determine assignees to process
+            let targetAssignees = [];
+            if (Array.isArray(assignees) && assignees.length > 0) {
+                targetAssignees = assignees;
+            } else if (rootReceiverUserId) {
+                targetAssignees = [{ receiverUserId: rootReceiverUserId, position: rootPosition }];
+            }
+
+            if (targetAssignees.length === 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'receiverUserId or assignees array is required'
+                });
+            }
+
+            // Conflict Check Phase for all assignees
+            for (const assignee of targetAssignees) {
+                const { receiverUserId } = assignee;
+                if (receiverUserId && normalizedSlotsTemplate.length) {
+                    for (const s of normalizedSlotsTemplate) {
+                        const interval = resolveSlotInterval(s);
+                        if (!interval) {
+                            return res.status(400).json({
+                                success: false,
+                                message: `Invalid slot times for user ${receiverUserId}`
+                            });
+                        }
+                        if (interval.endDate <= interval.startDate) {
+                            return res.status(400).json({
+                                success: false,
+                                message: 'Slot end time must be after the start time'
+                            });
+                        }
+                        const conflict = await hasScheduleConflict({
+                            userId: receiverUserId,
+                            startDate: interval.startDate,
+                            endDate: interval.endDate
                         });
-                    }
-                    if (interval.endDate <= interval.startDate) {
-                        return res.status(400).json({
-                            success: false,
-                            message: 'Slot end time must be after the start time'
-                        });
-                    }
-                    const conflict = await hasScheduleConflict({
-                        userId: receiverUserId,
-                        startDate: interval.startDate,
-                        endDate: interval.endDate
-                    });
-                    if (conflict) {
-                        return res.status(409).json({
-                            success: false,
-                            message: 'Receiver already has a booking in the requested time range',
-                            data: {
-                                conflictingScheduleId: conflict._id,
-                                conflictingTaskId: conflict.taskId,
-                                conflictingSlotId: conflict.slotId
-                            }
-                        });
+                        if (conflict) {
+                            return res.status(409).json({
+                                success: false,
+                                message: `Receiver ${receiverUserId} already has a booking in the requested time range`,
+                                data: {
+                                    receiverUserId,
+                                    conflictingScheduleId: conflict._id,
+                                    conflictingTaskId: conflict.taskId,
+                                    conflictingSlotId: conflict.slotId
+                                }
+                            });
+                        }
                     }
                 }
             }
 
-            const newTask = new AddTaskAssignModel({
-                userId,
-                receiverUserId,
-                position,
-                workParentType,
-                workChildType,
-                taskName,
-                clientName,
-                category,
-                priority,
-                timeSpend,
-                description,
-                taskImages: normalizedTaskImages,
-                attachments: normalizedAttachments,
-                slots: normalizedSlots,
-                timeTracking: {
-                    originalSlotMinutes,
-                    totalExtendedMinutes,
-                    totalWorkedMinutes: 0
+            const savedTasks = [];
+            const { getIO } = require('../../utils/socket');
+            const io = getIO && getIO();
+
+            // Creation Phase
+            for (const assignee of targetAssignees) {
+                const { receiverUserId, position } = assignee;
+
+                const newTask = new AddTaskAssignModel({
+                    userId,
+                    receiverUserId,
+                    position,
+                    workParentType,
+                    workChildType,
+                    taskName,
+                    clientName,
+                    category,
+                    priority,
+                    timeSpend,
+                    description,
+                    taskImages: normalizedTaskImages,
+                    attachments: normalizedAttachments,
+                    slots: normalizedSlotsTemplate.map(s => ({ ...s })), // Clone slots to ensure unique mongoose subdocs if needed
+                    timeTracking: {
+                        originalSlotMinutes,
+                        totalExtendedMinutes,
+                        totalWorkedMinutes: 0
+                    }
+                });
+
+                const saved = await newTask.save();
+                await syncTaskSchedule(saved);
+                savedTasks.push(saved);
+
+                // Emit socket events for each task
+                try {
+                    if (io) {
+                        io.to(String(saved._id)).emit('task:created', { taskId: String(saved._id), task: saved });
+                        if (saved.receiverUserId) {
+                            io.to(`user:${saved.receiverUserId}`).emit('task:assigned', { taskId: String(saved._id), task: saved });
+                        }
+                        if (saved.userId) {
+                            io.to(`user:${saved.userId}`).emit('task:created', { taskId: String(saved._id), task: saved });
+                        }
+                        io.emit('task:new', { taskId: String(saved._id), task: saved });
+                    }
+                } catch (e) {
+                    console.warn('Socket emission failed for a task:', e.message);
                 }
+            }
+
+
+
+            res.status(201).json({
+                success: true,
+                message: savedTasks.length > 1 ? 'Tasks created successfully' : 'Task created successfully',
+                data: savedTasks.length > 1 ? savedTasks : savedTasks[0]
             });
-
-            const saved = await newTask.save();
-            await syncTaskSchedule(saved);
-
-            // Emit socket event for real-time updates
-            try {
-                const { getIO } = require('../../utils/socket');
-                const io = getIO && getIO();
-                if (io) {
-                    // Emit to task-specific room
-                    io.to(String(saved._id)).emit('task:created', {
-                        taskId: String(saved._id),
-                        task: saved
-                    });
-
-                    // Emit to receiver user room (if assigned to someone)
-                    if (saved.receiverUserId) {
-                        io.to(`user:${saved.receiverUserId}`).emit('task:assigned', {
-                            taskId: String(saved._id),
-                            task: saved
-                        });
-                    }
-
-                    // Emit to creator user room
-                    if (saved.userId) {
-                        io.to(`user:${saved.userId}`).emit('task:created', {
-                            taskId: String(saved._id),
-                            task: saved
-                        });
-                    }
-
-                    // Emit to global tasks room for task list updates
-                    io.emit('task:new', {
-                        taskId: String(saved._id),
-                        task: saved
-                    });
-                }
-            } catch (e) {
-                // Ignore socket errors, don't break the API response
-                console.warn('Socket emission failed:', e.message);
-            }
-
-            // Invalidate task caches
-            await invalidateCache('cache:*getTaskAssign*');
-            await invalidateCache('cache:*addtaskassign*');
-            await invalidateCache('cache:*availability*');
-
-            res.status(201).json({ success: true, message: 'Task created successfully', data: saved });
         } catch (error) {
             next(error);
         }
@@ -754,15 +780,23 @@ const addTaskAssignController = {
                 });
             }
 
+            const updateObj = { taskStatus };
+            if (taskStatus === 'completed') {
+                updateObj['slots.$[].status'] = 'completed';
+            }
+
             const updated = await AddTaskAssignModel.findByIdAndUpdate(
                 taskId,
-                { taskStatus },
+                updateObj,
                 { new: true, runValidators: true }
             );
 
             if (!updated) {
                 return res.status(404).json({ success: false, message: 'Task not found' });
             }
+
+            // Sync UserSchedule
+            await syncTaskSchedule(updated);
 
             // Emit socket event for real-time status updates
             try {
@@ -805,10 +839,7 @@ const addTaskAssignController = {
                 console.warn('Socket emission failed:', e.message);
             }
 
-            // Invalidate task caches
-            await invalidateCache('cache:*getTaskAssign*');
-            await invalidateCache('cache:*addtaskassign*');
-            await invalidateCache('cache:*availability*');
+
 
             res.status(200).json({
                 success: true,
@@ -891,10 +922,7 @@ const addTaskAssignController = {
                 console.warn('Socket emission failed:', e.message);
             }
 
-            // Invalidate task caches
-            await invalidateCache('cache:*getTaskAssign*');
-            await invalidateCache('cache:*addtaskassign*');
-            await invalidateCache('cache:*availability*');
+
 
             res.status(201).json({
                 success: true,
@@ -1044,10 +1072,7 @@ const addTaskAssignController = {
                 console.warn('Socket emission failed:', e.message);
             }
 
-            // Invalidate task caches
-            await invalidateCache('cache:*getTaskAssign*');
-            await invalidateCache('cache:*addtaskassign*');
-            await invalidateCache('cache:*availability*');
+
 
             res.status(200).json({
                 success: true,
@@ -1117,7 +1142,9 @@ const addTaskAssignController = {
             const scheduleEntries = await UserScheduleModel.find({
                 userId: targetUserId,
                 end: { $gt: dayStart },
-                start: { $lt: dayEnd }
+                start: { $lt: dayEnd },
+                status: { $nin: [/^completed$/i, /^cancelled$/i] },
+                taskStatus: { $nin: [/^completed$/i, /^cancelled$/i] }
             })
                 .sort({ start: 1 })
                 .lean();
@@ -1161,6 +1188,13 @@ const addTaskAssignController = {
 
             const normalizedIntervals = scheduleEntries
                 .map((entry) => {
+                    const task = taskMap[entry.taskId?.toString()];
+                    const slot = task?.slots?.find((s) => s?._id?.toString() === entry.slotId?.toString());
+
+                    const effectiveStatus = slot?.status || entry.status;
+                    const effectiveTaskStatus = task?.taskStatus || entry.taskStatus;
+
+                    // Entries are already filtered by query to exclude completed/cancelled
                     const entryStart = new Date(entry.start);
                     const entryEnd = new Date(entry.end);
                     if (Number.isNaN(entryStart.getTime()) || Number.isNaN(entryEnd.getTime())) return null;

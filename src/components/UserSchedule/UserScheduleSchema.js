@@ -7,7 +7,17 @@ const UserScheduleSchema = new Schema(
         taskId: { type: Schema.Types.ObjectId, ref: 'AddTaskAssign', required: true },
         slotId: { type: Schema.Types.ObjectId, required: true },
         start: { type: Date, required: true },
-        end: { type: Date, required: true }
+        end: { type: Date, required: true },
+        status: {
+            type: String,
+            enum: ['scheduled', 'active', 'completed', 'expired', 'cancelled'],
+            default: 'scheduled'
+        },
+        taskStatus: {
+            type: String,
+            enum: ['pending', 'in_progress', 'completed', 'cancelled'],
+            default: 'pending'
+        }
     },
     {
         timestamps: true,

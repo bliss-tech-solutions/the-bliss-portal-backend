@@ -31,7 +31,7 @@ router.put('/addtaskassign/:taskId/unarchive', addTaskAssignController.unarchive
 router.put('/addtaskassign/:taskId/status', addTaskAssignController.updateStatus);
 
 // GET /api/availability - compute suggestions and bookings for a user
-// router.get('/availability', addTaskAssignController.getAvailability);
+router.get('/availability', addTaskAssignController.getAvailability);
 
 // POST /api/addtaskassign/:taskId/slots/:slotId/request-extension - request extra time
 router.post(
