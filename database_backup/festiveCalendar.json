@@ -1,0 +1,65 @@
+[
+  {
+    "_id": "690342778b1f3d3714c879f5",
+    "date": "2025-10-15",
+    "__v": 0,
+    "createdAt": "2025-10-30T10:48:23.724Z",
+    "notes": [
+      {
+        "note": "New task",
+        "userId": "grishama-bliss-3549",
+        "color": "#722ed1",
+        "archive": true,
+        "description": "dsfdsafdfsdfffs",
+        "createdAt": "2025-10-30T10:48:23.720Z",
+        "_id": "690342772c299cf13ce810c5"
+      },
+      {
+        "note": "Updated Task",
+        "userId": "grishama-bliss-3549",
+        "color": "#13c2c2",
+        "archive": true,
+        "description": "Updated Taskdsfafdfsaffsadfsaffdfasfdsaff",
+        "createdAt": "2025-10-30T10:50:56.565Z",
+        "_id": "690343102c299cf13ce810e1"
+      }
+    ],
+    "updatedAt": "2025-10-30T11:39:42.783Z"
+  },
+  {
+    "_id": "690497cc8b1f3d3714c87d38",
+    "date": "2025-10-23",
+    "__v": 0,
+    "createdAt": "2025-10-31T11:04:44.239Z",
+    "notes": [
+      {
+        "note": "Add the new task",
+        "userId": "grishama-bliss-3549",
+        "color": "#f5222d",
+        "archive": true,
+        "description": "This is the new taskfsdfs",
+        "createdAt": "2025-10-31T11:04:44.232Z",
+        "_id": "690497cc4d86cd93f565d912"
+      }
+    ],
+    "updatedAt": "2025-10-31T11:04:53.076Z"
+  },
+  {
+    "_id": "6905b1e08b1f3d3714c8805a",
+    "date": "2025-11-04",
+    "__v": 0,
+    "createdAt": "2025-11-01T07:08:16.131Z",
+    "notes": [
+      {
+        "note": "This is the new task",
+        "userId": "grishama-bliss-3549",
+        "color": "#722ed1",
+        "archive": true,
+        "description": "This is the new task \n",
+        "createdAt": "2025-11-01T07:08:16.125Z",
+        "_id": "6905b1e0361af926ef92073a"
+      }
+    ],
+    "updatedAt": "2025-11-01T07:33:31.990Z"
+  }
+]

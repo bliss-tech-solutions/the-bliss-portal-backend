@@ -57,7 +57,8 @@ const UserVerificationDocumentsSchema = new Schema(
 
         // Document Uploads (URLs or file paths)
         aadharCardImage: { type: String }, // URL to uploaded Aadhar card image
-        passportPhoto: { type: String }, // URL to uploaded passport photo
+        oldSalarySlip: { type: String }, // URL to uploaded old salary slip
+        checkPhoto: { type: String }, // URL to uploaded check photo
         offerLetter: { type: String }, // URL to uploaded offer letter
     },
     {

@@ -15,7 +15,17 @@ const CheckInCheckOutSchema = new Schema(
                 checkInReason: { type: String },
                 checkOutReason: { type: String },
                 checkInStatus: { type: String },
-                checkOutStatus: { type: String }
+                checkOutStatus: { type: String },
+                checkInType: {
+                    type: String,
+                    enum: ['OFFICE', 'WORK', 'MEETING', 'EXTERNAL_WORK', 'CLIENT_VISIT', 'SITE_WORK'],
+                    default: 'OFFICE'
+                },
+                DayStatus: {
+                    type: String,
+                    enum: ['PENDING', 'HALF', 'FULL'],
+                    default: 'PENDING'
+                }
             }
         ]
     },

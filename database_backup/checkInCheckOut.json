@@ -1,0 +1,67 @@
+[
+  {
+    "_id": "6952348f3d0d3e6c14288daa",
+    "userId": "nirjara-bliss-953‬",
+    "CheckInCheckOutTime": [
+      {
+        "date": "2025-12-29",
+        "checkInAt": "2025-12-29T07:58:07.562Z",
+        "checkInReason": "Start work",
+        "checkInType": "OFFICE",
+        "DayStatus": "HALF",
+        "_id": "6952348f3d0d3e6c14288dab"
+      }
+    ],
+    "createdAt": "2025-12-29T07:58:07.630Z",
+    "updatedAt": "2025-12-29T07:58:07.630Z",
+    "__v": 0
+  },
+  {
+    "_id": "69523657cb56e9b0c43ddf88",
+    "userId": "nayak-bliss-3549",
+    "CheckInCheckOutTime": [
+      {
+        "date": "2025-12-29",
+        "checkInAt": "2025-12-29T08:05:43.180Z",
+        "checkInType": "OFFICE",
+        "DayStatus": "HALF",
+        "_id": "69523657cb56e9b0c43ddf89"
+      }
+    ],
+    "createdAt": "2025-12-29T08:05:43.366Z",
+    "updatedAt": "2025-12-29T08:05:43.366Z",
+    "__v": 0
+  },
+  {
+    "_id": "695238e6cb56e9b0c43ddfcd",
+    "userId": "ishit-bliss-8269",
+    "CheckInCheckOutTime": [
+      {
+        "date": "2025-12-29",
+        "checkInAt": "2025-12-29T08:16:38.496Z",
+        "checkInType": "OFFICE",
+        "DayStatus": "HALF",
+        "_id": "695238e6cb56e9b0c43ddfce"
+      }
+    ],
+    "createdAt": "2025-12-29T08:16:38.636Z",
+    "updatedAt": "2025-12-29T08:16:38.636Z",
+    "__v": 0
+  },
+  {
+    "_id": "69523961cb56e9b0c43de017",
+    "userId": "alok-bliss-206‬",
+    "CheckInCheckOutTime": [
+      {
+        "date": "2025-12-29",
+        "checkInAt": "2025-12-29T08:18:41.329Z",
+        "checkInType": "OFFICE",
+        "DayStatus": "HALF",
+        "_id": "69523961cb56e9b0c43de018"
+      }
+    ],
+    "createdAt": "2025-12-29T08:18:41.412Z",
+    "updatedAt": "2025-12-29T08:18:41.412Z",
+    "__v": 0
+  }
+]

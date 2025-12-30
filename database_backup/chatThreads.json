@@ -1,0 +1,128 @@
+[
+  {
+    "_id": "6944e96fd27fc58b2b3ac3c2",
+    "taskId": "69441be99bfb317a159d5742",
+    "__v": 0,
+    "createdAt": "2025-12-19T05:58:07.537Z",
+    "messages": [
+      {
+        "senderId": "ishit-bliss-8269",
+        "receiverId": "riddhi-bliss-0042",
+        "userId": "ishit-bliss-8269",
+        "userName": "Ishit Trivedi",
+        "message": "🤣🤣🤣🤣",
+        "time": "Dec 19, 2025, 11:28 AM",
+        "createdAt": "2025-12-19T05:58:07.536Z"
+      },
+      {
+        "senderId": "riddhi-bliss-0042",
+        "receiverId": "ishit-bliss-8269",
+        "userId": "riddhi-bliss-0042",
+        "userName": "Riddhi Vaidya",
+        "message": "Heylllo",
+        "time": "Dec 19, 2025, 11:49 AM",
+        "createdAt": "2025-12-19T06:19:42.535Z"
+      },
+      {
+        "senderId": "ishit-bliss-8269",
+        "receiverId": "riddhi-bliss-0042",
+        "userId": "ishit-bliss-8269",
+        "userName": "Ishit Trivedi",
+        "message": "Okay its working",
+        "time": "Dec 19, 2025, 11:49 AM",
+        "createdAt": "2025-12-19T06:19:50.209Z"
+      },
+      {
+        "senderId": "ishit-bliss-8269",
+        "receiverId": "riddhi-bliss-0042",
+        "userId": "ishit-bliss-8269",
+        "userName": "Ishit Trivedi",
+        "message": "https://res.cloudinary.com/dpjtupftc/image/upload/v1766128574/chat-media/ajreqnbyjgtdtaaveyzv.jpg",
+        "time": "Dec 19, 2025, 12:46 PM",
+        "createdAt": "2025-12-19T07:16:15.428Z"
+      }
+    ],
+    "updatedAt": "2025-12-19T07:16:15.428Z"
+  },
+  {
+    "_id": "69492258d27fc58b2b3ae25a",
+    "taskId": "6943f92569e54ea5a42e1cc7",
+    "__v": 0,
+    "createdAt": "2025-12-22T10:50:00.808Z",
+    "messages": [
+      {
+        "senderId": "alok-bliss-206‬",
+        "receiverId": "rutvi-bliss-5935",
+        "userId": "alok-bliss-206‬",
+        "userName": "Alok Prajapati",
+        "message": "Hey I am john",
+        "time": "Dec 22, 2025, 4:20 PM",
+        "createdAt": "2025-12-22T10:50:00.807Z"
+      },
+      {
+        "senderId": "alok-bliss-206‬",
+        "receiverId": "rutvi-bliss-5935",
+        "userId": "alok-bliss-206‬",
+        "userName": "Alok Prajapati",
+        "message": "https://res.cloudinary.com/dpjtupftc/image/upload/v1766400620/chat-media/kr6bssphlncutsqz0xj2.jpg",
+        "time": "Dec 22, 2025, 4:20 PM",
+        "createdAt": "2025-12-22T10:50:23.211Z"
+      }
+    ],
+    "updatedAt": "2025-12-22T10:50:23.211Z"
+  },
+  {
+    "_id": "694efa80d27fc58b2b3b034a",
+    "taskId": "694efa5208078fc0c1301a31",
+    "__v": 0,
+    "createdAt": "2025-12-26T21:13:36.528Z",
+    "messages": [
+      {
+        "senderId": "ishit-bliss-8269",
+        "receiverId": "mehul-bliss-579‬",
+        "userId": "ishit-bliss-8269",
+        "userName": "Ishit Trivedi",
+        "message": "jaldi kar bhai",
+        "time": "Dec 27, 2025, 2:43 AM",
+        "createdAt": "2025-12-26T21:13:36.527Z"
+      },
+      {
+        "senderId": "ishit-bliss-8269",
+        "receiverId": "mehul-bliss-579‬",
+        "userId": "ishit-bliss-8269",
+        "userName": "Ishit Trivedi",
+        "message": "🤨",
+        "time": "Dec 27, 2025, 2:43 AM",
+        "createdAt": "2025-12-26T21:13:56.825Z"
+      },
+      {
+        "senderId": "mehul-bliss-579‬",
+        "receiverId": "ishit-bliss-8269",
+        "userId": "mehul-bliss-579‬",
+        "userName": "Mehul Patel",
+        "message": "Saas to lene do sirji",
+        "time": "Dec 27, 2025, 2:48 AM",
+        "createdAt": "2025-12-26T21:18:45.855Z"
+      }
+    ],
+    "updatedAt": "2025-12-26T21:18:45.855Z"
+  },
+  {
+    "_id": "694fb18bd27fc58b2b3b06f8",
+    "taskId": "694fb182a405d660d2dde1da",
+    "__v": 0,
+    "createdAt": "2025-12-27T10:14:35.096Z",
+    "messages": [
+      {
+        "senderId": "ishit-bliss-8269",
+        "receiverId": "riddhi-bliss-0042",
+        "userId": "ishit-bliss-8269",
+        "userName": "Ishit Trivedi",
+        "message": "fsdfdsafdfsdfdff",
+        "time": "Dec 27, 2025, 3:44 PM",
+        "createdAt": "2025-12-27T10:14:35.096Z"
+      }
+    ],
+    "updatedAt": "2025-12-27T10:14:35.096Z"
+  }
+]

@@ -1,0 +1,53 @@
+[
+  {
+    "_id": "694fb8e7a405d660d2dde311",
+    "userId": "ishit-bliss-8269",
+    "receiverUserId": "riddhi-bliss-0042",
+    "taskName": "diwALI ",
+    "clientName": "SUNWOOD",
+    "category": "graphics-designer",
+    "priority": "medium",
+    "timeSpend": "",
+    "description": "UAGSGC",
+    "taskImages": [
+      "https://res.cloudinary.com/dpjtupftc/raw/upload/v1766832352/chat-media/ihhixtou8gywsizwaa5j.xlsx"
+    ],
+    "attachments": [],
+    "slots": [
+      {
+        "start": "2025-12-27T12:45:00.000Z",
+        "end": "2025-12-27T14:00:00.000Z",
+        "slotDate": "2025-12-27T00:00:00.000Z",
+        "durationMinutes": 75,
+        "status": "scheduled",
+        "extensionMinutes": 30,
+        "extensionHistory": [
+          {
+            "requestedBy": "riddhi-bliss-0042",
+            "requestedAt": "2025-12-27T10:49:30.119Z",
+            "minutesRequested": 30,
+            "reason": "GFCXDXDX",
+            "status": "approved",
+            "_id": "694fb9baa405d660d2dde32a",
+            "respondedBy": "ishit-bliss-8269",
+            "respondedAt": "2025-12-27T13:11:14.276Z"
+          }
+        ],
+        "_id": "694fb8e7a405d660d2dde312"
+      }
+    ],
+    "timeTracking": {
+      "originalSlotMinutes": 45,
+      "totalExtendedMinutes": 30,
+      "totalWorkedMinutes": 0
+    },
+    "taskStatus": "completed",
+    "isArchived": false,
+    "chatCount": 0,
+    "signOutRequests": [],
+    "createdAt": "2025-12-27T10:45:59.713Z",
+    "updatedAt": "2025-12-27T13:11:14.323Z",
+    "__v": 2,
+    "archivedAt": "2025-12-27T10:51:15.139Z"
+  }
+]

@@ -1,0 +1,287 @@
+[
+  {
+    "_id": "69085ff18727f66413900900",
+    "userId": "sachin-bliss-3636",
+    "months": [
+      {
+        "month": "NOV",
+        "leaves": [
+          {
+            "startDate": "2025-11-05T00:00:00.000Z",
+            "endDate": "2025-11-08T00:00:00.000Z",
+            "status": "partially_approved",
+            "approvedDates": [
+              "2025-11-05T00:00:00.000Z"
+            ],
+            "rejectedDates": [
+              "2025-11-06T00:00:00.000Z",
+              "2025-11-07T00:00:00.000Z",
+              "2025-11-08T00:00:00.000Z"
+            ],
+            "history": [
+              {
+                "status": "pending",
+                "at": "2025-11-03T07:55:29.869Z",
+                "by": "sachin-bliss-3636",
+                "approvedDates": [],
+                "rejectedDates": [],
+                "_id": "69085ff18727f66413900902"
+              },
+              {
+                "status": "partially_approved",
+                "at": "2025-11-03T07:56:16.637Z",
+                "by": "grishama-bliss-3549",
+                "note": "",
+                "approvedDates": [
+                  "2025-11-05T00:00:00.000Z"
+                ],
+                "rejectedDates": [
+                  "2025-11-06T00:00:00.000Z",
+                  "2025-11-07T00:00:00.000Z",
+                  "2025-11-08T00:00:00.000Z"
+                ],
+                "_id": "690860208727f66413900931"
+              }
+            ],
+            "_id": "69085ff18727f66413900901",
+            "createdAt": "2025-11-03T07:55:29.904Z",
+            "updatedAt": "2025-11-03T07:56:16.640Z"
+          }
+        ],
+        "reason": "Family function"
+      }
+    ],
+    "createdAt": "2025-11-03T07:55:29.912Z",
+    "updatedAt": "2025-11-03T07:56:16.641Z",
+    "__v": 1
+  },
+  {
+    "_id": "690c526040164a325fb005ca",
+    "userId": "new-bliss-6466",
+    "months": [
+      {
+        "month": "NOV",
+        "leaves": [
+          {
+            "startDate": "2025-11-07T00:00:00.000Z",
+            "endDate": "2025-11-08T00:00:00.000Z",
+            "status": "partially_approved",
+            "approvedDates": [
+              "2025-11-07T00:00:00.000Z"
+            ],
+            "rejectedDates": [
+              "2025-11-08T00:00:00.000Z"
+            ],
+            "history": [
+              {
+                "status": "pending",
+                "at": "2025-11-06T07:46:39.963Z",
+                "by": "new-bliss-6466",
+                "approvedDates": [],
+                "rejectedDates": [],
+                "_id": "690c526040164a325fb005cc"
+              },
+              {
+                "status": "partially_approved",
+                "at": "2025-12-18T13:23:50.193Z",
+                "by": "nayak-bliss-3549",
+                "note": "",
+                "approvedDates": [
+                  "2025-11-07T00:00:00.000Z"
+                ],
+                "rejectedDates": [
+                  "2025-11-08T00:00:00.000Z"
+                ],
+                "_id": "6944006669e54ea5a42e1e19"
+              }
+            ],
+            "_id": "690c526040164a325fb005cb",
+            "createdAt": "2025-11-06T07:46:40.086Z",
+            "updatedAt": "2025-12-18T13:23:50.193Z"
+          }
+        ],
+        "reason": "This is my latest leave"
+      }
+    ],
+    "createdAt": "2025-11-06T07:46:40.090Z",
+    "updatedAt": "2025-12-18T13:23:50.194Z",
+    "__v": 1
+  },
+  {
+    "_id": "69492403ee2d54af59f7d5d1",
+    "userId": "alok-bliss-206‬",
+    "months": [
+      {
+        "month": "DEC",
+        "leaves": [
+          {
+            "startDate": "2025-12-24T00:00:00.000Z",
+            "endDate": "2025-12-26T00:00:00.000Z",
+            "status": "partially_approved",
+            "approvedDates": [
+              "2025-12-24T00:00:00.000Z"
+            ],
+            "rejectedDates": [
+              "2025-12-25T00:00:00.000Z",
+              "2025-12-26T00:00:00.000Z"
+            ],
+            "history": [
+              {
+                "status": "pending",
+                "at": "2025-12-22T10:57:07.158Z",
+                "by": "alok-bliss-206‬",
+                "approvedDates": [],
+                "rejectedDates": [],
+                "_id": "69492403ee2d54af59f7d5d3"
+              },
+              {
+                "status": "partially_approved",
+                "at": "2025-12-29T08:17:36.973Z",
+                "by": "nayak-bliss-3549",
+                "note": "",
+                "approvedDates": [
+                  "2025-12-24T00:00:00.000Z"
+                ],
+                "rejectedDates": [
+                  "2025-12-25T00:00:00.000Z",
+                  "2025-12-26T00:00:00.000Z"
+                ],
+                "_id": "69523920cb56e9b0c43ddfdd"
+              }
+            ],
+            "_id": "69492403ee2d54af59f7d5d2",
+            "createdAt": "2025-12-22T10:57:07.388Z",
+            "updatedAt": "2025-12-29T08:17:36.976Z"
+          },
+          {
+            "startDate": "2025-12-31T00:00:00.000Z",
+            "endDate": "2026-01-01T00:00:00.000Z",
+            "status": "rejected",
+            "approvedDates": [],
+            "rejectedDates": [
+              "2025-12-31T00:00:00.000Z",
+              "2026-01-01T00:00:00.000Z"
+            ],
+            "history": [
+              {
+                "status": "pending",
+                "at": "2025-12-27T10:52:35.355Z",
+                "by": "alok-bliss-206‬",
+                "approvedDates": [],
+                "rejectedDates": [],
+                "_id": "694fba73a405d660d2dde35b"
+              },
+              {
+                "status": "rejected",
+                "at": "2025-12-29T08:17:37.492Z",
+                "by": "nayak-bliss-3549",
+                "note": "",
+                "approvedDates": [],
+                "rejectedDates": [
+                  "2025-12-31T00:00:00.000Z",
+                  "2026-01-01T00:00:00.000Z"
+                ],
+                "_id": "69523921cb56e9b0c43ddff2"
+              }
+            ],
+            "_id": "694fba73a405d660d2dde35a",
+            "createdAt": "2025-12-27T10:52:35.418Z",
+            "updatedAt": "2025-12-29T08:17:37.492Z"
+          },
+          {
+            "startDate": "2026-01-30T00:00:00.000Z",
+            "endDate": "2026-01-30T00:00:00.000Z",
+            "status": "rejected",
+            "approvedDates": [],
+            "rejectedDates": [
+              "2026-01-30T00:00:00.000Z"
+            ],
+            "history": [
+              {
+                "status": "pending",
+                "at": "2025-12-27T10:52:35.355Z",
+                "by": "alok-bliss-206‬",
+                "approvedDates": [],
+                "rejectedDates": [],
+                "_id": "694fba73a405d660d2dde35d"
+              },
+              {
+                "status": "rejected",
+                "at": "2025-12-29T08:17:37.239Z",
+                "by": "nayak-bliss-3549",
+                "note": "",
+                "approvedDates": [],
+                "rejectedDates": [
+                  "2026-01-30T00:00:00.000Z"
+                ],
+                "_id": "69523921cb56e9b0c43ddfe7"
+              }
+            ],
+            "_id": "694fba73a405d660d2dde35c",
+            "createdAt": "2025-12-27T10:52:35.420Z",
+            "updatedAt": "2025-12-29T08:17:37.239Z"
+          }
+        ],
+        "reason": "Family function leave"
+      }
+    ],
+    "createdAt": "2025-12-22T10:57:07.389Z",
+    "updatedAt": "2025-12-29T08:17:37.494Z",
+    "__v": 4
+  },
+  {
+    "_id": "694efc1708078fc0c1301a77",
+    "userId": "mehul-bliss-579‬",
+    "months": [
+      {
+        "month": "DEC",
+        "leaves": [
+          {
+            "startDate": "2025-12-18T00:00:00.000Z",
+            "endDate": "2025-12-18T00:00:00.000Z",
+            "status": "pending",
+            "approvedDates": [],
+            "rejectedDates": [],
+            "history": [
+              {
+                "status": "pending",
+                "at": "2025-12-26T21:20:23.664Z",
+                "by": "mehul-bliss-579‬",
+                "approvedDates": [],
+                "rejectedDates": [],
+                "_id": "694efc1708078fc0c1301a79"
+              }
+            ],
+            "_id": "694efc1708078fc0c1301a78",
+            "createdAt": "2025-12-26T21:20:23.886Z",
+            "updatedAt": "2025-12-26T21:20:23.887Z"
+          },
+          {
+            "startDate": "2025-12-27T00:00:00.000Z",
+            "endDate": "2025-12-27T00:00:00.000Z",
+            "status": "pending",
+            "approvedDates": [],
+            "rejectedDates": [],
+            "history": [
+              {
+                "status": "pending",
+                "at": "2025-12-26T21:20:23.664Z",
+                "by": "mehul-bliss-579‬",
+                "approvedDates": [],
+                "rejectedDates": [],
+                "_id": "694efc1708078fc0c1301a7b"
+              }
+            ],
+            "_id": "694efc1708078fc0c1301a7a",
+            "createdAt": "2025-12-26T21:20:23.887Z",
+            "updatedAt": "2025-12-26T21:20:23.887Z"
+          }
+        ],
+        "reason": "me nahi aaunga"
+      }
+    ],
+    "createdAt": "2025-12-26T21:20:23.889Z",
+    "updatedAt": "2025-12-26T21:20:23.889Z",
+    "__v": 0
+  }
+]

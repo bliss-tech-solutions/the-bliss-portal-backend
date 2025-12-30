@@ -1,5 +1,6 @@
 const UserLeavesModel = require('./LeavesSchema/LeavesSchema');
 const { getIO } = require('../../utils/socket');
+const { invalidateCache } = require('../../middleware/redisCache');
 
 // Helper: generate all dates between start and end
 const getAllDatesInRange = (startDate, endDate) => {
@@ -37,10 +38,19 @@ const leavesController = {
                     months: [{ month: monthUpper, reason, leaves: leaveEntries }]
                 });
                 const saved = await newDoc.save();
+
+                // Invalidate cache
+                await invalidateCache('cache:*leave*');
+
                 try {
                     const io = getIO && getIO();
-                    if (io) io.emit('leave:requested', { userId, month: monthUpper, reason, leaves: leaveEntries });
-                } catch (_) {}
+                    if (io) {
+                        const payload = { userId, month: monthUpper, reason, leaves: leaveEntries, doc: saved };
+                        io.emit('leave:requested', payload);
+                        io.to(`user:${userId}`).emit('leave:requested', payload);
+                        io.to('analytics').emit('leave:requested', payload);
+                    }
+                } catch (_) { }
                 return res.status(201).json({ success: true, data: saved });
             }
 
@@ -55,9 +65,9 @@ const leavesController = {
                         const existEnd = existingLeave.endDate.getTime();
                         // Check if dates overlap
                         if ((newStart >= existStart && newStart <= existEnd) || (newEnd >= existStart && newEnd <= existEnd) || (newStart <= existStart && newEnd >= existEnd)) {
-                            return res.status(400).json({ 
-                                success: false, 
-                                message: `Leave dates already exist. Overlap: ${new Date(newStart).toISOString().split('T')[0]} to ${new Date(newEnd).toISOString().split('T')[0]}` 
+                            return res.status(400).json({
+                                success: false,
+                                message: `Leave dates already exist. Overlap: ${new Date(newStart).toISOString().split('T')[0]} to ${new Date(newEnd).toISOString().split('T')[0]}`
                             });
                         }
                     }
@@ -68,10 +78,18 @@ const leavesController = {
             }
             const saved = await doc.save();
 
+            // Invalidate cache
+            await invalidateCache('cache:*leave*');
+
             try {
                 const io = getIO && getIO();
-                if (io) io.emit('leave:requested', { userId, month: monthUpper, reason, leaves: leaveEntries });
-            } catch (_) {}
+                if (io) {
+                    const payload = { userId, month: monthUpper, reason, leaves: leaveEntries, doc: saved };
+                    io.emit('leave:requested', payload);
+                    io.to(`user:${userId}`).emit('leave:requested', payload);
+                    io.to('analytics').emit('leave:requested', payload);
+                }
+            } catch (_) { }
 
             res.status(201).json({ success: true, data: saved });
         } catch (error) { next(error); }
@@ -125,13 +143,13 @@ const leavesController = {
             if (!leave) return res.status(404).json({ success: false, message: 'Leave not found' });
 
             const allRequestedDates = getAllDatesInRange(leave.startDate, leave.endDate);
-            
-            if (Array.isArray(approvedDates) && approvedDates.length > 0) {
+
+            if (Array.isArray(approvedDates)) {
                 const approved = approvedDates.map(d => new Date(d));
-                const rejected = Array.isArray(rejectedDates) && rejectedDates.length > 0 
+                const rejected = Array.isArray(rejectedDates)
                     ? rejectedDates.map(d => new Date(d))
                     : allRequestedDates.filter(d => !approved.some(ad => ad.getTime() === d.getTime()));
-                
+
                 // Validate dates are within range
                 for (const ad of approved) {
                     if (ad < leave.startDate || ad > leave.endDate) {
@@ -148,12 +166,12 @@ const leavesController = {
                 leave.rejectedDates = rejected;
 
                 // Determine status
-                if (approved.length === allRequestedDates.length) {
-                    leave.status = 'approved';
-                } else if (approved.length > 0 && rejected.length > 0) {
+                if (approved.length === 0) {
+                    leave.status = 'rejected';
+                } else if (approved.length < allRequestedDates.length) {
                     leave.status = 'partially_approved';
                 } else {
-                    leave.status = 'rejected';
+                    leave.status = 'approved';
                 }
             } else {
                 // No dates specified - approve all
@@ -162,11 +180,11 @@ const leavesController = {
                 leave.rejectedDates = [];
             }
 
-            if (instructions) leave.instructions = instructions;
-            leave.history.push({ 
-                status: leave.status, 
-                at: new Date(), 
-                by: approverId, 
+            if (instructions !== undefined) leave.instructions = instructions;
+            leave.history.push({
+                status: leave.status,
+                at: new Date(),
+                by: approverId,
                 note: instructions,
                 approvedDates: leave.approvedDates,
                 rejectedDates: leave.rejectedDates
@@ -174,17 +192,26 @@ const leavesController = {
             leave.updatedAt = new Date();
             await doc.save();
 
+            // Invalidate cache
+            await invalidateCache('cache:*leave*');
+
             try {
                 const io = getIO && getIO();
-                if (io) io.emit('leave:updated', { 
-                    userId, 
-                    month: monthUpper, 
-                    leaveId, 
-                    status: leave.status,
-                    approvedDates: leave.approvedDates,
-                    rejectedDates: leave.rejectedDates
-                });
-            } catch (_) {}
+                if (io) {
+                    const payload = {
+                        userId,
+                        month: monthUpper,
+                        leaveId,
+                        status: leave.status,
+                        approvedDates: leave.approvedDates,
+                        rejectedDates: leave.rejectedDates,
+                        leave
+                    };
+                    io.emit('leave:updated', payload);
+                    io.to(`user:${userId}`).emit('leave:updated', payload);
+                    io.to('analytics').emit('leave:updated', payload);
+                }
+            } catch (_) { }
 
             res.status(200).json({ success: true, data: leave });
         } catch (error) { next(error); }
@@ -207,11 +234,11 @@ const leavesController = {
             if (!leave) return res.status(404).json({ success: false, message: 'Leave not found' });
 
             const allRequestedDates = getAllDatesInRange(leave.startDate, leave.endDate);
-            
-            if (Array.isArray(rejectedDates) && rejectedDates.length > 0) {
+
+            if (Array.isArray(rejectedDates)) {
                 const rejected = rejectedDates.map(d => new Date(d));
                 const approved = allRequestedDates.filter(d => !rejected.some(rd => rd.getTime() === d.getTime()));
-                
+
                 // Validate dates are within range
                 for (const rd of rejected) {
                     if (rd < leave.startDate || rd > leave.endDate) {
@@ -223,12 +250,12 @@ const leavesController = {
                 leave.approvedDates = approved;
 
                 // Determine status
-                if (rejected.length === allRequestedDates.length) {
-                    leave.status = 'rejected';
-                } else if (approved.length > 0 && rejected.length > 0) {
+                if (rejected.length === 0) {
+                    leave.status = 'approved';
+                } else if (rejected.length < allRequestedDates.length) {
                     leave.status = 'partially_approved';
                 } else {
-                    leave.status = 'approved';
+                    leave.status = 'rejected';
                 }
             } else {
                 // No dates specified - reject all
@@ -237,11 +264,11 @@ const leavesController = {
                 leave.approvedDates = [];
             }
 
-            if (instructions) leave.instructions = instructions;
-            leave.history.push({ 
-                status: leave.status, 
-                at: new Date(), 
-                by: approverId, 
+            if (instructions !== undefined) leave.instructions = instructions;
+            leave.history.push({
+                status: leave.status,
+                at: new Date(),
+                by: approverId,
                 note: instructions,
                 approvedDates: leave.approvedDates,
                 rejectedDates: leave.rejectedDates
@@ -249,19 +276,127 @@ const leavesController = {
             leave.updatedAt = new Date();
             await doc.save();
 
+            // Invalidate cache
+            await invalidateCache('cache:*leave*');
+
             try {
                 const io = getIO && getIO();
-                if (io) io.emit('leave:updated', { 
-                    userId, 
-                    month: monthUpper, 
-                    leaveId, 
+                if (io) {
+                    const payload = {
+                        userId,
+                        month: monthUpper,
+                        leaveId,
+                        status: leave.status,
+                        approvedDates: leave.approvedDates,
+                        rejectedDates: leave.rejectedDates,
+                        leave
+                    };
+                    io.emit('leave:updated', payload);
+                    io.to(`user:${userId}`).emit('leave:updated', payload);
+                    io.to('analytics').emit('leave:updated', payload);
+                }
+            } catch (_) { }
+
+            res.status(200).json({ success: true, data: leave });
+        } catch (error) { next(error); }
+    },
+
+    // POST /api/leave/updateBatch
+    updateBatch: async (req, res, next) => {
+        try {
+            const { userId, month, updates, approverId } = req.body;
+            if (!userId || !month || !Array.isArray(updates) || !approverId) {
+                return res.status(400).json({ success: false, message: 'userId, month, updates array, and approverId are required' });
+            }
+
+            const monthUpper = month.toUpperCase();
+            const doc = await UserLeavesModel.findOne({ userId });
+            if (!doc) return res.status(404).json({ success: false, message: 'User not found' });
+            const monthEntry = doc.months.find(m => m.month === monthUpper);
+            if (!monthEntry) return res.status(404).json({ success: false, message: 'Month not found' });
+
+            const results = [];
+
+            for (const update of updates) {
+                const { leaveId, action, approvedDates, rejectedDates, instructions } = update;
+                const leave = monthEntry.leaves.id(leaveId);
+                if (!leave) continue;
+
+                const allRequestedDates = getAllDatesInRange(leave.startDate, leave.endDate);
+
+                if (action === 'approve') {
+                    if (Array.isArray(approvedDates)) {
+                        const approved = approvedDates.map(d => new Date(d));
+                        const rejected = Array.isArray(rejectedDates)
+                            ? rejectedDates.map(d => new Date(d))
+                            : allRequestedDates.filter(d => !approved.some(ad => ad.getTime() === d.getTime()));
+
+                        leave.approvedDates = approved;
+                        leave.rejectedDates = rejected;
+                        if (approved.length === 0) leave.status = 'rejected';
+                        else if (approved.length < allRequestedDates.length) leave.status = 'partially_approved';
+                        else leave.status = 'approved';
+                    } else {
+                        leave.status = 'approved';
+                        leave.approvedDates = allRequestedDates;
+                        leave.rejectedDates = [];
+                    }
+                } else if (action === 'reject') {
+                    if (Array.isArray(rejectedDates)) {
+                        const rejected = rejectedDates.map(d => new Date(d));
+                        const approved = allRequestedDates.filter(d => !rejected.some(rd => rd.getTime() === d.getTime()));
+                        leave.rejectedDates = rejected;
+                        leave.approvedDates = approved;
+                        if (rejected.length === 0) leave.status = 'approved';
+                        else if (rejected.length < allRequestedDates.length) leave.status = 'partially_approved';
+                        else leave.status = 'rejected';
+                    } else {
+                        leave.status = 'rejected';
+                        leave.rejectedDates = allRequestedDates;
+                        leave.approvedDates = [];
+                    }
+                }
+
+                if (instructions !== undefined) leave.instructions = instructions;
+                leave.history.push({
                     status: leave.status,
+                    at: new Date(),
+                    by: approverId,
+                    note: instructions,
                     approvedDates: leave.approvedDates,
                     rejectedDates: leave.rejectedDates
                 });
-            } catch (_) {}
+                leave.updatedAt = new Date();
+                results.push(leave);
+            }
 
-            res.status(200).json({ success: true, data: leave });
+            await doc.save();
+
+            // Invalidate cache
+            await invalidateCache('cache:*leave*');
+
+            // Emit sockets for each updated leave
+            try {
+                const io = getIO && getIO();
+                if (io) {
+                    for (const leave of results) {
+                        const payload = {
+                            userId,
+                            month: monthUpper,
+                            leaveId: leave._id,
+                            status: leave.status,
+                            approvedDates: leave.approvedDates,
+                            rejectedDates: leave.rejectedDates,
+                            leave
+                        };
+                        io.emit('leave:updated', payload);
+                        io.to(`user:${userId}`).emit('leave:updated', payload);
+                        io.to('analytics').emit('leave:updated', payload);
+                    }
+                }
+            } catch (_) { }
+
+            res.status(200).json({ success: true, data: results });
         } catch (error) { next(error); }
     },
 
@@ -287,10 +422,18 @@ const leavesController = {
             leave.updatedAt = new Date();
             await doc.save();
 
+            // Invalidate cache
+            await invalidateCache('cache:*leave*');
+
             try {
                 const io = getIO && getIO();
-                if (io) io.emit('leave:deleted', { userId, month: monthUpper, leaveId });
-            } catch (_) {}
+                if (io) {
+                    const payload = { userId, month: monthUpper, leaveId, status: 'cancelled' };
+                    io.emit('leave:deleted', payload);
+                    io.to(`user:${userId}`).emit('leave:deleted', payload);
+                    io.to('analytics').emit('leave:deleted', payload);
+                }
+            } catch (_) { }
 
             res.status(200).json({ success: true, data: leave });
         } catch (error) { next(error); }

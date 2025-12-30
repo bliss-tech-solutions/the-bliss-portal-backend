@@ -1,0 +1,121 @@
+[
+  {
+    "_id": "692506d01dcb66ba7f1eceb7",
+    "productImage": [
+      "https://res.cloudinary.com/dpjtupftc/image/upload/v1764034253/chat-media/bwpziiplenxky542uabp.jpg",
+      "https://res.cloudinary.com/dpjtupftc/image/upload/v1764034253/chat-media/ln4cnmjpzftrgtblzcui.jpg",
+      "https://res.cloudinary.com/dpjtupftc/image/upload/v1764034253/chat-media/zmi1forzfao4nn6tayrh.png"
+    ],
+    "productTitle": "Apple Watch Series 10",
+    "productDescription": "The Apple Watch is a premium smartwatch that combines advanced technology with sleek design. It offers seamless integration with your iPhone, allowing you to receive notifications, track fitness, and monitor your health on the go. The watch features GPS, heart rate monitoring, and various workout modes to keep you active and motivated. With customizable watch faces and interchangeable bands, you can personalize it to match your style. Durable and water-resistant, the Apple Watch is the perfect c",
+    "productQuantity": 234,
+    "productPrice": 106.4,
+    "categoriesName": "Watch",
+    "archived": false,
+    "createdAt": "2025-11-25T01:30:56.026Z",
+    "updatedAt": "2025-11-25T01:30:59.673Z",
+    "__v": 0
+  },
+  {
+    "_id": "692507a91dcb66ba7f1ecebf",
+    "productImage": [
+      "https://res.cloudinary.com/dpjtupftc/image/upload/v1764034377/chat-media/cus0q1vqjfuo2tcgujbi.jpg",
+      "https://res.cloudinary.com/dpjtupftc/image/upload/v1764034377/chat-media/yh2irt5vu2rmk6hmfi5n.webp",
+      "https://res.cloudinary.com/dpjtupftc/image/upload/v1764034377/chat-media/xptz5xai8dspupqbp1p3.jpg",
+      "https://res.cloudinary.com/dpjtupftc/image/upload/v1764034378/chat-media/vgtbmjjlmnf8suawnyek.jpg"
+    ],
+    "productTitle": "Buy AirPods Max",
+    "productDescription": "Apple headphones deliver high-quality sound with sleek design and advanced technology. They offer immersive audio experience with rich bass and clear highs, perfect for music lovers. Equipped with noise-cancellation features, they reduce background noise for focused listening. Lightweight and comfortable, they are ideal for extended use during workouts or daily commutes. Seamlessly connect with Apple devices using Bluetooth for a wireless and hassle-free experience.",
+    "productQuantity": 121,
+    "productPrice": 200,
+    "categoriesName": "Headphones",
+    "archived": true,
+    "createdAt": "2025-11-25T01:34:33.261Z",
+    "updatedAt": "2025-11-25T01:36:10.795Z",
+    "__v": 0
+  },
+  {
+    "_id": "692508271dcb66ba7f1ecec7",
+    "productImage": [
+      "https://res.cloudinary.com/dpjtupftc/image/upload/v1764034595/chat-media/dwsz1zdaiyr2wahbf4p9.jpg",
+      "https://res.cloudinary.com/dpjtupftc/image/upload/v1764034595/chat-media/x3nm4ohntngvzsg5fjzh.jpg",
+      "https://res.cloudinary.com/dpjtupftc/image/upload/v1764034595/chat-media/dht77fsenyijfpzftqqi.jpg",
+      "https://res.cloudinary.com/dpjtupftc/image/upload/v1764034595/chat-media/zmlrazlvleh8ur4ocxa1.jpg"
+    ],
+    "productTitle": "Buy AirPods Max",
+    "productDescription": "Apple headphones deliver high-quality sound with sleek design and advanced technology. They offer immersive audio experience with rich bass and clear highs, perfect for music lovers. Equipped with noise-cancellation features, they reduce background noise for focused listening. Lightweight and comfortable, they are ideal for extended use during workouts or daily commutes. Seamlessly connect with Apple devices using Bluetooth for a wireless and hassle-free experience.",
+    "productQuantity": 121,
+    "productPrice": 200,
+    "categoriesName": "Headphones",
+    "archived": false,
+    "createdAt": "2025-11-25T01:36:39.036Z",
+    "updatedAt": "2025-11-25T01:36:39.036Z",
+    "__v": 0
+  },
+  {
+    "_id": "692508fa1dcb66ba7f1ececd",
+    "productImage": [
+      "https://res.cloudinary.com/dpjtupftc/image/upload/v1764034807/chat-media/dbdl5oam32fn51pppnha.jpg"
+    ],
+    "productTitle": "Buy AirPods 4",
+    "productDescription": "AirPods are wireless earbuds by Apple offering exceptional sound quality and seamless connectivity. They feature quick pairing with all Apple devices, automatic ear detection, and hands-free Siri voice control. With a compact charging case, AirPods provide over 24 hours of battery life for extended use. These earbuds deliver a comfortable fit, rich audio, and active noise cancellation for immersive listening.",
+    "productQuantity": 147,
+    "productPrice": 240,
+    "categoriesName": "AirPods",
+    "archived": false,
+    "createdAt": "2025-11-25T01:40:10.574Z",
+    "updatedAt": "2025-11-25T01:42:08.545Z",
+    "__v": 0
+  },
+  {
+    "_id": "69250a020a329a8a90a013de",
+    "productImage": [
+      "https://res.cloudinary.com/dpjtupftc/image/upload/v1764035011/chat-media/x6tie6r8iqdzxtssp9ld.jpg",
+      "https://res.cloudinary.com/dpjtupftc/image/upload/v1764035012/chat-media/oduoqguqcb83kufbmaio.jpg",
+      "https://res.cloudinary.com/dpjtupftc/image/upload/v1764035012/chat-media/qqrbcnftedwokebtupvf.jpg",
+      "https://res.cloudinary.com/dpjtupftc/image/upload/v1764035012/chat-media/cd9jblo9utvezdxpskzw.jpg"
+    ],
+    "productTitle": "Memoris Superlight Titanium Limited Edition",
+    "productDescription": "The limited edition Louis Moinet Memoris Superlight showcases a revolutionary approach to chronograph design. Its standout feature is the separation of the chronograph mechanism, consisting of 147 components, from the automatic movement, which contains 164 components. This innovative design places the chronograph at the top of the watch, with the automatic mechanism positioned beneath, enhancing functionality and visual appeal. This timepiece offers a mesmerising display of mechanical artistry. ",
+    "productQuantity": 4,
+    "productPrice": 314320.72,
+    "categoriesName": "Watch",
+    "archived": false,
+    "createdAt": "2025-11-25T01:44:34.239Z",
+    "updatedAt": "2025-11-25T01:44:34.239Z",
+    "__v": 0
+  },
+  {
+    "_id": "69250abc0a329a8a90a013e1",
+    "productImage": [
+      "https://res.cloudinary.com/dpjtupftc/image/upload/v1764035181/chat-media/ymdqre01dx1wewkbjuht.webp",
+      "https://res.cloudinary.com/dpjtupftc/image/upload/v1764035181/chat-media/v9v7pfksszru1i5sf6hf.webp"
+    ],
+    "productTitle": "1000X series | WH-1000XM6 Wireless Noise Cancelling Headphones",
+    "productDescription": "Sony headphones offer premium sound quality with deep bass and clear treble, providing an immersive audio experience for music lovers. They feature advanced noise-cancellation technology to minimize ambient noise, making them ideal for travel and work environments. Designed for comfort, Sony headphones have cushioned ear cups and adjustable headbands for extended wear. Many models support wireless Bluetooth connectivity for hassle-free, tangle-free use. With long battery life and intuitive.",
+    "productQuantity": 288,
+    "productPrice": 561.14,
+    "categoriesName": "Headphones",
+    "archived": false,
+    "createdAt": "2025-11-25T01:47:40.223Z",
+    "updatedAt": "2025-11-25T01:47:40.223Z",
+    "__v": 0
+  },
+  {
+    "_id": "69251adf79cee933a105b1cf",
+    "productImage": [
+      "https://res.cloudinary.com/dpjtupftc/image/upload/v1764039115/chat-media/vgdiv0sceu4gaazhvlry.avif",
+      "https://res.cloudinary.com/dpjtupftc/image/upload/v1764039115/chat-media/q9btsxpkeygy3meveiuj.jpg",
+      "https://res.cloudinary.com/dpjtupftc/image/upload/v1764039116/chat-media/rxjpqzeu4uwvwo9zjxhv.jpg"
+    ],
+    "productTitle": "Apple Iphone 17",
+    "productDescription": "The iPhone 17 is Apple's latest flagship smartphone, combining cutting-edge technology with a sleek design. It boasts a powerful A17 Bionic chip for lightning-fast performance and energy efficiency. The device features an advanced multi-lens camera system with enhanced night mode and 8K video recording capabilities. With a stunning OLED display and ProMotion technology, it offers smooth visuals and vibrant colors. The iPhone 17 supports 5G connectivity, improved battery life, and the latest iOS ",
+    "productQuantity": 2,
+    "productPrice": 1199,
+    "categoriesName": "Mobile",
+    "archived": false,
+    "createdAt": "2025-11-25T02:56:31.286Z",
+    "updatedAt": "2025-11-25T02:56:31.286Z",
+    "__v": 0
+  }
+]

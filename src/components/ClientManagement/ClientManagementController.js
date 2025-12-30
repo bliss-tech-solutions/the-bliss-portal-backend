@@ -1,6 +1,5 @@
 const ClientManagementModel = require('./ClientManagementSchema/ClientManagementSchema');
 const { getIO } = require('../../utils/socket');
-const { invalidateCache } = require('../../middleware/redisCache');
 
 const clientManagementController = {
     // GET /api/clientmanagement/getAllClientsData - Get all clients
@@ -214,8 +213,7 @@ const clientManagementController = {
                 console.warn('Socket emission failed:', e.message);
             }
 
-            // Invalidate client management caches
-            await invalidateCache('cache:*clientmanagement*');
+
 
             res.status(201).json({
                 success: true,
@@ -363,8 +361,7 @@ const clientManagementController = {
                 console.warn('Socket emission failed:', e.message);
             }
 
-            // Invalidate client management caches
-            await invalidateCache('cache:*clientmanagement*');
+
 
             res.status(200).json({
                 success: true,
@@ -415,8 +412,7 @@ const clientManagementController = {
                 console.warn('Socket emission failed:', e.message);
             }
 
-            // Invalidate client management caches
-            await invalidateCache('cache:*clientmanagement*');
+
 
             res.status(200).json({
                 success: true,
@@ -522,8 +518,7 @@ const clientManagementController = {
                 console.warn('Socket emission failed:', e.message);
             }
 
-            // Invalidate client management caches
-            await invalidateCache('cache:*clientmanagement*');
+
 
             res.status(201).json({
                 success: true,
@@ -806,8 +801,7 @@ const clientManagementController = {
                 console.warn('Socket emission failed:', e.message);
             }
 
-            // Invalidate client management caches
-            await invalidateCache('cache:*clientmanagement*');
+
 
             res.status(200).json({
                 success: true,
@@ -883,8 +877,7 @@ const clientManagementController = {
                 console.warn('Socket emission failed:', e.message);
             }
 
-            // Invalidate client management caches
-            await invalidateCache('cache:*clientmanagement*');
+
 
             res.status(200).json({
                 success: true,

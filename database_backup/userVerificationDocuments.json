@@ -1,0 +1,81 @@
+[
+  {
+    "_id": "694cf2aeb22684bf77e30119",
+    "userId": "alok-bliss-206‬",
+    "name": "alok prajapati",
+    "department": "Design",
+    "position": "Graphics Designer",
+    "jobType": "full-time",
+    "beforeBlissSalary": 20000,
+    "blissSalary": 29040,
+    "pfFund": 2904,
+    "joiningDate": "2025-05-15T00:00:00.000Z",
+    "currentAddress": "Ahmedabad",
+    "permanentAddress": "Ahmedabad",
+    "experience": "3 years",
+    "bankDetails": {
+      "accountHolderName": "Test Bank Name",
+      "accountNumber": "098098765432",
+      "bankName": "Kotak",
+      "ifscCode": "ABC09876",
+      "branchName": "odhav",
+      "accountType": "salary"
+    },
+    "aadharCardImage": "https://res.cloudinary.com/dpjtupftc/image/upload/v1766650537/chat-media/vwg5vd9feuldfliibqjo.png",
+    "passportPhoto": "https://res.cloudinary.com/dpjtupftc/image/upload/v1766650534/chat-media/ubfcb5w3maamdiblrlxq.png",
+    "offerLetter": "https://res.cloudinary.com/dpjtupftc/raw/upload/v1766650526/chat-media/dceo3p6tindluvzrkzdm.pdf",
+    "salaryIncrementHistory": [
+      {
+        "incrementPercent": 10,
+        "oldSalary": 24000,
+        "newSalary": 26400,
+        "incrementAmount": 2400,
+        "pfAmount": 2640,
+        "effectiveDate": "2025-12-24T18:30:00.000Z",
+        "note": "Same day salary increment",
+        "status": "superseded",
+        "_id": "694cf2ddb22684bf77e3011e",
+        "createdAt": "2025-12-25T08:16:29.619Z"
+      },
+      {
+        "incrementPercent": 20,
+        "oldSalary": 26400,
+        "newSalary": 31680,
+        "incrementAmount": 5280,
+        "pfAmount": 3168,
+        "effectiveDate": "2026-03-30T18:30:00.000Z",
+        "note": "Future increment",
+        "status": "pending_approval",
+        "_id": "694cf36bb22684bf77e30125",
+        "createdAt": "2025-12-25T08:18:51.883Z"
+      },
+      {
+        "incrementPercent": 20,
+        "oldSalary": 26400,
+        "newSalary": 31680,
+        "incrementAmount": 5280,
+        "pfAmount": 3168,
+        "effectiveDate": "2026-02-10T18:30:00.000Z",
+        "note": "ssfddf",
+        "status": "pending_approval",
+        "_id": "694d36c0b22684bf77e301c0",
+        "createdAt": "2025-12-25T13:06:08.721Z"
+      },
+      {
+        "incrementPercent": 10,
+        "oldSalary": 26400,
+        "newSalary": 29040,
+        "incrementAmount": 2640,
+        "pfAmount": 2904,
+        "effectiveDate": "2025-12-23T18:30:00.000Z",
+        "note": "fadsffsdfdfdsa",
+        "status": "active",
+        "_id": "694fb11da405d660d2dde1c0",
+        "createdAt": "2025-12-27T10:12:45.639Z"
+      }
+    ],
+    "createdAt": "2025-12-25T08:15:42.963Z",
+    "updatedAt": "2025-12-27T10:12:45.635Z",
+    "__v": 0
+  }
+]

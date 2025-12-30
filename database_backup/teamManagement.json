@@ -1,0 +1,182 @@
+[
+  {
+    "_id": "694fd33ba405d660d2dde47e",
+    "teamName": "Riddhi Graphics Team",
+    "members": [
+      {
+        "userId": "riddhi-bliss-0042",
+        "name": "Riddhi Vaidya",
+        "role": "teamLeader"
+      },
+      {
+        "userId": "pratham-bliss-1466",
+        "name": "Pratham Gajjar",
+        "role": "member"
+      },
+      {
+        "userId": "meet-bliss-5535",
+        "name": "Meet patel",
+        "role": "member"
+      }
+    ],
+    "teamLeader": "riddhi-bliss-0042",
+    "createdAt": "2025-12-27T12:38:19.575Z",
+    "updatedAt": "2025-12-27T12:42:23.435Z",
+    "__v": 0
+  },
+  {
+    "_id": "694fd3ca0db4590f6b25de1a",
+    "teamName": "Santosh Graphics Team",
+    "members": [
+      {
+        "userId": "santosh-bliss-2009",
+        "name": "Santosh Pathak",
+        "role": "teamLeader"
+      },
+      {
+        "userId": "yug-bliss-2912",
+        "name": "Yug Bheda",
+        "role": "member"
+      },
+      {
+        "userId": "vineet-bliss-9970",
+        "name": "Vineet Patel",
+        "role": "member"
+      }
+    ],
+    "teamLeader": "santosh-bliss-2009",
+    "createdAt": "2025-12-27T12:40:42.151Z",
+    "updatedAt": "2025-12-27T12:42:28.904Z",
+    "__v": 0
+  },
+  {
+    "_id": "694fd3ea0db4590f6b25de1f",
+    "teamName": "Mansi Graphics Team",
+    "members": [
+      {
+        "userId": "mansi-bliss-0633",
+        "name": "Mansi Barot",
+        "role": "teamLeader"
+      },
+      {
+        "userId": "meet-bliss-7629",
+        "name": "Meet Sharma",
+        "role": "member"
+      },
+      {
+        "userId": "rajvi-bliss-6094",
+        "name": "Rajvi Unadkat",
+        "role": "member"
+      }
+    ],
+    "teamLeader": "mansi-bliss-0633",
+    "createdAt": "2025-12-27T12:41:14.771Z",
+    "updatedAt": "2025-12-27T12:42:35.214Z",
+    "__v": 0
+  },
+  {
+    "_id": "694fd4280db4590f6b25de24",
+    "teamName": "Mehul Video Team",
+    "members": [
+      {
+        "userId": "mehul-bliss-579‬",
+        "name": "Mehul Patel",
+        "role": "teamLeader"
+      },
+      {
+        "userId": "krishi-bliss-0477",
+        "name": "Krishi Vasoya",
+        "role": "member"
+      },
+      {
+        "userId": "jignanshu-bliss-3854",
+        "name": "Jignanshu Bhatt",
+        "role": "member"
+      },
+      {
+        "userId": "sanjay-bliss-7846",
+        "name": "Sanjay Nakum",
+        "role": "member"
+      }
+    ],
+    "teamLeader": "mehul-bliss-579‬",
+    "createdAt": "2025-12-27T12:42:16.657Z",
+    "updatedAt": "2025-12-27T12:42:16.657Z",
+    "__v": 0
+  },
+  {
+    "_id": "694fd47a0db4590f6b25de35",
+    "teamName": "Ishit Execusion Team",
+    "members": [
+      {
+        "userId": "ishit-bliss-8269",
+        "name": "Ishit Trivedi",
+        "role": "teamLeader"
+      },
+      {
+        "userId": "krishana-bliss-9551",
+        "name": "krishana Shah",
+        "role": "member"
+      },
+      {
+        "userId": "nirjara-bliss-953‬",
+        "name": "Nirjara Parmar",
+        "role": "member"
+      },
+      {
+        "userId": "rutvi-bliss-5935",
+        "name": "Rutvi Sayani",
+        "role": "member"
+      },
+      {
+        "userId": "sakibkhan-bliss-9549",
+        "name": "Sakibkhan Pathan",
+        "role": "member"
+      },
+      {
+        "userId": "shreshtha-bliss-8071",
+        "name": "Shreshtha Chauhan",
+        "role": "member"
+      }
+    ],
+    "teamLeader": "ishit-bliss-8269",
+    "createdAt": "2025-12-27T12:43:38.882Z",
+    "updatedAt": "2025-12-27T12:43:38.882Z",
+    "__v": 0
+  },
+  {
+    "_id": "694fd4cf0db4590f6b25de3a",
+    "teamName": "Rudra Content Provider Team",
+    "members": [
+      {
+        "userId": "rudra-bliss-9310",
+        "name": "Rudra  Thakkar",
+        "role": "teamLeader"
+      },
+      {
+        "userId": "nandani-bliss-586‬",
+        "name": "Nandani Chhatbar",
+        "role": "member"
+      },
+      {
+        "userId": "omkar-bliss-1018",
+        "name": "Omkar Parmar",
+        "role": "member"
+      },
+      {
+        "userId": "vidhi-bliss-2072",
+        "name": "Vidhi Gambhava",
+        "role": "member"
+      },
+      {
+        "userId": "akshay-bliss-0383",
+        "name": "Akshay Singh",
+        "role": "member"
+      }
+    ],
+    "teamLeader": "rudra-bliss-9310",
+    "createdAt": "2025-12-27T12:45:03.667Z",
+    "updatedAt": "2025-12-27T12:45:03.667Z",
+    "__v": 0
+  }
+]

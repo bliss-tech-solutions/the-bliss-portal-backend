@@ -90,6 +90,9 @@ app.use('/api', redisCache({
         /\/teammanagement/i,
         /\/addtaskassign/i,
         /\/leavesapi/i,
+        /\/leave\//i,
+        /\/salaryCalculation/i,
+
     ],
     excludedMethods: [] // Cache all GET requests
 }));

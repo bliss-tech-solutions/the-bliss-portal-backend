@@ -21,6 +21,9 @@ router.post('/leave/approve/:userId/:month/:leaveId', leavesController.approve);
 // POST /api/leave/reject/:userId/:month/:leaveId - Reject leave
 router.post('/leave/reject/:userId/:month/:leaveId', leavesController.reject);
 
+// POST /api/leave/updateBatch - Bulk update leaves
+router.post('/leave/updateBatch', leavesController.updateBatch);
+
 // DELETE /api/leave/delete/:userId/:month/:leaveId - Delete leave
 router.delete('/leave/delete/:userId/:month/:leaveId', leavesController.deleteLeave);
 

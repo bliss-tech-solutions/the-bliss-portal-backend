@@ -5,7 +5,7 @@ const checkInCheckOutController = {
     // POST /api/checkin - Check in for the day
     checkIn: async (req, res, next) => {
         try {
-            const { userId, checkInReason, reason, status } = req.body;
+            const { userId, checkInReason, reason, status, checkInType } = req.body;
 
             if (!userId) {
                 return res.status(400).json({
@@ -17,10 +17,40 @@ const checkInCheckOutController = {
             const today = new Date().toISOString().split('T')[0];
             const now = new Date();
 
+            // Determine check-in type (default to OFFICE if not provided)
+            const type = checkInType || 'OFFICE';
+
+            // Calculate DayStatus based on check-in type and time
+            const checkInHour = now.getHours();
+            const checkInMinute = now.getMinutes();
+            const checkInTimeInMinutes = checkInHour * 60 + checkInMinute;
+            const cutoffTimeInMinutes = 10 * 60 + 50; // 10:50 AM
+
+            let dayStatus = 'PENDING';
+
+            // If check-in type is WORK, MEETING or external work, bypass time rules
+            if (type === 'WORK' || type === 'MEETING' || type === 'EXTERNAL_WORK' ||
+                type === 'CLIENT_VISIT' || type === 'SITE_WORK') {
+                // External business work - always set to PENDING (can become FULL day)
+                dayStatus = 'PENDING';
+            } else {
+                // Regular OFFICE check-in - apply time rules
+                if (checkInTimeInMinutes > cutoffTimeInMinutes) {
+                    dayStatus = 'HALF'; // Late check-in
+                } else {
+                    dayStatus = 'PENDING';
+                }
+            }
+
             let doc = await CheckInCheckOutModel.findOne({ userId });
 
             if (!doc) {
-                const newEntry = { date: today, checkInAt: now };
+                const newEntry = {
+                    date: today,
+                    checkInAt: now,
+                    DayStatus: dayStatus,
+                    checkInType: type
+                };
                 if (typeof checkInReason === 'string' && checkInReason.trim()) newEntry.checkInReason = checkInReason.trim();
                 else if (typeof reason === 'string' && reason.trim()) newEntry.checkInReason = reason.trim();
                 if (typeof status === 'string' && status.trim()) newEntry.checkInStatus = status.trim();
@@ -36,11 +66,18 @@ const checkInCheckOutController = {
                 }
                 if (entry) {
                     entry.checkInAt = now;
+                    entry.DayStatus = dayStatus;
+                    entry.checkInType = type;
                     if (typeof checkInReason === 'string' && checkInReason.trim()) entry.checkInReason = checkInReason.trim();
                     else if (typeof reason === 'string' && reason.trim()) entry.checkInReason = reason.trim();
                     if (typeof status === 'string' && status.trim()) entry.checkInStatus = status.trim();
                 } else {
-                    const newEntry = { date: today, checkInAt: now };
+                    const newEntry = {
+                        date: today,
+                        checkInAt: now,
+                        DayStatus: dayStatus,
+                        checkInType: type
+                    };
                     if (typeof checkInReason === 'string' && checkInReason.trim()) newEntry.checkInReason = checkInReason.trim();
                     else if (typeof reason === 'string' && reason.trim()) newEntry.checkInReason = reason.trim();
                     if (typeof status === 'string' && status.trim()) newEntry.checkInStatus = status.trim();
@@ -158,6 +195,55 @@ const checkInCheckOutController = {
 
             entry.checkOutAt = now;
             entry.totalHours = Math.round(((now - entry.checkInAt) / (1000 * 60 * 60)) * 100) / 100;
+
+            // Calculate final DayStatus based on check-in type, check-in time, and check-out time
+            const checkOutHour = now.getHours();
+            const checkOutMinute = now.getMinutes();
+            const checkOutTimeInMinutes = checkOutHour * 60 + checkOutMinute;
+
+            const checkInHour = entry.checkInAt.getHours();
+            const checkInMinute = entry.checkInAt.getMinutes();
+            const checkInTimeInMinutes = checkInHour * 60 + checkInMinute;
+            const checkInCutoff = 10 * 60 + 50; // 10:50 AM
+
+            const checkInType = entry.checkInType || 'OFFICE';
+
+            // Determine DayStatus based on type and times
+            if (checkInType === 'WORK' || checkInType === 'MEETING' || checkInType === 'EXTERNAL_WORK' ||
+                checkInType === 'CLIENT_VISIT' || checkInType === 'SITE_WORK') {
+                // WORK types: 7:00 PM cutoff (no late penalty)
+                const workCutoff = 19 * 60; // 7:00 PM (19:00)
+                if (checkOutTimeInMinutes >= workCutoff) {
+                    entry.DayStatus = 'FULL';
+                } else {
+                    entry.DayStatus = 'HALF';
+                }
+            } else {
+                // OFFICE type: Different cutoffs based on check-in time
+                const noonCutoff = 12 * 60; // 12:00 PM (noon)
+                
+                if (checkInTimeInMinutes > noonCutoff) {
+                    // Checked in after 12:00 PM (noon): Always HALF day (no redemption)
+                    entry.DayStatus = 'HALF';
+                } else if (checkInTimeInMinutes <= checkInCutoff) {
+                    // Checked in on time (before 10:50 AM): 7:00 PM cutoff
+                    const onTimeCutoff = 19 * 60; // 7:00 PM (19:00)
+                    if (checkOutTimeInMinutes >= onTimeCutoff) {
+                        entry.DayStatus = 'FULL';
+                    } else {
+                        entry.DayStatus = 'HALF';
+                    }
+                } else {
+                    // Checked in late (10:50 AM - 12:00 PM): 7:30 PM cutoff
+                    const lateCutoff = 19 * 60 + 30; // 7:30 PM (19:30)
+                    if (checkOutTimeInMinutes >= lateCutoff) {
+                        entry.DayStatus = 'FULL';
+                    } else {
+                        entry.DayStatus = 'HALF';
+                    }
+                }
+            }
+
             if (typeof checkOutReason === 'string' && checkOutReason.trim()) entry.checkOutReason = checkOutReason.trim();
             else if (typeof checkoutReasonLegacy === 'string' && checkoutReasonLegacy.trim()) entry.checkOutReason = checkoutReasonLegacy.trim();
             // keep backward-compatible field if legacy 'reason' provided

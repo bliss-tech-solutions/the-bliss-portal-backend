@@ -15,7 +15,7 @@ const clientManagementRoutes = require('../components/ClientManagement');
 const teamManagementRoutes = require('../components/TeamManagement');
 const globalChatRoutes = require('../components/GlobalChat');
 const analyticsRoutes = require('../components/Analytics');
-// const salaryRoutes = require('../components/salaryCalculations');
+const salaryCalculationRoutes = require('../components/salaryCalculation');
 
 // Register all routes
 // router.use('/testdummyapi', testDummyApiRoutes);
@@ -31,7 +31,7 @@ router.use('/', clientManagementRoutes);
 router.use('/', teamManagementRoutes);
 router.use('/', globalChatRoutes);
 router.use('/analytics', analyticsRoutes);
-// router.use('/', salaryRoutes);
+router.use('/salaryCalculation', salaryCalculationRoutes);
 
 // API Info endpoint
 router.get('/', (req, res) => {
@@ -86,6 +86,9 @@ router.get('/', (req, res) => {
                     getUserTasks: '/api/analytics/userwise/:userId/tasks?status=&limit=50&skip=0',
                     getUserStats: '/api/analytics/userwise/:userId/stats'
                 }
+            },
+            salaryCalculation: {
+                calculate: '/api/salaryCalculation/calculate/:userId?month=12&year=2025'
             }
         }
     });

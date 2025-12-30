@@ -1,0 +1,801 @@
+[
+  {
+    "_id": "6943f23969e54ea5a42e1c58",
+    "userId": "meet-bliss-7357",
+    "firstName": "Meet",
+    "lastName": "Khant",
+    "email": "meetKhant01@gmail.com",
+    "number": "9067157357",
+    "role": "admin",
+    "maritalStatus": "Married",
+    "birthDate": "1992-12-09T18:30:00.000Z",
+    "address": "Ahmedabad\nAhmedabad",
+    "pincode": "380001",
+    "languages": [
+      "English",
+      "Hindi",
+      "Gujarati"
+    ],
+    "skills": [
+      "Client Management",
+      "CoFounder",
+      "ContentWriting"
+    ],
+    "createdAt": "2025-12-18T12:23:21.456Z",
+    "updatedAt": "2025-12-18T12:23:27.113Z",
+    "__v": 0,
+    "Password": "123456",
+    "userEmail": "meet7357@blissSolution.com"
+  },
+  {
+    "_id": "6943f31869e54ea5a42e1c70",
+    "userId": "monish-bliss-9206",
+    "firstName": "Monish ",
+    "lastName": "Nayak",
+    "email": "monishNayak02@gmail.com",
+    "number": "8401849206",
+    "role": "admin",
+    "maritalStatus": "Married",
+    "birthDate": "1998-12-09T18:30:00.000Z",
+    "address": "Ahmedabad\nAhmedabad",
+    "pincode": "380001",
+    "languages": [
+      "English",
+      "Hindi",
+      "Gujarati"
+    ],
+    "skills": [
+      "CoFounder",
+      "ClientManagement",
+      "StockManagement",
+      "StockExpert"
+    ],
+    "createdAt": "2025-12-18T12:27:04.829Z",
+    "updatedAt": "2025-12-18T12:27:10.492Z",
+    "__v": 0,
+    "Password": "123456",
+    "userEmail": "monish9206@blissSolution.com"
+  },
+  {
+    "_id": "6943f3ea69e54ea5a42e1c80",
+    "userId": "ishit-bliss-8269",
+    "firstName": "Ishit",
+    "lastName": "Trivedi",
+    "email": "ishitTrivedi@gmail.com",
+    "number": "9876543210",
+    "role": "Execution",
+    "position": "SME",
+    "maritalStatus": "Married",
+    "birthDate": "1990-05-15T00:00:00.000Z",
+    "address": "123 Main Street, City, State, Country",
+    "pincode": "000000",
+    "languages": [
+      "English",
+      "Hindi",
+      "Spanish"
+    ],
+    "skills": [
+      "JavaScript",
+      "Node.js",
+      "React",
+      "MongoDB",
+      "TypeScript",
+      "Express"
+    ],
+    "createdAt": "2025-12-18T12:30:34.004Z",
+    "updatedAt": "2025-12-23T08:22:27.411Z",
+    "__v": 0,
+    "Password": "654321",
+    "userEmail": "ishit8269@blissSolution.com",
+    "details": "Experienced developer with 5+ years in full-stack development. Specialized in Node.js and React.",
+    "profilePhoto": "https://res.cloudinary.com/dpjtupftc/image/upload/v1766478146/chat-media/cmzjjymaihxmmgcht1d9.jpg"
+  },
+  {
+    "_id": "6943f4da69e54ea5a42e1c87",
+    "userId": "nayak-bliss-3549",
+    "firstName": "Nayak ",
+    "lastName": "Hardik",
+    "email": "nayakHardik03@gmail.com",
+    "number": "8734863549",
+    "role": "HR",
+    "maritalStatus": "Married",
+    "birthDate": "1986-12-17T18:30:00.000Z",
+    "address": "Ahmedabad\nAhmedabad",
+    "pincode": "380001",
+    "languages": [
+      "Hindi",
+      "Gujarati"
+    ],
+    "skills": [
+      "Acccountant Manager",
+      "HR"
+    ],
+    "createdAt": "2025-12-18T12:34:34.374Z",
+    "updatedAt": "2025-12-18T12:34:40.425Z",
+    "__v": 0,
+    "Password": "123456",
+    "userEmail": "nayak3549@blissSolution.com"
+  },
+  {
+    "_id": "6943f65269e54ea5a42e1c8e",
+    "userId": "rutvi-bliss-5935",
+    "firstName": "Rutvi",
+    "lastName": "Sayani",
+    "email": "sayanirutvi@gmail.com",
+    "number": "7575895935",
+    "role": "Execution",
+    "position": "SME",
+    "maritalStatus": "Single",
+    "birthDate": "2004-07-24T18:30:00.000Z",
+    "address": "902, Ratnam Tower Chief Justice Bungalows lane ",
+    "pincode": "380054",
+    "languages": [
+      "English",
+      "Hindi",
+      "Gujarati"
+    ],
+    "skills": [],
+    "createdAt": "2025-12-18T12:40:50.018Z",
+    "updatedAt": "2025-12-18T12:40:55.609Z",
+    "__v": 0,
+    "Password": "123456",
+    "userEmail": "rutvi5935@blissSolution.com"
+  },
+  {
+    "_id": "6943f72969e54ea5a42e1c95",
+    "userId": "alok-bliss-206‬",
+    "firstName": "Alok",
+    "lastName": "Prajapati",
+    "email": "aalokprajapati4206@gmail.com",
+    "number": "‪+91 85114 04206‬",
+    "role": "user",
+    "position": "Graphics Designer",
+    "maritalStatus": "Single",
+    "birthDate": "1999-12-15T18:30:00.000Z",
+    "address": "Ahmedabad\nAhmedabad",
+    "pincode": "380001",
+    "languages": [
+      "English",
+      "Hindi",
+      "Gujarati"
+    ],
+    "skills": [
+      "Graphics Designing",
+      "UIUX Designer"
+    ],
+    "createdAt": "2025-12-18T12:44:25.983Z",
+    "updatedAt": "2025-12-18T12:44:31.668Z",
+    "__v": 0,
+    "Password": "123456",
+    "userEmail": "alok206‬@blissSolution.com"
+  },
+  {
+    "_id": "6943f7e069e54ea5a42e1c9c",
+    "userId": "mehul-bliss-579‬",
+    "firstName": "Mehul",
+    "lastName": "Patel",
+    "email": "mehulPatel04@gmail.com",
+    "number": "‪+91 81283 20579‬",
+    "role": "user",
+    "position": "Video Editor",
+    "maritalStatus": "Married",
+    "birthDate": "1995-02-16T18:30:00.000Z",
+    "address": "Ahmedabad\nAhmedabad",
+    "pincode": "380001",
+    "languages": [
+      "English",
+      "Hindi",
+      "Gujarati"
+    ],
+    "skills": [
+      "Video Editor",
+      "Animation Creator",
+      "Visual Graphics Creator"
+    ],
+    "createdAt": "2025-12-18T12:47:28.624Z",
+    "updatedAt": "2025-12-18T12:47:34.667Z",
+    "__v": 0,
+    "Password": "123456",
+    "userEmail": "mehul579‬@blissSolution.com"
+  },
+  {
+    "_id": "6943f9db69e54ea5a42e1cd3",
+    "userId": "rudra-bliss-9310",
+    "firstName": "Rudra ",
+    "lastName": "Thakkar",
+    "email": "rudraThakkar05@gmail.com",
+    "number": "7878749310",
+    "role": "ContentProvider",
+    "position": "Content Writer",
+    "maritalStatus": "Single",
+    "birthDate": "2015-12-09T18:30:00.000Z",
+    "address": "Ahmedabad\nAhmedabad",
+    "pincode": "380001",
+    "languages": [
+      "English",
+      "Hindi",
+      "Gujarati"
+    ],
+    "skills": [
+      "Content Writter",
+      "SEO"
+    ],
+    "createdAt": "2025-12-18T12:55:55.814Z",
+    "updatedAt": "2025-12-18T12:56:01.796Z",
+    "__v": 0,
+    "Password": "123456",
+    "userEmail": "rudra9310@blissSolution.com"
+  },
+  {
+    "_id": "6943fa7a69e54ea5a42e1cda",
+    "userId": "riddhi-bliss-0042",
+    "firstName": "Riddhi",
+    "lastName": "Vaidya",
+    "email": "riddhiVaidya06@gmail.com",
+    "number": "9687630042",
+    "role": "user",
+    "position": "Graphics Designer",
+    "maritalStatus": "Married",
+    "birthDate": "1993-12-08T18:30:00.000Z",
+    "address": "Ahmedabad\nAhmedabad",
+    "pincode": "380001",
+    "languages": [
+      "English",
+      "Hindi",
+      "Marathi",
+      "Gujarati"
+    ],
+    "skills": [
+      "Graphics Designer",
+      "Team Leader"
+    ],
+    "createdAt": "2025-12-18T12:58:34.657Z",
+    "updatedAt": "2025-12-18T12:58:40.831Z",
+    "__v": 0,
+    "Password": "123456",
+    "userEmail": "riddhi0042@blissSolution.com"
+  },
+  {
+    "_id": "694a8e076452cae52512e922",
+    "userId": "pratham-bliss-1466",
+    "firstName": "Pratham",
+    "lastName": "Gajjar",
+    "email": "prathamgajjar066@gmail.com",
+    "number": "+91 87990 71466",
+    "role": "user",
+    "position": "Graphics Designer",
+    "maritalStatus": "Single",
+    "birthDate": "2001-12-17T18:30:00.000Z",
+    "address": "Ahmedabad\nAhmedabad",
+    "pincode": "380001",
+    "languages": [
+      "English",
+      "Hindi",
+      "Gujarati"
+    ],
+    "skills": [
+      "Graphics Designer"
+    ],
+    "createdAt": "2025-12-23T12:41:43.579Z",
+    "updatedAt": "2025-12-23T12:41:47.767Z",
+    "__v": 0,
+    "Password": "123456",
+    "userEmail": "pratham1466@blissSolution.com"
+  },
+  {
+    "_id": "694a961c6452cae52512e929",
+    "userId": "nandani-bliss-586‬",
+    "firstName": "Nandani",
+    "lastName": "Chhatbar",
+    "email": "nandaniChhatbar@gmail.com",
+    "number": "‪+91 84870 21586‬",
+    "role": "ContentProvider",
+    "position": "Content Writer",
+    "maritalStatus": "Single",
+    "birthDate": "2025-12-09T18:30:00.000Z",
+    "address": "Ahmedabad\nAhmedabad",
+    "pincode": "380001",
+    "languages": [
+      "English",
+      "Hindi",
+      "Gujarati"
+    ],
+    "skills": [
+      "Content Writter",
+      "Content Creator"
+    ],
+    "createdAt": "2025-12-23T13:16:12.332Z",
+    "updatedAt": "2025-12-23T13:16:16.500Z",
+    "__v": 0,
+    "Password": "123456",
+    "userEmail": "nandani586‬@blissSolution.com"
+  },
+  {
+    "_id": "694a97156452cae52512e930",
+    "userId": "sakibkhan-bliss-9549",
+    "firstName": "Sakibkhan",
+    "lastName": "Pathan",
+    "email": "sakibkhanPathan@gmail.com",
+    "number": "+91 78020 59549",
+    "role": "Execution",
+    "position": "SME",
+    "maritalStatus": "Married",
+    "birthDate": "2025-12-16T18:30:00.000Z",
+    "address": "Ahmedabad\nAhmedabad",
+    "pincode": "380001",
+    "languages": [
+      "English",
+      "Hindi",
+      "Gujarati"
+    ],
+    "skills": [
+      "Social Media Manager",
+      "Team Management"
+    ],
+    "createdAt": "2025-12-23T13:20:21.949Z",
+    "updatedAt": "2025-12-23T13:20:26.302Z",
+    "__v": 0,
+    "Password": "123456",
+    "userEmail": "sakibkhan9549@blissSolution.com"
+  },
+  {
+    "_id": "694a9b856452cae52512e946",
+    "userId": "akshay-bliss-0383",
+    "firstName": "Akshay",
+    "lastName": "Singh",
+    "email": "akshaySingh@gmail.com",
+    "number": "7820090383",
+    "role": "ContentProvider",
+    "position": "Content Writer",
+    "maritalStatus": "Single",
+    "birthDate": "2025-12-10T18:30:00.000Z",
+    "address": "Ahmedabad\nAhmedabad",
+    "pincode": "380001",
+    "languages": [
+      "English",
+      "Hindi",
+      "Gujarati"
+    ],
+    "skills": [
+      "Content Writter",
+      "Content Creator"
+    ],
+    "createdAt": "2025-12-23T13:39:17.234Z",
+    "updatedAt": "2025-12-23T13:39:21.615Z",
+    "__v": 0,
+    "Password": "123456",
+    "userEmail": "akshay0383@blissSolution.com"
+  },
+  {
+    "_id": "694a9bee6452cae52512e94d",
+    "userId": "omkar-bliss-1018",
+    "firstName": "Omkar",
+    "lastName": "Parmar",
+    "email": "omkarParmar@gmail.com",
+    "number": "9725561018",
+    "role": "ContentProvider",
+    "position": "Content Writer",
+    "maritalStatus": "Single",
+    "birthDate": "2025-12-10T18:30:00.000Z",
+    "address": "Ahmedabad\nAhmedabad",
+    "pincode": "380001",
+    "languages": [
+      "English",
+      "Hindi",
+      "Gujarati"
+    ],
+    "skills": [
+      "Content Writter",
+      "Content Creator"
+    ],
+    "createdAt": "2025-12-23T13:41:02.635Z",
+    "updatedAt": "2025-12-23T13:41:07.052Z",
+    "__v": 0,
+    "Password": "123456",
+    "userEmail": "omkar1018@blissSolution.com"
+  },
+  {
+    "_id": "694a9c716452cae52512e954",
+    "userId": "vidhi-bliss-2072",
+    "firstName": "Vidhi",
+    "lastName": "Gambhava",
+    "email": "vidhiGambhava@gmail.com",
+    "number": "8320642072",
+    "role": "ContentProvider",
+    "position": "Content Writer",
+    "maritalStatus": "Single",
+    "birthDate": "2025-12-02T18:30:00.000Z",
+    "address": "Ahmedabad\nAhmedabad",
+    "pincode": "380001",
+    "languages": [
+      "English",
+      "Hindi",
+      "Gujarati"
+    ],
+    "skills": [
+      "Content Writter",
+      "Content Creator"
+    ],
+    "createdAt": "2025-12-23T13:43:13.181Z",
+    "updatedAt": "2025-12-23T13:43:17.663Z",
+    "__v": 0,
+    "Password": "123456",
+    "userEmail": "vidhi2072@blissSolution.com"
+  },
+  {
+    "_id": "694be7eb8b63258f301cdcd9",
+    "userId": "nirjara-bliss-953‬",
+    "firstName": "Nirjara",
+    "lastName": "Parmar",
+    "email": "nirjaraParmar@gmail.com",
+    "number": "‪+91 93272 46953‬",
+    "role": "Execution",
+    "position": "SME",
+    "maritalStatus": "Single",
+    "birthDate": "2025-12-02T18:30:00.000Z",
+    "address": "Ahmedabad\nAhmedabad",
+    "pincode": "380001",
+    "languages": [
+      "English",
+      "Hindi",
+      "Gujarati"
+    ],
+    "skills": [
+      "Client Handling",
+      "Client Management",
+      "Team Management"
+    ],
+    "createdAt": "2025-12-24T13:17:31.403Z",
+    "updatedAt": "2025-12-24T13:17:35.623Z",
+    "__v": 0,
+    "Password": "123456",
+    "userEmail": "nirjara953‬@blissSolution.com"
+  },
+  {
+    "_id": "694f80b42106d436dbdf8f4a",
+    "userId": "meet-bliss-5535",
+    "firstName": "Meet",
+    "lastName": "patel",
+    "email": "meetPatel@gmail.com",
+    "number": "+91 95747 65535",
+    "role": "user",
+    "position": "Graphics Designer",
+    "maritalStatus": "Single",
+    "birthDate": "2025-12-09T18:30:00.000Z",
+    "address": "Ahmedabad\nAhmedabad",
+    "pincode": "380001",
+    "languages": [
+      "English",
+      "Hindi",
+      "Gujarati"
+    ],
+    "skills": [
+      "graphics designer"
+    ],
+    "createdAt": "2025-12-27T06:46:12.653Z",
+    "updatedAt": "2025-12-27T06:46:17.941Z",
+    "__v": 0,
+    "Password": "123456",
+    "userEmail": "meet5535@blissSolution.com"
+  },
+  {
+    "_id": "694fbda564a3ee4c3d8af5b4",
+    "userId": "krishna-bliss-3920",
+    "firstName": "Krishna",
+    "lastName": "Shah",
+    "email": "HR@bliss.com",
+    "number": "7984313920",
+    "role": "HR",
+    "maritalStatus": "Married",
+    "birthDate": "1999-03-25T18:30:00.000Z",
+    "address": "ahemdabad",
+    "pincode": "130038",
+    "languages": [
+      "English"
+    ],
+    "skills": [],
+    "createdAt": "2025-12-27T11:06:13.774Z",
+    "updatedAt": "2025-12-27T11:06:19.085Z",
+    "__v": 0,
+    "Password": "123456",
+    "userEmail": "krishna3920@blissSolution.com"
+  },
+  {
+    "_id": "694fc11ea405d660d2dde3c7",
+    "userId": "shreshtha-bliss-8071",
+    "firstName": "Shreshtha",
+    "lastName": "Chauhan",
+    "email": "shreshthaChauhan@gmail.com",
+    "number": "95106 08071",
+    "role": "Execution",
+    "position": "SME",
+    "maritalStatus": "Single",
+    "birthDate": "2025-12-02T18:30:00.000Z",
+    "address": "Ahmedabad\nAhmedabad",
+    "pincode": "380001",
+    "languages": [
+      "English",
+      "Hindi",
+      "Gujarati"
+    ],
+    "skills": [
+      "Social Media Manager"
+    ],
+    "createdAt": "2025-12-27T11:21:02.975Z",
+    "updatedAt": "2025-12-27T11:21:07.413Z",
+    "__v": 0,
+    "Password": "123456",
+    "userEmail": "shreshtha8071@blissSolution.com"
+  },
+  {
+    "_id": "694fc1dda405d660d2dde3ce",
+    "userId": "santosh-bliss-2009",
+    "firstName": "Santosh",
+    "lastName": "Pathak",
+    "email": "santoshPathak@gmail.com",
+    "number": "9559462009",
+    "role": "user",
+    "position": "Graphics Designer",
+    "maritalStatus": "Single",
+    "birthDate": "2025-12-03T18:30:00.000Z",
+    "address": "Ahmedabad\nAhmedabad",
+    "pincode": "380001",
+    "languages": [
+      "English",
+      "Hindi",
+      "Gujarati"
+    ],
+    "skills": [
+      "Graphics Designer"
+    ],
+    "createdAt": "2025-12-27T11:24:13.853Z",
+    "updatedAt": "2025-12-27T11:24:18.241Z",
+    "__v": 0,
+    "Password": "123456",
+    "userEmail": "santosh2009@blissSolution.com"
+  },
+  {
+    "_id": "694fc289a405d660d2dde3d5",
+    "userId": "rajvi-bliss-6094",
+    "firstName": "Rajvi",
+    "lastName": "Unadkat",
+    "email": "rajviUnadkat@gmail.com",
+    "number": "6353646094",
+    "role": "user",
+    "position": "Graphics Designer",
+    "maritalStatus": "Single",
+    "birthDate": "2025-12-02T18:30:00.000Z",
+    "address": "Ahmedabad\nAhmedabad",
+    "pincode": "380001",
+    "languages": [
+      "English",
+      "Hindi",
+      "Gujarati"
+    ],
+    "skills": [
+      "Graphics Designer"
+    ],
+    "createdAt": "2025-12-27T11:27:05.996Z",
+    "updatedAt": "2025-12-27T11:27:10.302Z",
+    "__v": 0,
+    "Password": "123456",
+    "userEmail": "rajvi6094@blissSolution.com"
+  },
+  {
+    "_id": "694fc301a405d660d2dde3dc",
+    "userId": "vineet-bliss-9970",
+    "firstName": "Vineet",
+    "lastName": "Patel",
+    "email": "vineetPatel@gmail.com",
+    "number": "7600429970",
+    "role": "user",
+    "position": "Graphics Designer",
+    "maritalStatus": "Single",
+    "birthDate": "2025-12-02T18:30:00.000Z",
+    "address": "Ahmedabad\nAhmedabad",
+    "pincode": "380001",
+    "languages": [
+      "English",
+      "Hindi",
+      "Gujarati"
+    ],
+    "skills": [
+      "Graphics Designer"
+    ],
+    "createdAt": "2025-12-27T11:29:05.088Z",
+    "updatedAt": "2025-12-27T11:29:09.732Z",
+    "__v": 0,
+    "Password": "123456",
+    "userEmail": "vineet9970@blissSolution.com"
+  },
+  {
+    "_id": "694fc361a405d660d2dde3e3",
+    "userId": "mansi-bliss-0633",
+    "firstName": "Mansi",
+    "lastName": "Barot",
+    "email": "mansiBarot@gmail.com",
+    "number": "+91 70433 70633",
+    "role": "user",
+    "position": "Graphics Designer",
+    "maritalStatus": "Single",
+    "birthDate": "2025-12-04T18:30:00.000Z",
+    "address": "Ahmedabad\nAhmedabad",
+    "pincode": "380001",
+    "languages": [
+      "English",
+      "Hindi",
+      "Gujarati"
+    ],
+    "skills": [
+      "Graphics Designer"
+    ],
+    "createdAt": "2025-12-27T11:30:41.500Z",
+    "updatedAt": "2025-12-27T11:30:45.835Z",
+    "__v": 0,
+    "Password": "123456",
+    "userEmail": "mansi0633@blissSolution.com"
+  },
+  {
+    "_id": "694fc3dba405d660d2dde3ea",
+    "userId": "yug-bliss-2912",
+    "firstName": "Yug",
+    "lastName": "Bheda",
+    "email": "yugBheda@gmail.com",
+    "number": "76239 32912",
+    "role": "user",
+    "position": "Graphics Designer",
+    "maritalStatus": "Single",
+    "birthDate": "2025-12-02T18:30:00.000Z",
+    "address": "Ahmedabad\nAhmedabad",
+    "pincode": "380001",
+    "languages": [
+      "English",
+      "Hindi",
+      "Gujarati"
+    ],
+    "skills": [
+      "Graphics Designer"
+    ],
+    "createdAt": "2025-12-27T11:32:43.830Z",
+    "updatedAt": "2025-12-27T11:32:48.220Z",
+    "__v": 0,
+    "Password": "123456",
+    "userEmail": "yug2912@blissSolution.com"
+  },
+  {
+    "_id": "694fc44ba405d660d2dde3f1",
+    "userId": "meet-bliss-7629",
+    "firstName": "Meet",
+    "lastName": "Sharma",
+    "email": "meetSharma@gmail.com",
+    "number": "8200147629",
+    "role": "user",
+    "position": "Graphics Designer",
+    "maritalStatus": "Single",
+    "birthDate": "2025-12-02T18:30:00.000Z",
+    "address": "Ahmedabad\nAhmedabad",
+    "pincode": "380001",
+    "languages": [
+      "English",
+      "Hindi",
+      "Gujarati"
+    ],
+    "skills": [
+      "Graphics Designer"
+    ],
+    "createdAt": "2025-12-27T11:34:35.262Z",
+    "updatedAt": "2025-12-27T11:34:39.698Z",
+    "__v": 0,
+    "Password": "123456",
+    "userEmail": "meet7629@blissSolution.com"
+  },
+  {
+    "_id": "694fc4eea405d660d2dde3f8",
+    "userId": "jignanshu-bliss-3854",
+    "firstName": "Jignanshu",
+    "lastName": "Bhatt",
+    "email": "jignanshuBhatt@gmail.com",
+    "number": "9537873854",
+    "role": "user",
+    "position": "Video Editor",
+    "maritalStatus": "Single",
+    "birthDate": "2025-12-02T18:30:00.000Z",
+    "address": "Ahmedabad\nAhmedabad",
+    "pincode": "380001",
+    "languages": [
+      "English",
+      "Hindi",
+      "Gujarati"
+    ],
+    "skills": [
+      "Video Editor"
+    ],
+    "createdAt": "2025-12-27T11:37:18.359Z",
+    "updatedAt": "2025-12-27T11:37:22.806Z",
+    "__v": 0,
+    "Password": "123456",
+    "userEmail": "jignanshu3854@blissSolution.com"
+  },
+  {
+    "_id": "694fc555a405d660d2dde3ff",
+    "userId": "krishi-bliss-0477",
+    "firstName": "Krishi",
+    "lastName": "Vasoya",
+    "email": "krishiVasoya@gmail.com",
+    "number": "8329510477",
+    "role": "user",
+    "position": "Video Editor",
+    "maritalStatus": "Single",
+    "birthDate": "2025-12-02T18:30:00.000Z",
+    "address": "Ahmedabad\nAhmedabad",
+    "pincode": "380001",
+    "languages": [
+      "English",
+      "Hindi",
+      "Gujarati"
+    ],
+    "skills": [
+      "Video Editor"
+    ],
+    "createdAt": "2025-12-27T11:39:01.231Z",
+    "updatedAt": "2025-12-27T11:39:05.640Z",
+    "__v": 0,
+    "Password": "123456",
+    "userEmail": "krishi0477@blissSolution.com"
+  },
+  {
+    "_id": "694fc5f8a405d660d2dde406",
+    "userId": "sanjay-bliss-7846",
+    "firstName": "Sanjay",
+    "lastName": "Nakum",
+    "email": "sanjayNakum@gmail.com",
+    "number": "7567467846",
+    "role": "user",
+    "position": "Video Editor",
+    "maritalStatus": "Married",
+    "birthDate": "2025-12-09T18:30:00.000Z",
+    "address": "Ahmedabad\nAhmedabad",
+    "pincode": "380001",
+    "languages": [
+      "English",
+      "Hindi",
+      "Gujarati"
+    ],
+    "skills": [
+      "Video Editor",
+      "CGI"
+    ],
+    "createdAt": "2025-12-27T11:41:44.297Z",
+    "updatedAt": "2025-12-27T11:41:48.858Z",
+    "__v": 0,
+    "Password": "123456",
+    "userEmail": "sanjay7846@blissSolution.com"
+  },
+  {
+    "_id": "694fccdf2ac916b044b9bffc",
+    "userId": "krishana-bliss-9551",
+    "firstName": "krishana",
+    "lastName": "Shah",
+    "email": "krishnaShah@gmail.com",
+    "number": "7802059551",
+    "role": "Execution",
+    "position": "SME",
+    "maritalStatus": "Married",
+    "birthDate": "2025-12-01T18:30:00.000Z",
+    "address": "Ahmedabad\nAhmedabad",
+    "pincode": "380001",
+    "languages": [
+      "English",
+      "Hindi",
+      "Gujarati"
+    ],
+    "skills": [
+      "Social Media Manager"
+    ],
+    "createdAt": "2025-12-27T12:11:11.636Z",
+    "updatedAt": "2025-12-27T12:11:17.109Z",
+    "__v": 0,
+    "Password": "123456",
+    "userEmail": "krishana9551@blissSolution.com"
+  }
+]

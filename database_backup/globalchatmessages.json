@@ -1,0 +1,80 @@
+[
+  {
+    "_id": "6943fc1369e54ea5a42e1d04",
+    "senderId": "ishit-bliss-8269",
+    "senderName": "Ishit Trivedi",
+    "senderEmail": "ishit8269@blissSolution.com",
+    "message": "k3 Client are working on @Ishit and @Riddhi",
+    "messageType": "text",
+    "time": "Dec 18, 2025, 6:35 PM",
+    "archived": false,
+    "createdAt": "2025-12-18T13:05:23.565Z",
+    "updatedAt": "2025-12-18T13:05:23.565Z",
+    "__v": 0
+  },
+  {
+    "_id": "6943fc5969e54ea5a42e1d0d",
+    "senderId": "rutvi-bliss-5935",
+    "senderName": "Rutvi Sayani",
+    "senderEmail": "sayanirutvi@gmail.com",
+    "message": "Krupa Ocean client working on @Rutvi and @Alok",
+    "messageType": "text",
+    "time": "Dec 18, 2025, 6:36 PM",
+    "archived": false,
+    "createdAt": "2025-12-18T13:06:33.614Z",
+    "updatedAt": "2025-12-18T13:06:33.614Z",
+    "__v": 0
+  },
+  {
+    "_id": "6944f9e174d1d557887394c5",
+    "senderId": "rudra-bliss-9310",
+    "senderName": "Rudra  Thakkar",
+    "senderEmail": "rudraThakkar05@gmail.com",
+    "message": "Okay",
+    "messageType": "text",
+    "time": "Dec 19, 2025, 12:38 PM",
+    "archived": false,
+    "createdAt": "2025-12-19T07:08:17.351Z",
+    "updatedAt": "2025-12-19T07:08:17.351Z",
+    "__v": 0
+  },
+  {
+    "_id": "6944f9ff74d1d557887394c7",
+    "senderId": "rudra-bliss-9310",
+    "senderName": "Rudra  Thakkar",
+    "senderEmail": "rudraThakkar05@gmail.com",
+    "message": "https://res.cloudinary.com/dpjtupftc/image/upload/v1766128125/chat-media/fjurottgibwz6ikcovrm.jpg",
+    "messageType": "image",
+    "time": "Dec 19, 2025, 12:38 PM",
+    "archived": false,
+    "createdAt": "2025-12-19T07:08:47.267Z",
+    "updatedAt": "2025-12-19T07:08:47.267Z",
+    "__v": 0
+  },
+  {
+    "_id": "69492468ee2d54af59f7d5d9",
+    "senderId": "alok-bliss-206‬",
+    "senderName": "Alok Prajapati",
+    "senderEmail": "aalokprajapati4206@gmail.com",
+    "message": "Hey I am john",
+    "messageType": "text",
+    "time": "Dec 22, 2025, 4:28 PM",
+    "archived": false,
+    "createdAt": "2025-12-22T10:58:48.177Z",
+    "updatedAt": "2025-12-22T10:58:48.177Z",
+    "__v": 0
+  },
+  {
+    "_id": "694bd56a8b63258f301cdcb4",
+    "senderId": "nayak-bliss-3549",
+    "senderName": "Nayak  Hardik",
+    "senderEmail": "nayakHardik03@gmail.com",
+    "message": "https://res.cloudinary.com/dpjtupftc/image/upload/v1766577513/chat-media/pcp70mwrehqvm9plt4ad.jpg",
+    "messageType": "image",
+    "time": "Dec 24, 2025, 5:28 PM",
+    "archived": false,
+    "createdAt": "2025-12-24T11:58:34.565Z",
+    "updatedAt": "2025-12-24T11:58:34.565Z",
+    "__v": 0
+  }
+]
