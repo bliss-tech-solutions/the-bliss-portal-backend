@@ -369,6 +369,11 @@ const addTaskAssignController = {
                     // Task room
                     io.to(String(taskId)).emit('task:chatMessageAdded', payload);
 
+                    // Add sound notification metadata
+                    payload.playSound = true;
+                    payload.notificationType = 'task_chat_message';
+                    payload.notificationMessage = `New message in task: ${updated.taskName || 'Task'}`;
+
                     // Receiver user room
                     if (updated.receiverUserId) {
                         io.to(`user:${updated.receiverUserId}`).emit('task:chatMessageAdded', payload);
@@ -742,7 +747,13 @@ const addTaskAssignController = {
                     if (io) {
                         io.to(String(saved._id)).emit('task:created', { taskId: String(saved._id), task: saved });
                         if (saved.receiverUserId) {
-                            io.to(`user:${saved.receiverUserId}`).emit('task:assigned', { taskId: String(saved._id), task: saved });
+                            io.to(`user:${saved.receiverUserId}`).emit('task:assigned', {
+                                taskId: String(saved._id),
+                                task: saved,
+                                playSound: true,
+                                notificationType: 'task_assigned',
+                                message: `New task assigned: ${saved.taskName || 'Task'}`
+                            });
                         }
                         if (saved.userId) {
                             io.to(`user:${saved.userId}`).emit('task:created', { taskId: String(saved._id), task: saved });
@@ -815,7 +826,10 @@ const addTaskAssignController = {
                         io.to(`user:${updated.receiverUserId}`).emit('task:statusUpdated', {
                             taskId: String(taskId),
                             taskStatus,
-                            task: updated
+                            task: updated,
+                            playSound: true,
+                            notificationType: 'task_status_updated',
+                            notificationMessage: `Task status updated to ${taskStatus}`
                         });
                     }
 
@@ -824,7 +838,10 @@ const addTaskAssignController = {
                         io.to(`user:${updated.userId}`).emit('task:statusUpdated', {
                             taskId: String(taskId),
                             taskStatus,
-                            task: updated
+                            task: updated,
+                            playSound: true,
+                            notificationType: 'task_status_updated',
+                            notificationMessage: `Task status updated to ${taskStatus}`
                         });
                     }
 
@@ -896,7 +913,10 @@ const addTaskAssignController = {
                     const payload = {
                         taskId: String(savedTask._id),
                         slotId: String(savedSlot._id),
-                        extensionRequest: savedExtension
+                        extensionRequest: savedExtension,
+                        playSound: true,
+                        notificationType: 'task_extension_requested',
+                        notificationMessage: `Extension request for task: ${savedTask.taskName || 'Task'}`
                     };
 
                     // Task room
@@ -1046,7 +1066,10 @@ const addTaskAssignController = {
                         extensionId: String(extensionId),
                         decision,
                         adjustmentMinutes,
-                        task: savedTask
+                        task: savedTask,
+                        playSound: true,
+                        notificationType: 'task_extension_responded',
+                        notificationMessage: `Extension ${decision} for task: ${savedTask.taskName || 'Task'}`
                     };
 
                     // Task room

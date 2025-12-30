@@ -54,7 +54,10 @@ const globalChatController = {
                         message: savedMessage.message,
                         messageType: savedMessage.messageType,
                         time: savedMessage.time,
-                        createdAt: savedMessage.createdAt
+                        createdAt: savedMessage.createdAt,
+                        playSound: true,
+                        notificationType: 'global_chat',
+                        notificationMessage: `New message from ${savedMessage.senderName}`
                     };
 
                     // Broadcast to all users in global-chat room

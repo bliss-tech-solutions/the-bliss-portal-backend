@@ -193,7 +193,10 @@ const clientManagementController = {
                         savedClient.assignedUsers.forEach(user => {
                             io.to(`user:${user.userId}`).emit('client:assigned', {
                                 clientId: String(savedClient._id),
-                                client: savedClient
+                                client: savedClient,
+                                playSound: true,
+                                notificationType: 'client_assigned',
+                                notificationMessage: `New client assigned: ${savedClient.clientName}`
                             });
                         });
                     }
@@ -470,7 +473,10 @@ const clientManagementController = {
                     const socketPayload = {
                         clientId: String(clientId),
                         userId: addedAttachment.uploadedBy.userId,
-                        attachment: addedAttachment
+                        attachment: addedAttachment,
+                        playSound: true,
+                        notificationType: 'client_attachment_added',
+                        notificationMessage: `New attachment added to client: ${savedClient.clientName}`
                     };
 
                     // Emit to client-specific room
