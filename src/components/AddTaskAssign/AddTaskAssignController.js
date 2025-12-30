@@ -207,11 +207,45 @@ const addTaskAssignController = {
                 { isArchived: true, archivedAt: new Date(), archivedBy: actorUserId || undefined },
                 { new: true }
             );
-            if (!updated) return res.status(404).json({ success: false, message: 'Task not found' });
+            // Emit socket event for real-time updates
+            try {
+                const { getIO } = require('../../utils/socket');
+                const io = getIO && getIO();
+                if (io) {
+                    const payload = {
+                        taskId: String(taskId),
+                        isArchived: true,
+                        task: updated
+                    };
+
+                    // Task room
+                    io.to(String(taskId)).emit('task:archived', payload);
+
+                    // Receiver user room
+                    if (updated.receiverUserId) {
+                        io.to(`user:${updated.receiverUserId}`).emit('task:archived', payload);
+                    }
+
+                    // Creator user room
+                    if (updated.userId) {
+                        io.to(`user:${updated.userId}`).emit('task:archived', payload);
+                    }
+
+                    // Global list update
+                    io.emit('task:updated', {
+                        taskId: String(taskId),
+                        task: updated
+                    });
+                }
+            } catch (e) {
+                console.warn('Socket emission failed:', e.message);
+            }
+
 
             // Invalidate task caches
             await invalidateCache('cache:*getTaskAssign*');
             await invalidateCache('cache:*addtaskassign*');
+            await invalidateCache('cache:*availability*');
 
             res.status(200).json({ success: true, message: 'Task archived', data: updated });
         } catch (error) {
@@ -230,9 +264,44 @@ const addTaskAssignController = {
             );
             if (!updated) return res.status(404).json({ success: false, message: 'Task not found' });
 
+            // Emit socket event for real-time updates
+            try {
+                const { getIO } = require('../../utils/socket');
+                const io = getIO && getIO();
+                if (io) {
+                    const payload = {
+                        taskId: String(taskId),
+                        isArchived: false,
+                        task: updated
+                    };
+
+                    // Task room
+                    io.to(String(taskId)).emit('task:unarchived', payload);
+
+                    // Receiver user room
+                    if (updated.receiverUserId) {
+                        io.to(`user:${updated.receiverUserId}`).emit('task:unarchived', payload);
+                    }
+
+                    // Creator user room
+                    if (updated.userId) {
+                        io.to(`user:${updated.userId}`).emit('task:unarchived', payload);
+                    }
+
+                    // Global list update
+                    io.emit('task:updated', {
+                        taskId: String(taskId),
+                        task: updated
+                    });
+                }
+            } catch (e) {
+                console.warn('Socket emission failed:', e.message);
+            }
+
             // Invalidate task caches
             await invalidateCache('cache:*getTaskAssign*');
             await invalidateCache('cache:*addtaskassign*');
+            await invalidateCache('cache:*availability*');
 
             res.status(200).json({ success: true, message: 'Task unarchived', data: updated });
         } catch (error) {
@@ -271,9 +340,45 @@ const addTaskAssignController = {
                 return res.status(404).json({ success: false, message: 'Task not found' });
             }
 
+            // Emit socket event for real-time updates
+            try {
+                const { getIO } = require('../../utils/socket');
+                const io = getIO && getIO();
+                if (io) {
+                    const newMessage = updated.chatMessages[updated.chatMessages.length - 1];
+                    const payload = {
+                        taskId: String(taskId),
+                        message: newMessage,
+                        task: updated
+                    };
+
+                    // Task room
+                    io.to(String(taskId)).emit('task:chatMessageAdded', payload);
+
+                    // Receiver user room
+                    if (updated.receiverUserId) {
+                        io.to(`user:${updated.receiverUserId}`).emit('task:chatMessageAdded', payload);
+                    }
+
+                    // Creator user room
+                    if (updated.userId) {
+                        io.to(`user:${updated.userId}`).emit('task:chatMessageAdded', payload);
+                    }
+
+                    // Global list update
+                    io.emit('task:updated', {
+                        taskId: String(taskId),
+                        task: updated
+                    });
+                }
+            } catch (e) {
+                console.warn('Socket emission failed:', e.message);
+            }
+
             // Invalidate task caches
             await invalidateCache(`cache:*getTaskAssign*`);
             await invalidateCache(`cache:*addtaskassign*`);
+            await invalidateCache(`cache:*availability*`);
 
             res.status(200).json({ success: true, message: 'Chat message added', data: updated });
         } catch (error) {
@@ -627,6 +732,7 @@ const addTaskAssignController = {
             // Invalidate task caches
             await invalidateCache('cache:*getTaskAssign*');
             await invalidateCache('cache:*addtaskassign*');
+            await invalidateCache('cache:*availability*');
 
             res.status(201).json({ success: true, message: 'Task created successfully', data: saved });
         } catch (error) {
@@ -702,6 +808,7 @@ const addTaskAssignController = {
             // Invalidate task caches
             await invalidateCache('cache:*getTaskAssign*');
             await invalidateCache('cache:*addtaskassign*');
+            await invalidateCache('cache:*availability*');
 
             res.status(200).json({
                 success: true,
@@ -787,6 +894,7 @@ const addTaskAssignController = {
             // Invalidate task caches
             await invalidateCache('cache:*getTaskAssign*');
             await invalidateCache('cache:*addtaskassign*');
+            await invalidateCache('cache:*availability*');
 
             res.status(201).json({
                 success: true,
@@ -939,6 +1047,7 @@ const addTaskAssignController = {
             // Invalidate task caches
             await invalidateCache('cache:*getTaskAssign*');
             await invalidateCache('cache:*addtaskassign*');
+            await invalidateCache('cache:*availability*');
 
             res.status(200).json({
                 success: true,

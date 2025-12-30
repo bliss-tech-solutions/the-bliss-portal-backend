@@ -88,11 +88,10 @@ app.use('/api', redisCache({
         /\/chat\/messages/i, // Has manual caching in controller
         /\/userverificationdocuments/i, // Exclude to ensure real-time salary updates
         /\/teammanagement/i,
-        /\/addtaskassign/i,
         /\/leavesapi/i,
         /\/leave\//i,
         /\/salaryCalculation/i,
-
+        /\/addtaskassign/i
     ],
     excludedMethods: [] // Cache all GET requests
 }));
