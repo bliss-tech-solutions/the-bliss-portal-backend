@@ -55,17 +55,9 @@ const chatController = {
                             message: newMessage?.message || message,
                             time: newMessage?.time || time,
                             createdAt: newMessage?.createdAt || createdAt
-                        },
-                        playSound: true,
-                        notificationType: 'chat_message',
-                        message: `New message from ${newMessage?.userName || userName}`,
-                        iosSound: 'default'
+                        }
                     };
                     io.to(String(taskId)).emit('chat:new', payload);
-                    // Also emit to receiver if different from sender
-                    if (receiverId && receiverId !== senderId) {
-                        io.to(`user:${receiverId}`).emit('chat:new', payload);
-                    }
                 }
             } catch (e) { }
 
