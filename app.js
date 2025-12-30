@@ -93,7 +93,8 @@ app.use('/api', redisCache({
         /\/salaryCalculation/i,
         /\/addtaskassign/i,
         /\/gettaskassign/i,
-        /\/availability/i
+        /\/availability/i,
+        /\/clientmanagement/i
     ],
     excludedMethods: [] // Cache all GET requests
 }));

@@ -134,7 +134,7 @@ const clientManagementController = {
                     });
                 }
 
-                const userIds = new Set(); // Track unique userIds
+                // No restrictions - allow same user multiple times with any positions
                 for (const user of assignedUsers) {
                     if (!user.userId || !user.name) {
                         return res.status(400).json({
@@ -142,17 +142,6 @@ const clientManagementController = {
                             message: 'Each assigned user must have userId and name'
                         });
                     }
-
-                    // Check for duplicate userIds - removed because same user can have multiple positions
-                    /*
-                    if (userIds.has(user.userId)) {
-                        return res.status(400).json({
-                            success: false,
-                            message: `Duplicate user found: ${user.name} (${user.userId})`
-                        });
-                    }
-                    userIds.add(user.userId);
-                    */
 
                     normalizedAssignedUsers.push({
                         userId: user.userId,
@@ -301,7 +290,7 @@ const clientManagementController = {
                 }
 
                 const normalizedAssignedUsers = [];
-                const userIds = new Set();
+                // No restrictions - allow same user multiple times with any positions
 
                 for (const user of assignedUsers) {
                     if (!user.userId || !user.name) {
@@ -310,17 +299,6 @@ const clientManagementController = {
                             message: 'Each assigned user must have userId and name'
                         });
                     }
-
-                    // Check for duplicate userIds - removed because same user can have multiple positions
-                    /*
-                    if (userIds.has(user.userId)) {
-                        return res.status(400).json({
-                            success: false,
-                            message: `Duplicate user found: ${user.name} (${user.userId})`
-                        });
-                    }
-                    userIds.add(user.userId);
-                    */
 
                     normalizedAssignedUsers.push({
                         userId: user.userId,
