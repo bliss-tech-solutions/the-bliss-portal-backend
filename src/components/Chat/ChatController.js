@@ -58,7 +58,8 @@ const chatController = {
                         },
                         playSound: true,
                         notificationType: 'chat_message',
-                        message: `New message from ${newMessage?.userName || userName}`
+                        message: `New message from ${newMessage?.userName || userName}`,
+                        iosSound: 'default'
                     };
                     io.to(String(taskId)).emit('chat:new', payload);
                     // Also emit to receiver if different from sender

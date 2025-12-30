@@ -373,6 +373,7 @@ const addTaskAssignController = {
                     payload.playSound = true;
                     payload.notificationType = 'task_chat_message';
                     payload.notificationMessage = `New message in task: ${updated.taskName || 'Task'}`;
+                    payload.iosSound = 'default';
 
                     // Receiver user room
                     if (updated.receiverUserId) {
@@ -752,7 +753,8 @@ const addTaskAssignController = {
                                 task: saved,
                                 playSound: true,
                                 notificationType: 'task_assigned',
-                                message: `New task assigned: ${saved.taskName || 'Task'}`
+                                message: `New task assigned: ${saved.taskName || 'Task'}`,
+                                iosSound: 'default'
                             });
                         }
                         if (saved.userId) {
@@ -829,7 +831,8 @@ const addTaskAssignController = {
                             task: updated,
                             playSound: true,
                             notificationType: 'task_status_updated',
-                            notificationMessage: `Task status updated to ${taskStatus}`
+                            notificationMessage: `Task status updated to ${taskStatus}`,
+                            iosSound: 'default'
                         });
                     }
 
@@ -841,7 +844,8 @@ const addTaskAssignController = {
                             task: updated,
                             playSound: true,
                             notificationType: 'task_status_updated',
-                            notificationMessage: `Task status updated to ${taskStatus}`
+                            notificationMessage: `Task status updated to ${taskStatus}`,
+                            iosSound: 'default'
                         });
                     }
 
@@ -916,7 +920,9 @@ const addTaskAssignController = {
                         extensionRequest: savedExtension,
                         playSound: true,
                         notificationType: 'task_extension_requested',
-                        notificationMessage: `Extension request for task: ${savedTask.taskName || 'Task'}`
+                        notificationMessage: `Extension request for task: ${savedTask.taskName || 'Task'}`,
+                        iosSound: 'default',
+                        iosSound: 'default'
                     };
 
                     // Task room
@@ -1069,7 +1075,8 @@ const addTaskAssignController = {
                         task: savedTask,
                         playSound: true,
                         notificationType: 'task_extension_responded',
-                        notificationMessage: `Extension ${decision} for task: ${savedTask.taskName || 'Task'}`
+                        notificationMessage: `Extension ${decision} for task: ${savedTask.taskName || 'Task'}`,
+                        iosSound: 'default'
                     };
 
                     // Task room

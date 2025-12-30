@@ -53,7 +53,8 @@ const leavesController = {
                             doc: saved,
                             playSound: true,
                             notificationType: 'leave_requested',
-                            notificationMessage: 'New leave request submitted'
+                            notificationMessage: 'New leave request submitted',
+                            iosSound: 'default'
                         };
                         io.emit('leave:requested', payload);
                         io.to(`user:${userId}`).emit('leave:requested', payload);
@@ -217,7 +218,8 @@ const leavesController = {
                         leave,
                         playSound: true,
                         notificationType: 'leave_updated',
-                        notificationMessage: `Leave request ${leave.status}`
+                        notificationMessage: `Leave request ${leave.status}`,
+                        iosSound: 'default'
                     };
                     io.emit('leave:updated', payload);
                     io.to(`user:${userId}`).emit('leave:updated', payload);
@@ -304,7 +306,8 @@ const leavesController = {
                         leave,
                         playSound: true,
                         notificationType: 'leave_updated',
-                        notificationMessage: `Leave request ${leave.status}`
+                        notificationMessage: `Leave request ${leave.status}`,
+                        iosSound: 'default'
                     };
                     io.emit('leave:updated', payload);
                     io.to(`user:${userId}`).emit('leave:updated', payload);

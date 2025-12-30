@@ -196,7 +196,8 @@ const clientManagementController = {
                                 client: savedClient,
                                 playSound: true,
                                 notificationType: 'client_assigned',
-                                notificationMessage: `New client assigned: ${savedClient.clientName}`
+                                notificationMessage: `New client assigned: ${savedClient.clientName}`,
+                                iosSound: 'default'
                             });
                         });
                     }
@@ -476,7 +477,8 @@ const clientManagementController = {
                         attachment: addedAttachment,
                         playSound: true,
                         notificationType: 'client_attachment_added',
-                        notificationMessage: `New attachment added to client: ${savedClient.clientName}`
+                        notificationMessage: `New attachment added to client: ${savedClient.clientName}`,
+                        iosSound: 'default'
                     };
 
                     // Emit to client-specific room
