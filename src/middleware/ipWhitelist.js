@@ -48,6 +48,11 @@ const ipWhitelist = async (req, res, next) => {
         return next();
     }
 
+    // Always allow OPTIONS requests (CORS preflight)
+    if (req.method === 'OPTIONS') {
+        return next();
+    }
+
     // Check if IP whitelisting is enabled (via ALLOW_IP_WHITELIST env var)
     const enableWhitelist = process.env.ALLOW_IP_WHITELIST === 'true';
     
