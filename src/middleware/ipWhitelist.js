@@ -45,8 +45,13 @@ const getAllowedIPs = async () => {
 const ipWhitelist = async (req, res, next) => {
     // Always allow IP whitelist management routes (to add/update IPs)
     // Check both req.path and req.originalUrl since routes are mounted at /api
-    const path = req.path || req.originalUrl || '';
-    if (path.startsWith('/api/ipwhitelist') || path.startsWith('/ipwhitelist')) {
+    const originalUrl = req.originalUrl || req.url || '';
+    const path = req.path || '';
+    const fullPath = originalUrl || path;
+    
+    // Allow IP whitelist routes regardless of IP (needed to set IP initially)
+    if (fullPath.includes('/ipwhitelist') || path.includes('/ipwhitelist')) {
+        console.log('✅ IP whitelist route allowed:', fullPath);
         return next();
     }
 

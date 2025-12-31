@@ -35,7 +35,7 @@ app.use(helmet());
 // CORS configuration - Allow multiple websites (MUST be before IP whitelist)
 const corsOrigins = [
     'http://localhost:3000',
-    "http://localhost:5173",
+    'http://localhost:5173',
     'http://localhost:2711',
     'http://localhost:3001',
     'https://yourwebsite.com',
@@ -43,12 +43,12 @@ const corsOrigins = [
     'https://bliss-portal.com',
     'https://www.bliss-portal.com',
     'https://the-bliss-portal.vercel.app',
-    "https://the-bliss-portal.vercel.app/",
-    "https://www.the-bliss-portal.vercel.app",
-    "https://www.the-bliss-portal.vercel.app/",
-    "https://techerudite-assignment-three.vercel.app",
-    "https://the-bliss-portal-backend.onrender.com",
-    "https://www.the-bliss-portal-backend.onrender.com",
+    'https://the-bliss-portal.vercel.app/',
+    'https://www.the-bliss-portal.vercel.app',
+    'https://www.the-bliss-portal.vercel.app/',
+    'https://techerudite-assignment-three.vercel.app',
+    'https://the-bliss-portal-backend.onrender.com',
+    'https://www.the-bliss-portal-backend.onrender.com',
     // Render deployment URLs (add your actual Render domain)
     process.env.RENDER_EXTERNAL_URL || null,
     process.env.FRONTEND_URL || null
@@ -56,7 +56,7 @@ const corsOrigins = [
 
 app.use(cors({
     origin: corsOrigins,
-    credentials: true,
+    credentials: true,  // Allow cookies and credentials
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     optionsSuccessStatus: 200
@@ -139,14 +139,16 @@ try {
     const { Server } = require('socket.io');
     io = new Server(server, {
         cors: {
-            origin: corsOrigins,
-            methods: ['GET', 'POST']
+            origin: corsOrigins, // Match the frontend origin to allow socket connections
+            methods: ['GET', 'POST'],
+            credentials: true
         }
     });
     setIO(io);
 
     io.on('connection', (socket) => {
         console.log('🧩 Socket connected:', socket.id);
+        
         // allow rooms per task for scoped chat
         socket.on('joinTask', (taskId) => {
             if (!taskId) return;

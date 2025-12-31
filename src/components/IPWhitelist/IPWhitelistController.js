@@ -8,12 +8,15 @@ const ipWhitelistController = {
     // POST /api/ipwhitelist/setIP - Set the IP (simple - replaces any old IP)
     setIP: async (req, res, next) => {
         try {
-            const { ipAddress, description } = req.body;
+            console.log('📝 setIP request:', { body: req.body, headers: req.headers['content-type'] });
+            
+            const { ipAddress, description } = req.body || {};
 
-            if (!ipAddress) {
+            if (!ipAddress || typeof ipAddress !== 'string' || ipAddress.trim() === '') {
                 return res.status(400).json({
                     success: false,
-                    message: 'ipAddress is required'
+                    message: 'ipAddress is required and must be a non-empty string',
+                    receivedBody: req.body
                 });
             }
 
