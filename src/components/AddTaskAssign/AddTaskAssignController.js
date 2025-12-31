@@ -369,12 +369,6 @@ const addTaskAssignController = {
                     // Task room
                     io.to(String(taskId)).emit('task:chatMessageAdded', payload);
 
-                    // Add sound notification metadata
-                    payload.playSound = true;
-                    payload.notificationType = 'task_chat_message';
-                    payload.notificationMessage = `New message in task: ${updated.taskName || 'Task'}`;
-                    payload.iosSound = 'default';
-
                     // Receiver user room
                     if (updated.receiverUserId) {
                         io.to(`user:${updated.receiverUserId}`).emit('task:chatMessageAdded', payload);
@@ -753,8 +747,7 @@ const addTaskAssignController = {
                                 task: saved,
                                 playSound: true,
                                 notificationType: 'task_assigned',
-                                message: `New task assigned: ${saved.taskName || 'Task'}`,
-                                iosSound: 'default'
+                                message: `New task assigned: ${saved.taskName || 'Task'}`
                             });
                         }
                         if (saved.userId) {
@@ -828,11 +821,7 @@ const addTaskAssignController = {
                         io.to(`user:${updated.receiverUserId}`).emit('task:statusUpdated', {
                             taskId: String(taskId),
                             taskStatus,
-                            task: updated,
-                            playSound: true,
-                            notificationType: 'task_status_updated',
-                            notificationMessage: `Task status updated to ${taskStatus}`,
-                            iosSound: 'default'
+                            task: updated
                         });
                     }
 
@@ -841,11 +830,7 @@ const addTaskAssignController = {
                         io.to(`user:${updated.userId}`).emit('task:statusUpdated', {
                             taskId: String(taskId),
                             taskStatus,
-                            task: updated,
-                            playSound: true,
-                            notificationType: 'task_status_updated',
-                            notificationMessage: `Task status updated to ${taskStatus}`,
-                            iosSound: 'default'
+                            task: updated
                         });
                     }
 
@@ -917,12 +902,7 @@ const addTaskAssignController = {
                     const payload = {
                         taskId: String(savedTask._id),
                         slotId: String(savedSlot._id),
-                        extensionRequest: savedExtension,
-                        playSound: true,
-                        notificationType: 'task_extension_requested',
-                        notificationMessage: `Extension request for task: ${savedTask.taskName || 'Task'}`,
-                        iosSound: 'default',
-                        iosSound: 'default'
+                        extensionRequest: savedExtension
                     };
 
                     // Task room
@@ -1072,11 +1052,7 @@ const addTaskAssignController = {
                         extensionId: String(extensionId),
                         decision,
                         adjustmentMinutes,
-                        task: savedTask,
-                        playSound: true,
-                        notificationType: 'task_extension_responded',
-                        notificationMessage: `Extension ${decision} for task: ${savedTask.taskName || 'Task'}`,
-                        iosSound: 'default'
+                        task: savedTask
                     };
 
                     // Task room

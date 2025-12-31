@@ -45,17 +45,7 @@ const leavesController = {
                 try {
                     const io = getIO && getIO();
                     if (io) {
-                        const payload = { 
-                            userId, 
-                            month: monthUpper, 
-                            reason, 
-                            leaves: leaveEntries, 
-                            doc: saved,
-                            playSound: true,
-                            notificationType: 'leave_requested',
-                            notificationMessage: 'New leave request submitted',
-                            iosSound: 'default'
-                        };
+                        const payload = { userId, month: monthUpper, reason, leaves: leaveEntries, doc: saved };
                         io.emit('leave:requested', payload);
                         io.to(`user:${userId}`).emit('leave:requested', payload);
                         io.to('analytics').emit('leave:requested', payload);
@@ -215,11 +205,7 @@ const leavesController = {
                         status: leave.status,
                         approvedDates: leave.approvedDates,
                         rejectedDates: leave.rejectedDates,
-                        leave,
-                        playSound: true,
-                        notificationType: 'leave_updated',
-                        notificationMessage: `Leave request ${leave.status}`,
-                        iosSound: 'default'
+                        leave
                     };
                     io.emit('leave:updated', payload);
                     io.to(`user:${userId}`).emit('leave:updated', payload);
@@ -303,11 +289,7 @@ const leavesController = {
                         status: leave.status,
                         approvedDates: leave.approvedDates,
                         rejectedDates: leave.rejectedDates,
-                        leave,
-                        playSound: true,
-                        notificationType: 'leave_updated',
-                        notificationMessage: `Leave request ${leave.status}`,
-                        iosSound: 'default'
+                        leave
                     };
                     io.emit('leave:updated', payload);
                     io.to(`user:${userId}`).emit('leave:updated', payload);

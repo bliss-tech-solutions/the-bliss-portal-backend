@@ -16,6 +16,7 @@ const teamManagementRoutes = require('../components/TeamManagement');
 const globalChatRoutes = require('../components/GlobalChat');
 const analyticsRoutes = require('../components/Analytics');
 const salaryCalculationRoutes = require('../components/salaryCalculation');
+const ipWhitelistRoutes = require('../components/IPWhitelist');
 
 // Register all routes
 // router.use('/testdummyapi', testDummyApiRoutes);
@@ -32,6 +33,7 @@ router.use('/', teamManagementRoutes);
 router.use('/', globalChatRoutes);
 router.use('/analytics', analyticsRoutes);
 router.use('/salaryCalculation', salaryCalculationRoutes);
+router.use('/', ipWhitelistRoutes);
 
 // API Info endpoint
 router.get('/', (req, res) => {
