@@ -169,6 +169,41 @@ const ipWhitelistController = {
             }
             next(error);
         }
+    },
+
+    // GET /api/ipwhitelist/getMyPublicIP - Get the office WiFi's public IP (what backend sees)
+    getMyPublicIP: async (req, res, next) => {
+        try {
+            // Get the IP that the backend sees (this is your office WiFi's PUBLIC IP)
+            // All office devices on same WiFi will show the SAME public IP
+            const publicIP = req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+                req.headers['x-real-ip'] ||
+                req.ip ||
+                req.connection.remoteAddress ||
+                req.socket.remoteAddress ||
+                (req.connection.socket ? req.connection.socket.remoteAddress : null) ||
+                'unknown';
+
+            // Get currently whitelisted IP
+            const activeIP = await IPWhitelistModel.findOne({ isActive: true }).sort({ updatedAt: -1 });
+
+            res.status(200).json({
+                success: true,
+                message: 'Office WiFi Public IP (what backend sees)',
+                data: {
+                    officeWiFiPublicIP: publicIP,  // This is what you need to whitelist in MongoDB!
+                    note: 'All office devices on this WiFi share this same public IP',
+                    yourLocalIP: '192.168.1.30 (from WiFi settings - NOT what backend sees)',
+                    currentlyWhitelistedIP: activeIP ? activeIP.ipAddress : null,
+                    isWhitelisted: activeIP && activeIP.ipAddress === publicIP,
+                    instruction: activeIP && activeIP.ipAddress === publicIP
+                        ? '✅ Office WiFi IP is whitelisted. All office devices will work!'
+                        : `⚠️ Add this public IP (${publicIP}) to MongoDB. All office devices on this WiFi will then work.`
+                }
+            });
+        } catch (error) {
+            next(error);
+        }
     }
 };
 

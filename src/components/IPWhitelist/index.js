@@ -12,5 +12,8 @@ router.get('/ipwhitelist/getCurrentIP', ipWhitelistController.getCurrentIP);
 // POST /api/ipwhitelist/addMyIP - Automatically add current client IP
 router.post('/ipwhitelist/addMyIP', ipWhitelistController.addMyIP);
 
+// GET /api/ipwhitelist/getMyPublicIP - Get the public IP that backend sees
+router.get('/ipwhitelist/getMyPublicIP', ipWhitelistController.getMyPublicIP);
+
 module.exports = router;
 
