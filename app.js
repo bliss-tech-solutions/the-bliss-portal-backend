@@ -32,10 +32,13 @@ app.set('trust proxy', true);
 // Security middleware
 app.use(helmet());
 
-// CORS configuration - Allow multiple websites (MUST be before IP whitelist)
+// IP Whitelist middleware (only allow specific IP)
+app.use(ipWhitelist);
+
+// CORS configuration - Allow multiple websites
 const corsOrigins = [
     'http://localhost:3000',
-    'http://localhost:5173',
+    "http://localhost:5173",
     'http://localhost:2711',
     'http://localhost:3001',
     'https://yourwebsite.com',
@@ -43,12 +46,12 @@ const corsOrigins = [
     'https://bliss-portal.com',
     'https://www.bliss-portal.com',
     'https://the-bliss-portal.vercel.app',
-    'https://the-bliss-portal.vercel.app/',
-    'https://www.the-bliss-portal.vercel.app',
-    'https://www.the-bliss-portal.vercel.app/',
-    'https://techerudite-assignment-three.vercel.app',
-    'https://the-bliss-portal-backend.onrender.com',
-    'https://www.the-bliss-portal-backend.onrender.com',
+    "https://the-bliss-portal.vercel.app/",
+    "https://www.the-bliss-portal.vercel.app",
+    "https://www.the-bliss-portal.vercel.app/",
+    "https://techerudite-assignment-three.vercel.app",
+    "https://the-bliss-portal-backend.onrender.com",
+    "https://www.the-bliss-portal-backend.onrender.com",
     // Render deployment URLs (add your actual Render domain)
     process.env.RENDER_EXTERNAL_URL || null,
     process.env.FRONTEND_URL || null
@@ -56,14 +59,11 @@ const corsOrigins = [
 
 app.use(cors({
     origin: corsOrigins,
-    credentials: true,  // Allow cookies and credentials
+    credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     optionsSuccessStatus: 200
 }));
-
-// IP Whitelist middleware (only allow specific IP) - AFTER CORS
-app.use(ipWhitelist);
 
 // Logging middleware
 app.use(morgan('combined'));
@@ -139,16 +139,14 @@ try {
     const { Server } = require('socket.io');
     io = new Server(server, {
         cors: {
-            origin: corsOrigins, // Match the frontend origin to allow socket connections
-            methods: ['GET', 'POST'],
-            credentials: true
+            origin: corsOrigins,
+            methods: ['GET', 'POST']
         }
     });
     setIO(io);
 
     io.on('connection', (socket) => {
         console.log('🧩 Socket connected:', socket.id);
-        
         // allow rooms per task for scoped chat
         socket.on('joinTask', (taskId) => {
             if (!taskId) return;

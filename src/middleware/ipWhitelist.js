@@ -1,65 +1,4 @@
-const IPWhitelistModel = require('../components/IPWhitelist/IPWhitelistSchema/IPWhitelistSchema');
-const { cacheHelper } = require('../config/redis');
-
-const IP_WHITELIST_CACHE_KEY = 'ip:whitelist:active';
-const CACHE_TTL = 60; // 1 minute cache (short for faster updates)
-
-// Helper function to get allowed IPs from MongoDB (with caching)
-const getAllowedIPs = async () => {
-    try {
-        // Try cache first
-        const cached = await cacheHelper.get(IP_WHITELIST_CACHE_KEY);
-        if (cached && Array.isArray(cached) && cached.length > 0) {
-            return cached;
-        }
-
-        // Fetch from database
-        const activeIP = await IPWhitelistModel.findOne({ isActive: true }).sort({ updatedAt: -1 });
-        
-        if (!activeIP) {
-            // Fallback to environment variable if no IP in database
-            const allowedIPsString = process.env.ALLOWED_IPS || process.env.IP_ADDRESS;
-            if (allowedIPsString) {
-                return allowedIPsString.split(',').map(ip => ip.trim()).filter(Boolean);
-            }
-            return [];
-        }
-
-        const ipAddresses = [activeIP.ipAddress];
-
-        // Cache the result
-        await cacheHelper.set(IP_WHITELIST_CACHE_KEY, ipAddresses, CACHE_TTL);
-
-        return ipAddresses;
-    } catch (error) {
-        console.error('Error fetching allowed IPs from database:', error.message);
-        // Fallback to environment variable if database fails
-        const allowedIPsString = process.env.ALLOWED_IPS || process.env.IP_ADDRESS;
-        if (allowedIPsString) {
-            return allowedIPsString.split(',').map(ip => ip.trim()).filter(Boolean);
-        }
-        return [];
-    }
-};
-
-const ipWhitelist = async (req, res, next) => {
-    // Always allow IP whitelist management routes (to add/update IPs)
-    // Check both req.path and req.originalUrl since routes are mounted at /api
-    const originalUrl = req.originalUrl || req.url || '';
-    const path = req.path || '';
-    const fullPath = originalUrl || path;
-    
-    // Allow IP whitelist routes regardless of IP (needed to set IP initially)
-    if (fullPath.includes('/ipwhitelist') || path.includes('/ipwhitelist')) {
-        console.log('✅ IP whitelist route allowed:', fullPath);
-        return next();
-    }
-
-    // Always allow OPTIONS requests (CORS preflight)
-    if (req.method === 'OPTIONS') {
-        return next();
-    }
-
+const ipWhitelist = (req, res, next) => {
     // Check if IP whitelisting is enabled (via ALLOW_IP_WHITELIST env var)
     const enableWhitelist = process.env.ALLOW_IP_WHITELIST === 'true';
     
@@ -68,14 +7,17 @@ const ipWhitelist = async (req, res, next) => {
         return next();
     }
 
-    // Get allowed IPs from MongoDB (with fallback to env var)
-    const allowedIPs = await getAllowedIPs();
+    // Get allowed IPs from environment variable
+    // Can be single IP or comma-separated list: "192.168.1.1,10.0.0.1"
+    const allowedIPsString = process.env.ALLOWED_IPS || process.env.IP_ADDRESS;
 
-    // If no IPs configured, allow all (for initial setup)
-    if (!allowedIPs || allowedIPs.length === 0) {
-        console.warn('⚠️  No allowed IPs configured in database or env - allowing all IPs');
+    if (!allowedIPsString) {
+        console.warn('⚠️  ALLOWED_IPS not configured - allowing all IPs');
         return next();
     }
+
+    // Parse allowed IPs (support comma-separated list)
+    const allowedIPs = allowedIPsString.split(',').map(ip => ip.trim()).filter(Boolean);
 
     // Get client IP address
     // On Render/proxied environments, use x-forwarded-for header
@@ -112,16 +54,6 @@ const ipWhitelist = async (req, res, next) => {
         next();
     } else {
         console.log(`❌ IP ${clientIP} is not whitelisted`);
-        
-        // Add CORS headers even for blocked requests to prevent CORS errors
-        const origin = req.headers.origin;
-        if (origin) {
-            res.setHeader('Access-Control-Allow-Origin', origin);
-            res.setHeader('Access-Control-Allow-Credentials', 'true');
-            res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-            res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-        }
-        
         res.status(403).json({
             success: false,
             message: 'Access denied. Your IP address is not authorized.',
