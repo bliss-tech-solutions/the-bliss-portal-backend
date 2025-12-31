@@ -32,10 +32,7 @@ app.set('trust proxy', true);
 // Security middleware
 app.use(helmet());
 
-// IP Whitelist middleware (only allow specific IP)
-app.use(ipWhitelist);
-
-// CORS configuration - Allow multiple websites
+// CORS configuration - Allow multiple websites (MUST be before IP whitelist)
 const corsOrigins = [
     'http://localhost:3000',
     "http://localhost:5173",
@@ -64,6 +61,9 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     optionsSuccessStatus: 200
 }));
+
+// IP Whitelist middleware (only allow specific IP) - AFTER CORS
+app.use(ipWhitelist);
 
 // Logging middleware
 app.use(morgan('combined'));

@@ -105,6 +105,16 @@ const ipWhitelist = async (req, res, next) => {
         next();
     } else {
         console.log(`❌ IP ${clientIP} is not whitelisted`);
+        
+        // Add CORS headers even for blocked requests to prevent CORS errors
+        const origin = req.headers.origin;
+        if (origin) {
+            res.setHeader('Access-Control-Allow-Origin', origin);
+            res.setHeader('Access-Control-Allow-Credentials', 'true');
+            res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+            res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+        }
+        
         res.status(403).json({
             success: false,
             message: 'Access denied. Your IP address is not authorized.',
