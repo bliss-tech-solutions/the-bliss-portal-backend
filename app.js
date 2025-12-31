@@ -51,7 +51,7 @@ const corsOrigins = [
     "https://www.the-bliss-portal.vercel.app/",
     "https://techerudite-assignment-three.vercel.app",
     "https://the-bliss-portal-backend.onrender.com",
-    "https://www.the-bliss-portal-backend.onrender.com"
+    "https://www.the-bliss-portal-backend.onrender.com",
     // Render deployment URLs (add your actual Render domain)
     process.env.RENDER_EXTERNAL_URL || null,
     process.env.FRONTEND_URL || null
