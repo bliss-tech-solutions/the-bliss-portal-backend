@@ -6,7 +6,7 @@ let redisClient = null;
 const initRedis = async () => {
     try {
         const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
-        
+
         redisClient = redis.createClient({
             url: redisUrl,
             socket: {
@@ -39,10 +39,14 @@ const initRedis = async () => {
 
         // Connect to Redis
         await redisClient.connect();
-        
+
         return redisClient;
     } catch (error) {
         console.error('❌ Redis connection failed:', error.message);
+        if (error.code === 'ECONNREFUSED' && error.address === '127.0.0.1') {
+            console.error('⚠️  HINT: It looks like you are trying to connect to a local Redis (127.0.0.1) on a cloud environment.');
+            console.error('⚠️  Make sure to set the REDIS_URL environment variable to point to your hosted Redis instance.');
+        }
         console.warn('⚠️ Continuing without Redis cache...');
         return null;
     }

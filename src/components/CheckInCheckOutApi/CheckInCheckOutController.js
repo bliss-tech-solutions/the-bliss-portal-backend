@@ -1,6 +1,22 @@
 const CheckInCheckOutModel = require('./CheckInCheckOutSchema/CheckInCheckOutSchema');
 const { getIO } = require('../../utils/socket');
 
+// Helper to get IST time details
+const getISTTime = () => {
+    const now = new Date();
+    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const istOffset = 5.5 * 60 * 60 * 1000;
+    const istDate = new Date(utc + istOffset);
+
+    return {
+        realNow: now, // The actual absolute time (for DB saving)
+        istDate: istDate, // The time shifted to IST (for logic)
+        today: istDate.toISOString().split('T')[0], // IST YYYY-MM-DD
+        hours: istDate.getUTCHours(), // IST hours
+        minutes: istDate.getUTCMinutes() // IST minutes
+    };
+};
+
 const checkInCheckOutController = {
     // POST /api/checkin - Check in for the day
     checkIn: async (req, res, next) => {
@@ -14,15 +30,12 @@ const checkInCheckOutController = {
                 });
             }
 
-            const today = new Date().toISOString().split('T')[0];
-            const now = new Date();
+            const { today, hours: checkInHour, minutes: checkInMinute, realNow: now } = getISTTime();
 
             // Determine check-in type (default to OFFICE if not provided)
             const type = checkInType || 'OFFICE';
 
             // Calculate DayStatus based on check-in type and time
-            const checkInHour = now.getHours();
-            const checkInMinute = now.getMinutes();
             const checkInTimeInMinutes = checkInHour * 60 + checkInMinute;
             const cutoffTimeInMinutes = 10 * 60 + 50; // 10:50 AM
 
@@ -121,11 +134,7 @@ const checkInCheckOutController = {
                 return res.status(400).json({ success: false, message: 'userId is required' });
             }
 
-            const now = new Date();
-            const y = now.getFullYear();
-            const m = String(now.getMonth() + 1).padStart(2, '0');
-            const d = String(now.getDate()).padStart(2, '0');
-            const todayLocal = `${y}-${m}-${d}`; // server-local YYYY-MM-DD
+            const { today: todayLocal } = getISTTime();
 
             const doc = await CheckInCheckOutModel.findOne({ userId });
             const entry = doc ? (doc.CheckInCheckOutTime || []).find(e => e.date === todayLocal) : null;
@@ -147,11 +156,7 @@ const checkInCheckOutController = {
                 return res.status(400).json({ success: false, message: 'userId is required' });
             }
 
-            const now = new Date();
-            const y = now.getFullYear();
-            const m = String(now.getMonth() + 1).padStart(2, '0');
-            const d = String(now.getDate()).padStart(2, '0');
-            const todayLocal = `${y}-${m}-${d}`; // server-local YYYY-MM-DD
+            const { today: todayLocal } = getISTTime();
 
             const doc = await CheckInCheckOutModel.findOne({ userId });
             const entry = doc ? (doc.CheckInCheckOutTime || []).find(e => e.date === todayLocal) : null;
@@ -177,8 +182,7 @@ const checkInCheckOutController = {
                 });
             }
 
-            const today = new Date().toISOString().split('T')[0];
-            const now = new Date();
+            const { today, hours: checkOutHour, minutes: checkOutMinute, realNow: now } = getISTTime();
 
             const doc = await CheckInCheckOutModel.findOne({ userId });
             if (!doc) {
@@ -193,16 +197,18 @@ const checkInCheckOutController = {
                 return res.status(400).json({ success: false, message: 'User already checked out today' });
             }
 
-            entry.checkOutAt = now;
+            entry.checkOutAt = now; // Save actual UTC time
             entry.totalHours = Math.round(((now - entry.checkInAt) / (1000 * 60 * 60)) * 100) / 100;
 
             // Calculate final DayStatus based on check-in type, check-in time, and check-out time
-            const checkOutHour = now.getHours();
-            const checkOutMinute = now.getMinutes();
             const checkOutTimeInMinutes = checkOutHour * 60 + checkOutMinute;
 
-            const checkInHour = entry.checkInAt.getHours();
-            const checkInMinute = entry.checkInAt.getMinutes();
+            // Convert stored checkInAt (UTC/Absolute) to IST for logic comparison
+            const checkInAtUTC = entry.checkInAt.getTime() + (entry.checkInAt.getTimezoneOffset() * 60000); // effectively entry.checkInAt.getTime() on server
+            const checkInAtIST = new Date(checkInAtUTC + (5.5 * 60 * 60 * 1000));
+
+            const checkInHour = checkInAtIST.getUTCHours();
+            const checkInMinute = checkInAtIST.getUTCMinutes();
             const checkInTimeInMinutes = checkInHour * 60 + checkInMinute;
             const checkInCutoff = 10 * 60 + 50; // 10:50 AM
 
@@ -221,7 +227,7 @@ const checkInCheckOutController = {
             } else {
                 // OFFICE type: Different cutoffs based on check-in time
                 const noonCutoff = 12 * 60; // 12:00 PM (noon)
-                
+
                 if (checkInTimeInMinutes > noonCutoff) {
                     // Checked in after 12:00 PM (noon): Always HALF day (no redemption)
                     entry.DayStatus = 'HALF';
@@ -274,7 +280,7 @@ const checkInCheckOutController = {
     getTodayRecord: async (req, res, next) => {
         try {
             const { userId } = req.params;
-            const today = new Date().toISOString().split('T')[0];
+            const { today } = getISTTime();
 
             const doc = await CheckInCheckOutModel.findOne({ userId });
             if (!doc) {
