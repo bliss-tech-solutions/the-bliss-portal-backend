@@ -18,7 +18,7 @@ const { setIO } = require('./src/utils/socket');
 // Import middleware
 const errorHandler = require('./src/middleware/errorHandler');
 const notFound = require('./src/middleware/notFound');
-const ipWhitelist = require('./src/middleware/ipWhitelist');
+// const ipWhitelist = require('./src/middleware/ipWhitelist');
 const { redisCache } = require('./src/middleware/redisCache');
 
 const app = express();
@@ -33,7 +33,7 @@ app.set('trust proxy', true);
 app.use(helmet());
 
 // IP Whitelist middleware (only allow specific IP)
-app.use(ipWhitelist);
+// app.use(ipWhitelist);
 
 // CORS configuration - Allow multiple websites
 const corsOrigins = [
