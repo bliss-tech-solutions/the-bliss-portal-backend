@@ -96,7 +96,8 @@ app.use('/api', redisCache({
         /\/addtaskassign/i,
         /\/gettaskassign/i,
         /\/availability/i,
-        /\/clientmanagement/i
+        /\/clientmanagement/i,
+        /\/daily-working/i
     ],
     excludedMethods: [] // Cache all GET requests
 }));
@@ -205,6 +206,21 @@ try {
             const { clientId, userId } = payload || {};
             if (typeof clientId === 'string' && clientId.trim() && typeof userId === 'string' && userId.trim()) {
                 socket.leave(`client:${clientId.trim()}:user:${userId.trim()}`);
+            }
+        });
+
+        // Individual/Group Chat room subscriptions
+        socket.on('joinConversation', (conversationId) => {
+            if (conversationId) {
+                socket.join(String(conversationId));
+                console.log(`💬 User joined conversation: ${conversationId}`);
+            }
+        });
+
+        socket.on('leaveConversation', (conversationId) => {
+            if (conversationId) {
+                socket.leave(String(conversationId));
+                console.log(`👋 User left conversation: ${conversationId}`);
             }
         });
 
