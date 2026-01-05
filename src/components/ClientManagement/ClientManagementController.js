@@ -92,6 +92,7 @@ const clientManagementController = {
                 onboardDate,
                 status,
                 itsDataReceived,
+                brochureLink,
                 assignedUsers
             } = req.body;
 
@@ -173,6 +174,7 @@ const clientManagementController = {
                 onboardDate: date,
                 status: normalizedStatus,
                 itsDataReceived: dataReceived,
+                brochureLink: brochureLink ? String(brochureLink).trim() : '',
                 assignedUsers: normalizedAssignedUsers
             });
 
@@ -224,6 +226,7 @@ const clientManagementController = {
                 onboardDate,
                 status,
                 itsDataReceived,
+                brochureLink,
                 assignedUsers
             } = req.body;
 
@@ -280,6 +283,9 @@ const clientManagementController = {
             }
             if (itsDataReceived !== undefined) {
                 updateData.itsDataReceived = Boolean(itsDataReceived);
+            }
+            if (brochureLink !== undefined) {
+                updateData.brochureLink = String(brochureLink).trim();
             }
             if (assignedUsers !== undefined) {
                 if (!Array.isArray(assignedUsers)) {

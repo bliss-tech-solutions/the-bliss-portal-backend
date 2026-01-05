@@ -54,6 +54,11 @@ const ClientManagementSchema = new Schema(
             type: Boolean,
             default: false
         },
+        brochureLink: {
+            type: String,
+            default: '',
+            trim: true
+        },
         assignedUsers: {
             type: [AssignedUserSchema],
             default: []
