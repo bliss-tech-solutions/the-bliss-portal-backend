@@ -15,8 +15,11 @@ router.get('/festive/range', festiveCalendarController.getNotesInRange);
 // GET /api/festive/user/:userId?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD - notes by user
 router.get('/festive/user/:userId', festiveCalendarController.getNotesByUser);
 
-// PUT /api/festive/update - update archive and/or a note
-router.put('/festive/update', festiveCalendarController.updatedFestiveTask);
+// PUT /api/festive/note - update archive and/or a note
+router.put('/festive/note', festiveCalendarController.updatedFestiveTask);
+
+// DELETE /api/festive/note/:date/:noteId - delete a note
+router.delete('/festive/note/:date/:noteId', festiveCalendarController.deleteNote);
 
 module.exports = router;
 

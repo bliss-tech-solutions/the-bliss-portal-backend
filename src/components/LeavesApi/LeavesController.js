@@ -15,29 +15,6 @@ const getAllDatesInRange = (startDate, endDate) => {
     return dates;
 };
 
-// Helper: check if date is restricted (Sat, Sun, Mon, 3rd Friday)
-const isDateRestricted = (date) => {
-    const day = date.getDay(); // 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
-    if (day === 0 || day === 1 || day === 6) return true; // Sun, Mon, Sat
-
-    // Check if 3rd Friday
-    if (day === 5) { // Friday
-        const year = date.getFullYear();
-        const month = date.getMonth();
-        const firstDay = new Date(year, month, 1);
-        const firstFriday = new Date(firstDay);
-        // Find FIRST Friday
-        firstFriday.setDate(firstDay.getDate() + (5 - firstDay.getDay() + 7) % 7);
-        const thirdFriday = new Date(firstFriday);
-        thirdFriday.setDate(firstFriday.getDate() + 14); // 3rd Friday
-
-        // Compare dates (ignoring time)
-        return date.getFullYear() === thirdFriday.getFullYear() &&
-            date.getMonth() === thirdFriday.getMonth() &&
-            date.getDate() === thirdFriday.getDate();
-    }
-    return false;
-};
 
 const leavesController = {
     // POST /api/leave/request - Submit leave entries for a month
@@ -68,22 +45,13 @@ const leavesController = {
                 const startDate = new Date(l.startDate);
                 const endDate = new Date(l.endDate);
 
-                // Date Validation for non-HR roles
-                if (!isHR) {
-                    const datesInRange = getAllDatesInRange(startDate, endDate);
-                    for (const date of datesInRange) {
-                        if (isDateRestricted(date)) {
-                            return res.status(400).json({
-                                success: false,
-                                message: `Leave dates include restricted days. Restricted Date: ${date.toISOString().split('T')[0]}`
-                            });
-                        }
-                    }
-                }
+                // Leave date validation (Sat, Sun, Mon, 3rd Friday) has been moved to frontend.
+                // Backend now accepts all dates, but still identifies HR role for other potential logic/logging.
 
                 leaveEntries.push({
                     startDate,
                     endDate,
+                    reason,
                     status: 'pending',
                     history: [{ status: 'pending', at: new Date(), by: userId }]
                 });

@@ -8,6 +8,7 @@ const LeaveSchema = new Schema({
     approvedDates: { type: [Date], default: [] },
     rejectedDates: { type: [Date], default: [] },
     instructions: { type: String },
+    reason: { type: String },
     history: [{
         status: { type: String, required: true },
         at: { type: Date, default: Date.now },

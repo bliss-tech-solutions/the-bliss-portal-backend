@@ -5,12 +5,12 @@ const festiveCalendarController = {
     // POST /api/festive/note - add a note to a date
     addNote: async (req, res, next) => {
         try {
-            const { date, note, userId, color, description } = req.body;
+            const { date, note, userId, color, description, eventType } = req.body;
             if (!date || !note) {
                 return res.status(400).json({ success: false, message: 'date and note are required' });
             }
 
-            const update = { $push: { notes: { note, userId, color, description, createdAt: new Date() } } };
+            const update = { $push: { notes: { note, userId, color, description, eventType, createdAt: new Date() } } };
             const doc = await FestiveCalendarModel.findOneAndUpdate(
                 { date },
                 update,
@@ -21,7 +21,7 @@ const festiveCalendarController = {
             try {
                 const io = getIO && getIO();
                 if (io) {
-                    const payload = { date, note, userId, color, description, docId: doc._id };
+                    const payload = { date, note, userId, color, description, eventType, docId: doc._id };
                     io.emit('festive:noteAdded', payload);
                     io.to(`festive:${date}`).emit('festive:noteAdded', payload);
                 }
@@ -112,6 +112,7 @@ const festiveCalendarController = {
                 if (typeof note === 'string') n.note = note;
                 if (typeof color === 'string') n.color = color;
                 if (typeof description === 'string') n.description = description;
+                if (typeof eventType === 'string') n.eventType = eventType;
                 if (typeof archive === 'boolean') n.archive = archive;
             }
 
@@ -121,12 +122,49 @@ const festiveCalendarController = {
             try {
                 const io = getIO && getIO();
                 if (io) {
-                    io.emit('festive:updated', { date, noteId, note, color, description, archive, docId: doc._id });
-                    io.to(`festive:${date}`).emit('festive:updated', { date, noteId, note, color, description, archive, docId: doc._id });
+                    io.emit('festive:updated', { date, noteId, note, color, description, archive, eventType, docId: doc._id });
+                    io.to(`festive:${date}`).emit('festive:updated', { date, noteId, note, color, description, archive, eventType, docId: doc._id });
                 }
             } catch (_) { /* ignore socket errors */ }
 
             return res.status(200).json({ success: true, message: 'Festive task updated', data: doc });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    // DELETE /api/festive/note/:date/:noteId - delete a specific note
+    deleteNote: async (req, res, next) => {
+        try {
+            const { date, noteId } = req.params;
+            if (!date || !noteId) {
+                return res.status(400).json({ success: false, message: 'date and noteId are required' });
+            }
+
+            const doc = await FestiveCalendarModel.findOne({ date });
+            if (!doc) {
+                return res.status(404).json({ success: false, message: 'Date not found' });
+            }
+
+            const initialLength = doc.notes.length;
+            doc.notes = doc.notes.filter(n => String(n._id) !== String(noteId));
+
+            if (doc.notes.length === initialLength) {
+                return res.status(404).json({ success: false, message: 'Note not found' });
+            }
+
+            await doc.save();
+
+            // Emit real-time event for deletion
+            try {
+                const io = getIO && getIO();
+                if (io) {
+                    io.emit('festive:noteDeleted', { date, noteId });
+                    io.to(`festive:${date}`).emit('festive:noteDeleted', { date, noteId });
+                }
+            } catch (_) { /* ignore socket errors */ }
+
+            return res.status(200).json({ success: true, message: 'Note deleted', data: doc });
         } catch (error) {
             next(error);
         }
