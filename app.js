@@ -97,7 +97,8 @@ app.use('/api', redisCache({
         /\/gettaskassign/i,
         /\/availability/i,
         /\/clientmanagement/i,
-        /\/daily-working/i
+        /\/daily-working/i,
+        /\/festive\//i // Exclude festive calendar APIs for real-time data
     ],
     excludedMethods: [] // Cache all GET requests
 }));
