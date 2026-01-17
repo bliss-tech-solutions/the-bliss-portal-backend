@@ -1,0 +1,191 @@
+const ProjectsInroleUserDataModel = require('./ProjectsInroleUserDataSchema');
+const RealEstateProjectModel = require('../RealEstateProject/RealEstateProjectSchema/RealEstateProjectSchema');
+const RealEstateUserModel = require('../realEstateUserData/realEstateUserSchema/realEstateUserSchema');
+
+/**
+ * Enroll a user in a real estate project
+ * @route POST /api/realEstate/project/enroll
+ */
+exports.enrollInProject = async (req, res) => {
+    try {
+        const { projectId, userId } = req.body;
+
+        if (!projectId || !userId) {
+            return res.status(400).json({
+                success: false,
+                message: 'projectId and userId are required'
+            });
+        }
+
+        // 1. Verify project exists
+        const project = await RealEstateProjectModel.findById(projectId);
+        if (!project) {
+            return res.status(404).json({
+                success: false,
+                message: 'Project not found'
+            });
+        }
+
+        // 2. Verify user exists
+        const user = await RealEstateUserModel.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        // 3. Find or create the project enrollment document
+        let enrollmentDoc = await ProjectsInroleUserDataModel.findOne({ projectId });
+
+        if (!enrollmentDoc) {
+            enrollmentDoc = new ProjectsInroleUserDataModel({
+                projectId,
+                groupSize: project.groupSize,
+                remainingGroupSize: project.groupSize,
+                users: []
+            });
+        }
+
+        // 4. Check if user is already enrolled
+        const alreadyEnrolled = enrollmentDoc.users.some(u => u.userId.toString() === userId.toString());
+        if (alreadyEnrolled) {
+            return res.status(400).json({
+                success: false,
+                message: 'User is already enrolled in this project'
+            });
+        }
+
+        // 5. Check if group is full
+        if (enrollmentDoc.users.length >= project.groupSize) {
+            return res.status(400).json({
+                success: false,
+                message: 'Project group size is already full'
+            });
+        }
+
+        // 6. Add user and update remaining size
+        enrollmentDoc.users.push({ userId, enrolledAt: new Date() });
+        enrollmentDoc.remainingGroupSize = project.groupSize - enrollmentDoc.users.length;
+
+        await enrollmentDoc.save();
+
+        res.status(201).json({
+            success: true,
+            message: 'User enrolled successfully',
+            data: {
+                projectId: enrollmentDoc.projectId,
+                userId: userId, // Current user enrolled
+                groupSize: enrollmentDoc.groupSize,
+                remainingGroupSize: enrollmentDoc.remainingGroupSize,
+                totalEnrolled: enrollmentDoc.users.length
+            }
+        });
+
+    } catch (error) {
+        console.error('Error in enrollInProject:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal Server Error',
+            error: error.message
+        });
+    }
+};
+
+/**
+ * Get all project enrollments (shows all projects with their status)
+ * @route GET /api/realEstate/project/enroll/getAll
+ */
+exports.getAllEnrollments = async (req, res) => {
+    try {
+        const enrollments = await RealEstateProjectModel.aggregate([
+            {
+                $lookup: {
+                    from: 'ProjectsInroleUserData',
+                    localField: '_id',
+                    foreignField: 'projectId',
+                    as: 'enrollmentInfo'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$enrollmentInfo',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $project: {
+                    projectName: 1,
+                    projectLocation: 1,
+                    projectPrice: 1,
+                    projectImages: 1,
+                    groupSize: 1,
+                    lastDayToJoin: 1,
+                    projectDescriptionAndDetails: 1,
+                    tag: 1,
+                    createdAt: 1,
+                    updatedAt: 1,
+                    users: { $ifNull: ['$enrollmentInfo.users', []] },
+                    remainingGroupSize: {
+                        $ifNull: ['$enrollmentInfo.remainingGroupSize', '$groupSize']
+                    },
+                    totalEnrolled: {
+                        $size: { $ifNull: ['$enrollmentInfo.users', []] }
+                    }
+                }
+            },
+            {
+                $sort: { createdAt: -1 }
+            }
+        ]);
+
+        res.status(200).json({
+            success: true,
+            count: enrollments.length,
+            data: enrollments
+        });
+    } catch (error) {
+        console.error('Error in getAllEnrollments:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal Server Error',
+            error: error.message
+        });
+    }
+};
+
+/**
+ * Get enrollments for a specific user
+ * @route GET /api/realEstate/project/enroll/user/:userId
+ */
+exports.getEnrollmentsByUserId = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        if (!userId) {
+            return res.status(400).json({
+                success: false,
+                message: 'userId is required'
+            });
+        }
+
+        const enrollments = await ProjectsInroleUserDataModel.find({
+            'users.userId': userId
+        })
+            .populate('projectId')
+            .populate('users.userId', 'fullName mobileNumber email');
+
+        res.status(200).json({
+            success: true,
+            count: enrollments.length,
+            data: enrollments
+        });
+    } catch (error) {
+        console.error('Error in getEnrollmentsByUserId:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal Server Error',
+            error: error.message
+        });
+    }
+};

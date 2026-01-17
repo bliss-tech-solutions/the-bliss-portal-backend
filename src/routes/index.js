@@ -20,6 +20,7 @@ const salaryCalculationRoutes = require('../components/salaryCalculation');
 const dailyWorkingRoutes = require('../components/DailyWorking');
 const realEstateUserRoutes = require('../components/RealEstate/realEstateUserData');
 const realEstateProjectRoutes = require('../components/RealEstate/RealEstateProject');
+const projectsInroleUserDataRoutes = require('../components/RealEstate/ProjectsInroleUserData');
 
 // Register all routes
 // router.use('/testdummyapi', testDummyApiRoutes);
@@ -40,6 +41,7 @@ router.use('/salaryCalculation', salaryCalculationRoutes);
 router.use('/', dailyWorkingRoutes);
 router.use('/', realEstateUserRoutes);
 router.use('/', realEstateProjectRoutes);
+router.use('/', projectsInroleUserDataRoutes);
 
 // API Info endpoint
 router.get('/', (req, res) => {
@@ -109,7 +111,10 @@ router.get('/', (req, res) => {
                 getAll: '/api/realEstate/project/getAll',
                 getById: '/api/realEstate/project/getById/:id',
                 update: '/api/realEstate/project/update/:id',
-                delete: '/api/realEstate/project/delete/:id'
+                delete: '/api/realEstate/project/delete/:id',
+                enroll: '/api/realEstate/project/enroll',
+                getAllEnrollments: '/api/realEstate/project/enroll/getAll',
+                getUserEnrollments: '/api/realEstate/project/enroll/user/:userId'
             }
         }
     });

@@ -100,7 +100,8 @@ app.use('/api', redisCache({
         /\/availability/i,
         /\/clientmanagement/i,
         /\/daily-working/i,
-        /\/festive\//i // Exclude festive calendar APIs for real-time data
+        /\/festive\//i, // Exclude festive calendar APIs for real-time data
+        /\/realEstate\/project\/enroll/i // Exclude project enrollment for real-time group size updates
     ],
     excludedMethods: [] // Cache all GET requests
 }));
