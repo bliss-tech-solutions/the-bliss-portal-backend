@@ -415,6 +415,27 @@ const userDetailsController = {
         } catch (error) {
             next(error);
         }
+    },
+
+    // GET /api/userdetails/getUniqueRolesAndPositions - Get all unique roles and positions
+    getUniqueRolesAndPositions: async (req, res, next) => {
+        try {
+            const [roles, positions] = await Promise.all([
+                UserDetailsModel.distinct('role'),
+                UserDetailsModel.distinct('position')
+            ]);
+
+            res.status(200).json({
+                success: true,
+                message: 'Unique roles and positions retrieved successfully',
+                data: {
+                    roles,
+                    positions
+                }
+            });
+        } catch (error) {
+            next(error);
+        }
     }
 };
 

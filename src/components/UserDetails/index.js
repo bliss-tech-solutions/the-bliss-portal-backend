@@ -8,6 +8,9 @@ const userDetailsController = require('./UserDetailsController');
 // GET /api/userdetails/getUserDetails - Get all user details
 router.get('/getUserDetails', userDetailsController.getUserDetails);
 
+// GET /api/userdetails/getUniqueRolesAndPositions - Get all unique roles and positions
+router.get('/getUniqueRolesAndPositions', userDetailsController.getUniqueRolesAndPositions);
+
 // POST /api/userdetails/addUserDetails - Create new user details
 router.post('/addUserDetails', userDetailsController.addUserDetails);
 

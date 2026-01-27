@@ -10,13 +10,12 @@ const realEstateProjectController = {
                 projectPrice,
                 projectImages,
                 groupSize,
-                lastDayToJoin,
                 projectDescriptionAndDetails,
                 tag
             } = req.body;
 
             // Validate required fields
-            if (!projectName || !projectLocation || !projectPrice || !groupSize || !lastDayToJoin || !projectDescriptionAndDetails || !tag) {
+            if (!projectName || !projectLocation || !projectPrice || !groupSize || !projectDescriptionAndDetails || !tag) {
                 return res.status(400).json({
                     success: false,
                     message: 'All fields are required'
@@ -29,7 +28,6 @@ const realEstateProjectController = {
                 projectPrice,
                 projectImages,
                 groupSize,
-                lastDayToJoin,
                 projectDescriptionAndDetails,
                 tag
             });

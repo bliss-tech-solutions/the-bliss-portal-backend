@@ -22,10 +22,6 @@ const realEstateProjectSchema = new Schema({
         type: Number,
         required: true
     },
-    lastDayToJoin: {
-        type: Date,
-        required: true
-    },
     projectDescriptionAndDetails: {
         type: String,
         required: true
@@ -34,6 +30,11 @@ const realEstateProjectSchema = new Schema({
         type: String,
         enum: ['Exclusive deal', 'Limited time offer'],
         required: true
+    },
+    status: {
+        type: String,
+        enum: ['active', 'inactive'],
+        default: 'active'
     }
 }, {
     timestamps: true,
