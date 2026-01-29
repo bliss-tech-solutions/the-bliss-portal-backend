@@ -24,6 +24,9 @@ router.post('/addtaskassign/:taskId/chat', addTaskAssignController.addChatMessag
 // PUT /api/addtaskassign/:taskId/archive - archive task
 router.put('/addtaskassign/:taskId/archive', addTaskAssignController.archive);
 
+// PUT /api/addtaskassign/:taskId - edit task
+router.put('/addtaskassign/:taskId', addTaskAssignController.editTask);
+
 // PUT /api/addtaskassign/:taskId/unarchive - unarchive task
 router.put('/addtaskassign/:taskId/unarchive', addTaskAssignController.unarchive);
 

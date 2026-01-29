@@ -772,6 +772,264 @@ const addTaskAssignController = {
         }
     },
 
+    // PUT /api/addtaskassign/:taskId - edit a task
+    editTask: async (req, res, next) => {
+        try {
+            const { taskId } = req.params;
+            const {
+                receiverUserId, // Optional: if changing assignee
+                taskName,
+                clientName,
+                category,
+                priority,
+                timeSpend,
+                description,
+                taskImages,
+                attachments,
+                slots, // Optional: if provided, replaces all slots
+                slot,  // Optional: single slot (wrapped in array)
+                status // Optional: task status
+            } = req.body;
+
+            const existingTask = await AddTaskAssignModel.findById(taskId);
+            if (!existingTask) {
+                return res.status(404).json({ success: false, message: 'Task not found' });
+            }
+
+            // check if archived
+            if (existingTask.isArchived) {
+                 return res.status(400).json({ success: false, message: 'Cannot edit an archived task' });
+            }
+
+            const updateData = {};
+            if (taskName !== undefined) updateData.taskName = taskName;
+            if (clientName !== undefined) updateData.clientName = clientName;
+            if (category !== undefined) updateData.category = category;
+            if (priority !== undefined) updateData.priority = priority;
+            if (timeSpend !== undefined) updateData.timeSpend = timeSpend;
+            if (description !== undefined) updateData.description = description;
+
+            if (taskImages !== undefined) {
+                 updateData.taskImages = Array.isArray(taskImages)
+                    ? taskImages.filter(Boolean)
+                    : taskImages ? [taskImages] : [];
+            }
+            if (attachments !== undefined) {
+                updateData.attachments = Array.isArray(attachments)
+                    ? attachments.filter(Boolean)
+                    : attachments ? [attachments] : [];
+            }
+
+             // Handle receiverUserId change
+            const effectiveReceiverId = receiverUserId || existingTask.receiverUserId;
+            if (receiverUserId && receiverUserId !== existingTask.receiverUserId) {
+                updateData.receiverUserId = receiverUserId;
+            }
+
+            // Handle Slots
+            let normalizedSlotsTemplate = null;
+            if (slots || slot) {
+                const normalizeSlot = (slotPayload = {}) => {
+                    if (!slotPayload) return undefined;
+                    const start = slotPayload.start ?? undefined;
+                    const end = slotPayload.end ?? undefined;
+                    let durationMinutes = Number.isFinite(slotPayload.durationMinutes)
+                        ? slotPayload.durationMinutes
+                        : undefined;
+
+                    if (
+                        durationMinutes === undefined &&
+                        typeof slotPayload.durationMinutes === 'string' &&
+                        slotPayload.durationMinutes.trim() !== ''
+                    ) {
+                        const parsed = Number(slotPayload.durationMinutes);
+                        durationMinutes = Number.isFinite(parsed) ? parsed : undefined;
+                    }
+
+                    if (durationMinutes === undefined && start && end) {
+                        const startDate = new Date(start);
+                        const endDate = new Date(end);
+                        if (!Number.isNaN(startDate.getTime()) && !Number.isNaN(endDate.getTime())) {
+                            durationMinutes = Math.max(0, Math.round((endDate - startDate) / 60000));
+                        }
+                    }
+
+                    const slotDate =
+                        slotPayload.slotDate && !Number.isNaN(new Date(slotPayload.slotDate).getTime())
+                            ? new Date(slotPayload.slotDate)
+                            : undefined;
+
+                    let extensionMinutes = 0;
+                     if (Number.isFinite(slotPayload.extensionMinutes)) {
+                        extensionMinutes = slotPayload.extensionMinutes;
+                    } else if (
+                        typeof slotPayload.extensionMinutes === 'string' &&
+                        slotPayload.extensionMinutes.trim() !== ''
+                    ) {
+                         const parsedExtension = Number(slotPayload.extensionMinutes);
+                         extensionMinutes = Number.isFinite(parsedExtension) ? parsedExtension : 0;
+                    }
+
+                    return {
+                        start,
+                        end,
+                        slotDate,
+                        durationMinutes,
+                        status: slotPayload.status || 'scheduled',
+                        extensionMinutes,
+                        extensionHistory: Array.isArray(slotPayload.extensionHistory)
+                            ? slotPayload.extensionHistory
+                            : []
+                    };
+                };
+
+                if (Array.isArray(slots)) {
+                     normalizedSlotsTemplate = slots.map(normalizeSlot).filter(Boolean);
+                } else if (slot) {
+                    const parsed = normalizeSlot(slot);
+                    if (parsed) normalizedSlotsTemplate = [parsed];
+                }
+            }
+
+            // If slots are being updated, we must check (A) validity (B) conflicts
+            // Use effectiveReceiverId for conflict check
+            if (normalizedSlotsTemplate) {
+                 for (const s of normalizedSlotsTemplate) {
+                    const interval = resolveSlotInterval(s);
+                     if (!interval) {
+                         return res.status(400).json({
+                            success: false,
+                            message: `Invalid slot times`
+                        });
+                    }
+                    if (interval.endDate <= interval.startDate) {
+                         return res.status(400).json({
+                            success: false,
+                            message: 'Slot end time must be after the start time'
+                        });
+                    }
+
+                    const conflict = await hasScheduleConflict({
+                        userId: effectiveReceiverId,
+                        startDate: interval.startDate,
+                        endDate: interval.endDate,
+                        excludeTaskId: taskId // Important: exclude self
+                    });
+
+                    if (conflict) {
+                         return res.status(409).json({
+                            success: false,
+                            message: `Receiver ${effectiveReceiverId} already has a booking in the requested time range`,
+                            data: {
+                                receiverUserId: effectiveReceiverId,
+                                conflictingScheduleId: conflict._id,
+                                conflictingTaskId: conflict.taskId,
+                                conflictingSlotId: conflict.slotId
+                            }
+                        });
+                    }
+                 }
+
+                // If check passes, set slots in updateData
+                updateData.slots = normalizedSlotsTemplate;
+
+                // Recalculate timeTracking
+                const originalSlotMinutes = normalizedSlotsTemplate.reduce(
+                    (minutes, current) => minutes + (current?.durationMinutes || 0),
+                    0
+                );
+                const totalExtendedMinutes = normalizedSlotsTemplate.reduce(
+                     (minutes, current) => minutes + (current?.extensionMinutes || 0),
+                    0
+                );
+
+                // Preserve existing worked minutes or reset? Usually preserve found in existingTask
+                // But we'll just update the derived totals
+                const existingWorked = existingTask.timeTracking?.totalWorkedMinutes || 0;
+                updateData.timeTracking = {
+                    originalSlotMinutes,
+                    totalExtendedMinutes,
+                    totalWorkedMinutes: existingWorked // Persist this
+                };
+            } else if (receiverUserId && receiverUserId !== existingTask.receiverUserId) {
+                // If NO new slots provided, but USER changed, we must check if existing slots conflict for NEW user
+                 // Note: This relies on existingTask.slots being valid in DB format
+                 // But wait, existingTask.slots might be partially completed. We should check future slots?
+                 // For simplicity, we check all non-completed slots against new user
+                 const activeSlots = (existingTask.slots || []).filter(s =>
+                     !['completed','cancelled'].includes(s.status)
+                 );
+
+                 for (const s of activeSlots) {
+                     const interval = resolveSlotInterval(s);
+                     if (interval) {
+                         const conflict = await hasScheduleConflict({
+                             userId: effectiveReceiverId,
+                            startDate: interval.startDate,
+                            endDate: interval.endDate,
+                            excludeTaskId: taskId // Shouldn't strictly be needed if new user has no task match, but good practice
+                         });
+
+                         if (conflict) {
+                             return res.status(409).json({
+                                success: false,
+                                message: `New receiver ${effectiveReceiverId} has a schedule conflict`,
+                                data: conflict
+                            });
+                         }
+                     }
+                 }
+            }
+
+            const updatedTask = await AddTaskAssignModel.findByIdAndUpdate(
+                taskId,
+                updateData,
+                { new: true, runValidators: true }
+            );
+
+            // Sync Schedule
+            await syncTaskSchedule(updatedTask);
+
+            // Socket Events
+             try {
+                const { getIO } = require('../../utils/socket');
+                const io = getIO && getIO();
+                if (io) {
+                    const payload = {
+                        taskId: String(updatedTask._id),
+                        task: updatedTask,
+                        message: `Task updated: ${updatedTask.taskName}`
+                    };
+
+                    io.to(String(updatedTask._id)).emit('task:updated', payload);
+                    if (updatedTask.receiverUserId) {
+                        io.to(`user:${updatedTask.receiverUserId}`).emit('task:updated', payload);
+                    }
+                    if (updatedTask.userId) {
+                        io.to(`user:${updatedTask.userId}`).emit('task:updated', payload);
+                    }
+                     // If user changed, notify OLD user too?
+                    if (existingTask.receiverUserId && existingTask.receiverUserId !== updatedTask.receiverUserId) {
+                         io.to(`user:${existingTask.receiverUserId}`).emit('task:updated', payload);
+                    }
+
+                    io.emit('task:updated', payload);
+                }
+            } catch (e) {
+                console.warn('Socket emission failed:', e.message);
+            }
+
+            res.status(200).json({
+                success: true,
+                message: 'Task updated successfully',
+                data: updatedTask
+            });
+
+        } catch (error) {
+            next(error);
+        }
+    },
+
     // PUT /api/addtaskassign/:taskId/status - update task status
     updateStatus: async (req, res, next) => {
         try {
