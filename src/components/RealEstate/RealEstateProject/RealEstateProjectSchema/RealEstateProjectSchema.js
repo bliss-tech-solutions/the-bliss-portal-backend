@@ -31,6 +31,14 @@ const realEstateProjectSchema = new Schema({
         enum: ['Exclusive deal', 'Limited time offer'],
         required: true
     },
+    latitude: {
+        type: String,
+        required: false
+    },
+    longitude: {
+        type: String,
+        required: false
+    },
     status: {
         type: String,
         enum: ['active', 'inactive'],

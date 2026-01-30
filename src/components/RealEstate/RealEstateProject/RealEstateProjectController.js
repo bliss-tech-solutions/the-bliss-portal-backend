@@ -11,7 +11,9 @@ const realEstateProjectController = {
                 projectImages,
                 groupSize,
                 projectDescriptionAndDetails,
-                tag
+                tag,
+                latitude,
+                longitude
             } = req.body;
 
             // Validate required fields
@@ -29,7 +31,9 @@ const realEstateProjectController = {
                 projectImages,
                 groupSize,
                 projectDescriptionAndDetails,
-                tag
+                tag,
+                latitude,
+                longitude
             });
 
             const savedProject = await newProject.save();

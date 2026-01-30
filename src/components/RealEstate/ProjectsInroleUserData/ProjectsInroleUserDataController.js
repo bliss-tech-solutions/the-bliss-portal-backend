@@ -98,7 +98,10 @@ exports.enrollInProject = async (req, res) => {
  */
 exports.getAllEnrollments = async (req, res) => {
     try {
-        const enrollments = await RealEstateProjectModel.aggregate([
+        const { userId } = req.query;
+        const mongoose = require('mongoose');
+
+        const pipeline = [
             {
                 $lookup: {
                     from: 'ProjectsInroleUserData',
@@ -123,6 +126,8 @@ exports.getAllEnrollments = async (req, res) => {
                     lastDayToJoin: 1,
                     projectDescriptionAndDetails: 1,
                     tag: 1,
+                    latitude: 1,
+                    longitude: 1,
                     createdAt: 1,
                     updatedAt: 1,
                     users: { $ifNull: ['$enrollmentInfo.users', []] },
@@ -131,13 +136,33 @@ exports.getAllEnrollments = async (req, res) => {
                     },
                     totalEnrolled: {
                         $size: { $ifNull: ['$enrollmentInfo.users', []] }
+                    },
+                    isEnrolled: {
+                        $cond: {
+                            if: {
+                                $and: [
+                                    { $ne: [userId, undefined] },
+                                    { $ne: [userId, ""] },
+                                    { $in: [new mongoose.Types.ObjectId(userId), { $ifNull: ['$enrollmentInfo.users.userId', []] }] }
+                                ]
+                            },
+                            then: true,
+                            else: false
+                        }
                     }
                 }
             },
             {
                 $sort: { createdAt: -1 }
             }
-        ]);
+        ];
+
+        // If userId is not provided, we should skip the ObjectId conversion to avoid errors
+        if (!userId || userId === "") {
+            pipeline[2].$project.isEnrolled = { $literal: false };
+        }
+
+        const enrollments = await RealEstateProjectModel.aggregate(pipeline);
 
         res.status(200).json({
             success: true,
