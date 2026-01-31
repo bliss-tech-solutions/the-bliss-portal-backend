@@ -59,7 +59,7 @@ const userVerificationDocumentsController = {
                 experience,
                 bankDetails,
                 aadharCardImage,
-                oldSalarySlip,
+                panCardImage,
                 checkPhoto,
                 offerLetter
             } = req.body;
@@ -104,7 +104,7 @@ const userVerificationDocumentsController = {
                     accountType: bankDetails.accountType
                 } : undefined,
                 aadharCardImage,
-                oldSalarySlip,
+                panCardImage,
                 checkPhoto,
                 offerLetter
             });
@@ -143,7 +143,7 @@ const userVerificationDocumentsController = {
                 experience,
                 bankDetails,
                 aadharCardImage,
-                oldSalarySlip,
+                panCardImage,
                 checkPhoto,
                 offerLetter
             } = req.body;
@@ -186,7 +186,7 @@ const userVerificationDocumentsController = {
             }
 
             if (typeof aadharCardImage === 'string') updateFields.aadharCardImage = aadharCardImage;
-            if (typeof oldSalarySlip === 'string') updateFields.oldSalarySlip = oldSalarySlip;
+            if (typeof panCardImage === 'string') updateFields.panCardImage = panCardImage;
             if (typeof checkPhoto === 'string') updateFields.checkPhoto = checkPhoto;
             if (typeof offerLetter === 'string') updateFields.offerLetter = offerLetter;
 

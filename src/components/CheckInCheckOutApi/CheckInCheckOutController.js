@@ -330,21 +330,81 @@ const checkInCheckOutController = {
     // GET /api/checkin/all - Get all check-in/out records (admin view)
     getAllRecords: async (req, res, next) => {
         try {
-            const { date, limit = 50 } = req.query;
+            const { date, startDate, endDate, page = 1, limit = 50 } = req.query;
+            const pageNumber = parseInt(page);
+            const limitNumber = parseInt(limit);
+            const skip = (pageNumber - 1) * limitNumber;
 
-            const docs = await CheckInCheckOutModel.find({}).limit(1000);
-            let flattened = [];
-            for (const d of docs) {
-                for (const e of (d.CheckInCheckOutTime || [])) {
-                    if (!date || e.date === date) {
-                        flattened.push({ userId: d.userId, ...e });
-                    }
-                }
+            const pipeline = [];
+
+            // 1. Unwind to get individual check-in/out entries
+            pipeline.push({ $unwind: '$CheckInCheckOutTime' });
+
+            // 2. Match stage for filtering
+            const matchStage = {};
+
+            if (date) {
+                matchStage['CheckInCheckOutTime.date'] = date;
+            } else if (startDate && endDate) {
+                matchStage['CheckInCheckOutTime.date'] = { $gte: startDate, $lte: endDate };
+            } else if (startDate) {
+                matchStage['CheckInCheckOutTime.date'] = { $gte: startDate };
+            } else if (endDate) {
+                matchStage['CheckInCheckOutTime.date'] = { $lte: endDate };
             }
-            flattened.sort((a, b) => (a.date < b.date ? 1 : -1));
-            const limited = flattened.slice(0, parseInt(limit));
 
-            res.status(200).json({ success: true, message: 'All records retrieved successfully', data: limited, count: limited.length });
+            if (Object.keys(matchStage).length > 0) {
+                pipeline.push({ $match: matchStage });
+            }
+
+            // 3. Sort by date descending (latest first)
+            pipeline.push({ $sort: { 'CheckInCheckOutTime.date': -1, 'CheckInCheckOutTime.checkInAt': -1 } });
+
+            // 4. Facet for data and total count
+            pipeline.push({
+                $facet: {
+                    metadata: [{ $count: 'total' }],
+                    data: [
+                        { $skip: skip },
+                        { $limit: limitNumber },
+                        {
+                            $project: {
+                                _id: 0,
+                                userId: 1,
+                                date: '$CheckInCheckOutTime.date',
+                                checkInAt: '$CheckInCheckOutTime.checkInAt',
+                                checkOutAt: '$CheckInCheckOutTime.checkOutAt',
+                                totalHours: '$CheckInCheckOutTime.totalHours',
+                                reason: '$CheckInCheckOutTime.reason',
+                                checkInReason: '$CheckInCheckOutTime.checkInReason',
+                                checkOutReason: '$CheckInCheckOutTime.checkOutReason',
+                                checkInStatus: '$CheckInCheckOutTime.checkInStatus',
+                                checkOutStatus: '$CheckInCheckOutTime.checkOutStatus',
+                                checkInType: '$CheckInCheckOutTime.checkInType',
+                                DayStatus: '$CheckInCheckOutTime.DayStatus'
+                            }
+                        }
+                    ]
+                }
+            });
+
+            const result = await CheckInCheckOutModel.aggregate(pipeline);
+
+            const data = result[0].data;
+            const totalDocs = result[0].metadata[0] ? result[0].metadata[0].total : 0;
+            const totalPages = Math.ceil(totalDocs / limitNumber);
+
+            res.status(200).json({
+                success: true,
+                message: 'All records retrieved successfully',
+                data: data,
+                pagination: {
+                    totalDocs,
+                    totalPages,
+                    currentPage: pageNumber,
+                    limit: limitNumber
+                }
+            });
         } catch (error) {
             next(error);
         }
