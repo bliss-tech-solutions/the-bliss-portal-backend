@@ -93,6 +93,82 @@ exports.enrollInProject = async (req, res) => {
 };
 
 /**
+ * Unenroll a user from a real estate project
+ * @route POST /api/realEstate/project/unenroll
+ */
+exports.unenrollFromProject = async (req, res) => {
+    try {
+        const { projectId, userId } = req.body;
+
+        if (!projectId || !userId) {
+            return res.status(400).json({
+                success: false,
+                message: 'projectId and userId are required'
+            });
+        }
+
+        // 1. Find the project enrollment document
+        const enrollmentDoc = await ProjectsInroleUserDataModel.findOne({ projectId });
+
+        if (!enrollmentDoc) {
+            return res.status(404).json({
+                success: false,
+                message: 'Project enrollment not found'
+            });
+        }
+
+        // 2. Check if user is enrolled
+        const initialUserCount = enrollmentDoc.users.length;
+        const userIndex = enrollmentDoc.users.findIndex(u => u.userId.toString() === userId.toString());
+
+        if (userIndex === -1) {
+            return res.status(400).json({
+                success: false,
+                message: 'User is not enrolled in this project'
+            });
+        }
+
+        // 3. Remove User
+        enrollmentDoc.users.splice(userIndex, 1);
+
+        // 4. Update remaining group size
+        // We get the project details to know the max group size (though we can assume existing logic maintained remaining properly)
+        // Alternatively, since we just removed one, we can increment remainingGroupSize if we trust it, or recalculate.
+        // Recalculating is safer if we know the total group size.
+        // But the model has `remainingGroupSize` and `groupSize`.
+
+        // Let's recalculate to be safe using the document's own groupSize field
+        if (enrollmentDoc.groupSize) {
+            enrollmentDoc.remainingGroupSize = enrollmentDoc.groupSize - enrollmentDoc.users.length;
+        } else {
+            // Fallback if groupSize missing (unlikely if created correctly), just increment
+            enrollmentDoc.remainingGroupSize = (enrollmentDoc.remainingGroupSize || 0) + 1;
+        }
+
+        await enrollmentDoc.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'User unenrolled successfully',
+            data: {
+                projectId: enrollmentDoc.projectId,
+                userId: userId,
+                remainingGroupSize: enrollmentDoc.remainingGroupSize,
+                totalEnrolled: enrollmentDoc.users.length
+            }
+        });
+
+    } catch (error) {
+        console.error('Error in unenrollFromProject:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal Server Error',
+            error: error.message
+        });
+    }
+};
+
+/**
  * Get all project enrollments (shows all projects with their status)
  * @route GET /api/realEstate/project/enroll/getAll
  */
