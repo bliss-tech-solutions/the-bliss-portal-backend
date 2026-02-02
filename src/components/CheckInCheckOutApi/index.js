@@ -18,6 +18,9 @@ router.get('/checkin/status', checkInCheckOutController.getCheckInStatus);
 // GET /api/checkout/status - check-out status for today
 router.get('/checkout/status', checkInCheckOutController.getCheckOutStatus);
 
+// GET /api/checkin/analysis - Get detailed attendance analysis
+router.get('/checkin/analysis', checkInCheckOutController.getAnalysis);
+
 // GET /api/checkin/:userId/today - Get today's record for a user
 router.get('/checkin/:userId/today', checkInCheckOutController.getTodayRecord);
 

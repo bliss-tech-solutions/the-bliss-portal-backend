@@ -59,6 +59,11 @@ const ClientManagementSchema = new Schema(
             default: '',
             trim: true
         },
+        deliverableConfigs: [{
+            type: { type: String, required: true }, // e.g. "reels", "drone"
+            label: { type: String, required: true }, // e.g. "Reels", "Drone Shots"
+            targetCount: { type: Number, required: true, default: 0 }
+        }],
         assignedUsers: {
             type: [AssignedUserSchema],
             default: []
@@ -66,7 +71,18 @@ const ClientManagementSchema = new Schema(
         attachments: {
             type: [AttachmentSchema],
             default: []
-        }
+        },
+        monthlyDeliverables: [{
+            month: { type: String, required: true }, // e.g. "Feb 2026"
+            categories: [{
+                type: { type: String, required: true }, // Matches deliverableConfigs.type
+                items: [{
+                    status: { type: Boolean, default: false },
+                    updatedAt: { type: Date, default: Date.now }
+                }]
+            }],
+            updatedAt: { type: Date, default: Date.now }
+        }]
     },
     {
         timestamps: true,

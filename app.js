@@ -38,6 +38,7 @@ app.use(helmet());
 // CORS configuration - Allow multiple websites
 const corsOrigins = [
     'http://localhost:3000',
+    "http://localhost:5174",
     "http://localhost:5173",
     'http://localhost:2711',
     'http://localhost:3001',
@@ -101,7 +102,8 @@ app.use('/api', redisCache({
         /\/clientmanagement/i,
         /\/daily-working/i,
         /\/festive\//i, // Exclude festive calendar APIs for real-time data
-        /\/realEstate/i // Exclude all Real Estate APIs for real-time data
+        /\/realEstate/i, // Exclude all Real Estate APIs for real-time data
+        /\/dashboard/i
     ],
     excludedMethods: [] // Cache all GET requests
 }));

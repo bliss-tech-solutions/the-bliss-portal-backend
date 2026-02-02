@@ -327,7 +327,160 @@ const checkInCheckOutController = {
         }
     },
 
-    // GET /api/checkin/all - Get all check-in/out records (admin view)
+    // GET /api/checkin/analysis - Get detailed attendance analysis
+    getAnalysis: async (req, res, next) => {
+        try {
+            const { userId, startDate, endDate, month, year, date } = req.query;
+
+            // 1. Determine Date Range
+            let start, end;
+            const todayIST = getISTTime().today;
+
+            if (date) {
+                start = date;
+                end = date;
+            } else if (startDate && endDate) {
+                start = startDate;
+                end = endDate;
+            } else if (month && year) {
+                const m = parseInt(month);
+                const y = parseInt(year);
+                // Create dates in IST strings YYYY-MM-DD
+                const firstDay = new Date(Date.UTC(y, m - 1, 1));
+                const lastDay = new Date(Date.UTC(y, m, 0)); // Last day of month
+                start = firstDay.toISOString().split('T')[0];
+                end = lastDay.toISOString().split('T')[0];
+            } else {
+                // Default to current month
+                const now = new Date();
+                const m = now.getMonth();
+                const y = now.getFullYear();
+                const firstDay = new Date(Date.UTC(y, m, 1));
+                const lastDay = new Date(Date.UTC(y, m + 1, 0));
+                start = firstDay.toISOString().split('T')[0];
+                end = lastDay.toISOString().split('T')[0];
+            }
+
+            const pipeline = [];
+
+            // 2. Filter by User if provided
+            if (userId) {
+                pipeline.push({ $match: { userId: userId } });
+            }
+
+            // 3. Unwind entries
+            pipeline.push({ $unwind: '$CheckInCheckOutTime' });
+
+            // 4. Match Date Range
+            pipeline.push({
+                $match: {
+                    'CheckInCheckOutTime.date': { $gte: start, $lte: end }
+                }
+            });
+
+            // 5. Group by User to collect records for processing
+            pipeline.push({
+                $group: {
+                    _id: '$userId',
+                    records: { $push: '$CheckInCheckOutTime' }
+                }
+            });
+
+            const results = await CheckInCheckOutModel.aggregate(pipeline);
+
+            // 6. Post-process results (Calculate hours, handle missing checkout)
+            const analysisData = results.map(userRecord => {
+                let totalWorkingHours = 0;
+                let fullDays = 0;
+                let halfDays = 0;
+                let pendingDays = 0; // Days that are still legitimately pending (e.g. today before logic applied? usually 0 if we force calc)
+
+                const processedRecords = userRecord.records.map(entry => {
+                    let totalHours = entry.totalHours || 0;
+                    let dayStatus = entry.DayStatus;
+                    let checkOutAt = entry.checkOutAt;
+                    let isAutoCheckout = false;
+
+                    // CHECKOUT MISSING LOGIC
+                    if (!checkOutAt && entry.checkInAt) {
+                        isAutoCheckout = true;
+
+                        // Construct 2:00 PM (14:00) IST for the entry date
+                        // entry.date is YYYY-MM-DD string
+                        // We need to create a Date object corresponding to 14:00 IST on that day
+
+                        // Parse YYYY-MM-DD
+                        const [y, m, d] = entry.date.split('-').map(Number);
+
+                        // Create UTC date that corresponds to 14:00 IST
+                        // 14:00 IST = 08:30 UTC
+                        const autoCheckOutDate = new Date(Date.UTC(y, m - 1, d, 8, 30, 0));
+
+                        checkOutAt = autoCheckOutDate;
+
+                        // Calculate Duration
+                        // checkInAt is stored as Date (UTC). 
+                        const durationMs = autoCheckOutDate - entry.checkInAt;
+                        totalHours = Math.round((durationMs / (1000 * 60 * 60)) * 100) / 100;
+                        if (totalHours < 0) totalHours = 0; // Should not happen unless checkin is after 2pm
+
+                        // Force DayStatus to HALF as per requirement
+                        dayStatus = 'HALF';
+                    }
+
+                    // Accumulate Counts
+                    totalWorkingHours += totalHours;
+                    if (dayStatus === 'FULL') fullDays++;
+                    else if (dayStatus === 'HALF') halfDays++;
+                    else pendingDays++;
+
+                    return {
+                        date: entry.date,
+                        checkInAt: entry.checkInAt,
+                        checkOutAt: checkOutAt,
+                        totalHours: totalHours,
+                        checkInStatus: entry.checkInStatus,
+                        checkOutStatus: entry.checkOutStatus,
+                        reason: entry.reason || entry.checkInReason, // Legacy/Fallback
+                        checkInReason: entry.checkInReason,
+                        checkOutReason: entry.checkOutReason,
+                        checkInType: entry.checkInType,
+                        DayStatus: dayStatus,
+                        isAutoCheckout
+                    };
+                });
+
+                // Sort processed records by date desc
+                processedRecords.sort((a, b) => (a.date < b.date ? 1 : -1));
+
+                return {
+                    userId: userRecord._id,
+                    summary: {
+                        totalWorkingHours: Math.round(totalWorkingHours * 100) / 100,
+                        fullDays,
+                        halfDays,
+                        pendingDays,
+                        totalDaysPresent: processedRecords.length
+                    },
+                    records: processedRecords
+                };
+            });
+
+            res.status(200).json({
+                success: true,
+                message: 'Analysis data retrieved successfully',
+                data: analysisData,
+                meta: {
+                    start,
+                    end
+                }
+            });
+
+        } catch (error) {
+            next(error);
+        }
+    },
+
     getAllRecords: async (req, res, next) => {
         try {
             const { date, startDate, endDate, page = 1, limit = 50 } = req.query;

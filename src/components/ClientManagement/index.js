@@ -36,11 +36,26 @@ router.get('/clientmanagement/:clientId/attachments/sortedByUserId', clientManag
 // GET /api/clientmanagement/:clientId/attachments/byUserId/:userId - Get attachments for a client filtered by userId
 router.get('/clientmanagement/:clientId/attachments/byUserId/:userId', clientManagementController.getAttachmentsByClientIdAndUserId);
 
+// GET /api/clientmanagement/tracker/:userId - Get bulk tracker data for a specific user (Optimization)
+router.get('/clientmanagement/tracker/:userId', clientManagementController.getTrackerDataByUserId);
+
 // PUT /api/clientmanagement/:clientId/attachments/:attachmentId - Update attachment
 router.put('/clientmanagement/:clientId/attachments/:attachmentId', clientManagementController.updateAttachment);
 
 // DELETE /api/clientmanagement/:clientId/attachments/:attachmentId - Delete attachment
 router.delete('/clientmanagement/:clientId/attachments/:attachmentId', clientManagementController.deleteAttachment);
 
-module.exports = router;
+// Deliverable tracking routes
+// GET /api/clientmanagement/deliverables/summary - Get deliverables summary for all clients
+router.get('/clientmanagement/deliverables/summary', clientManagementController.getDeliverablesSummary);
 
+// GET /api/clientmanagement/deliverables/summary - Get deliverables summary for all clients
+router.get('/clientmanagement/deliverables/summary', clientManagementController.getDeliverablesSummary);
+
+// GET /api/clientmanagement/deliverables/export - Get optimized data for Excel export
+router.get('/clientmanagement/deliverables/export', clientManagementController.getDeliverablesExportData);
+
+// PATCH /api/clientmanagement/:clientId/deliverables/update - Toggle any deliverable status dynamically
+router.patch('/clientmanagement/:clientId/deliverables/update', clientManagementController.updateDeliverableStatus);
+
+module.exports = router;

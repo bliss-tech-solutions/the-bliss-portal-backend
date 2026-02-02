@@ -93,6 +93,7 @@ const clientManagementController = {
                 status,
                 itsDataReceived,
                 brochureLink,
+                deliverableConfigs,
                 assignedUsers
             } = req.body;
 
@@ -175,6 +176,7 @@ const clientManagementController = {
                 status: normalizedStatus,
                 itsDataReceived: dataReceived,
                 brochureLink: brochureLink ? String(brochureLink).trim() : '',
+                deliverableConfigs: deliverableConfigs || [],
                 assignedUsers: normalizedAssignedUsers
             });
 
@@ -227,6 +229,7 @@ const clientManagementController = {
                 status,
                 itsDataReceived,
                 brochureLink,
+                deliverableConfigs,
                 assignedUsers
             } = req.body;
 
@@ -286,6 +289,9 @@ const clientManagementController = {
             }
             if (brochureLink !== undefined) {
                 updateData.brochureLink = String(brochureLink).trim();
+            }
+            if (deliverableConfigs !== undefined) {
+                updateData.deliverableConfigs = deliverableConfigs;
             }
             if (assignedUsers !== undefined) {
                 if (!Array.isArray(assignedUsers)) {
@@ -874,7 +880,424 @@ const clientManagementController = {
         } catch (error) {
             next(error);
         }
+    },
+
+    // PATCH /api/clientmanagement/:clientId/deliverables/update - Toggle any deliverable status dynamically
+    updateDeliverableStatus: async (req, res, next) => {
+        try {
+            const { clientId } = req.params;
+            const { type, index, status, month } = req.body; // type: e.g. 'drone', 'cinematic', index: 0-indexed, status: boolean
+
+            if (!type || index === undefined || index < 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Type and non-negative index are required.'
+                });
+            }
+
+            const client = await ClientManagementModel.findById(clientId);
+            if (!client) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Client not found'
+                });
+            }
+
+            // Find config for this type
+            const config = client.deliverableConfigs.find(c => c.type === type);
+            if (!config) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Deliverable type "${type}" is not configured for this client.`
+                });
+            }
+
+            // Check index bounds
+            if (index >= config.targetCount) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Invalid index for ${type}. Target count is ${config.targetCount}.`
+                });
+            }
+
+            const currentMonth = month || new Date().toLocaleString('en-US', { month: 'short', year: 'numeric' });
+
+            let entryIndex = client.monthlyDeliverables.findIndex(d => d.month === currentMonth);
+
+            if (entryIndex === -1) {
+                // Initialize new month entry using ALL deliverableConfigs
+                const categories = client.deliverableConfigs.map(conf => ({
+                    type: conf.type,
+                    items: Array(conf.targetCount).fill(null).map(() => ({ status: false, updatedAt: new Date() }))
+                }));
+
+                const newEntry = {
+                    month: currentMonth,
+                    categories: categories,
+                    updatedAt: new Date()
+                };
+                client.monthlyDeliverables.push(newEntry);
+                entryIndex = client.monthlyDeliverables.length - 1;
+            }
+
+            // Find or create category in the current month entry
+            let categoryIndex = client.monthlyDeliverables[entryIndex].categories.findIndex(c => c.type === type);
+
+            if (categoryIndex === -1) {
+                // If category missing (maybe added to config later), initialize it
+                client.monthlyDeliverables[entryIndex].categories.push({
+                    type: type,
+                    items: Array(config.targetCount).fill(null).map(() => ({ status: false, updatedAt: new Date() }))
+                });
+                categoryIndex = client.monthlyDeliverables[entryIndex].categories.length - 1;
+            }
+
+            const category = client.monthlyDeliverables[entryIndex].categories[categoryIndex];
+
+            // Ensure array has enough elements (safety)
+            while (category.items.length <= index) {
+                category.items.push({ status: false, updatedAt: new Date() });
+            }
+
+            // Toggle or set status
+            const item = category.items[index];
+            item.status = status !== undefined ? Boolean(status) : !item.status;
+            item.updatedAt = new Date();
+
+            client.monthlyDeliverables[entryIndex].updatedAt = new Date();
+
+            await client.save();
+
+            // Emit socket event for real-time update
+            try {
+                const io = getIO && getIO();
+                if (io) {
+                    // 1. Granular update
+                    io.emit('client:deliverable:updated', {
+                        clientId,
+                        month: currentMonth,
+                        type,
+                        index,
+                        status: item.status
+                    });
+
+                    // 2. Full Summary for dashboard
+                    const summary = calculateClientSummary(client, currentMonth);
+                    io.emit('client:summary:updated', {
+                        clientId,
+                        month: currentMonth,
+                        summary
+                    });
+                }
+            } catch (e) {
+                console.warn('Socket emission failed:', e.message);
+            }
+
+            res.status(200).json({
+                success: true,
+                message: `${type} updated successfully`,
+                data: client.monthlyDeliverables[entryIndex]
+            });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    // GET /api/clientmanagement/deliverables/summary - Get deliverables summary for all clients
+    getDeliverablesSummary: async (req, res, next) => {
+        try {
+            const { month, userId } = req.query; // Optional: filter by month or userId
+            const currentMonth = month || new Date().toLocaleString('en-US', { month: 'short', year: 'numeric' });
+
+            const query = { status: 'active' };
+            if (userId) {
+                query['assignedUsers.userId'] = userId;
+            }
+
+            const clients = await ClientManagementModel.find(query).sort({ clientName: 1 });
+
+            const summary = clients.map(client => calculateClientSummary(client, currentMonth));
+
+            res.status(200).json({
+                success: true,
+                message: 'Deliverables summary retrieved successfully',
+                month: currentMonth,
+                data: summary,
+                count: summary.length
+            });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    // GET /api/clientmanagement/deliverables/export - Get data for Excel export
+    getDeliverablesExportData: async (req, res, next) => {
+        try {
+            const { startDate, endDate, city } = req.query;
+
+            if (!startDate || !endDate) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'startDate and endDate are required.'
+                });
+            }
+
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+
+            if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid date format.'
+                });
+            }
+
+            // Generate list of months in the range (e.g. ["Jan 2026", "Feb 2026"])
+            const monthsInRange = [];
+            let current = new Date(start.getFullYear(), start.getMonth(), 1);
+            while (current <= end) {
+                monthsInRange.push(current.toLocaleString('en-US', { month: 'short', year: 'numeric' }));
+                current.setMonth(current.getMonth() + 1);
+            }
+
+            // Build query
+            const query = { status: 'active' };
+            if (city) {
+                query.city = { $regex: new RegExp(city, 'i') };
+            }
+
+            const clients = await ClientManagementModel.find(query).sort({ clientName: 1 });
+
+            const exportData = clients.map(client => {
+                const row = {
+                    "Client Name": client.clientName,
+                    "City": client.city,
+                    "Onboard Date": client.onboardDate ? new Date(client.onboardDate).toLocaleDateString() : 'N/A'
+                };
+
+                // Initialize totals for each configured deliverable type
+                const totals = {};
+                client.deliverableConfigs.forEach(conf => {
+                    totals[conf.label || conf.type] = 0;
+                });
+
+                // Aggregate across requested months
+                client.monthlyDeliverables.forEach(monthEntry => {
+                    if (monthsInRange.includes(monthEntry.month)) {
+                        monthEntry.categories.forEach(cat => {
+                            const config = client.deliverableConfigs.find(c => c.type === cat.type);
+                            const label = config ? (config.label || config.type) : cat.type;
+
+                            const completed = cat.items.filter(item => item.status === true).length;
+                            totals[label] = (totals[label] || 0) + completed;
+                        });
+                    }
+                });
+
+                // Add totals to row
+                Object.assign(row, totals);
+
+                return row;
+            });
+
+            res.status(200).json({
+                success: true,
+                message: 'Export data generated successfully',
+                data: exportData,
+                count: exportData.length,
+                meta: {
+                    startDate,
+                    endDate,
+                    monthsTracked: monthsInRange
+                }
+            });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    // GET /api/clientmanagement/deliverables/export - Optimized data for Excel export
+    getDeliverablesExportData: async (req, res, next) => {
+        try {
+            const { startDate, endDate, city } = req.query;
+
+            if (!startDate || !endDate) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'startDate and endDate are required.'
+                });
+            }
+
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+
+            if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid date format.'
+                });
+            }
+
+            // Generate list of months in the range (e.g. ["Jan 2026", "Feb 2026"])
+            const monthsInRange = [];
+            let current = new Date(start.getFullYear(), start.getMonth(), 1);
+            while (current <= end) {
+                monthsInRange.push(current.toLocaleString('en-US', { month: 'short', year: 'numeric' }));
+                current.setMonth(current.getMonth() + 1);
+            }
+
+            // Build query
+            const query = { status: 'active' };
+            if (city) {
+                query.city = { $regex: new RegExp(city, 'i') };
+            }
+
+            const clients = await ClientManagementModel.find(query).sort({ clientName: 1 });
+
+            // Flatten data for easy frontend Excel export
+            const exportData = clients.map(client => {
+                const row = {
+                    "Client Name": client.clientName,
+                    "City": client.city,
+                    "Onboard Date": client.onboardDate ? new Date(client.onboardDate).toLocaleDateString() : 'N/A'
+                };
+
+                // Initialize counts for EVERY configured category for this client
+                client.deliverableConfigs.forEach(conf => {
+                    const label = conf.label || conf.type;
+                    row[label] = 0;
+                });
+
+                // Sum up completed items across the requested months
+                client.monthlyDeliverables.forEach(monthEntry => {
+                    if (monthsInRange.includes(monthEntry.month)) {
+                        monthEntry.categories.forEach(cat => {
+                            const config = client.deliverableConfigs.find(c => c.type === cat.type);
+                            const label = config ? (config.label || config.type) : cat.type;
+
+                            const completedCount = cat.items.filter(item => item.status === true).length;
+                            row[label] = (row[label] || 0) + completedCount;
+                        });
+                    }
+                });
+
+                return row;
+            });
+
+            res.status(200).json({
+                success: true,
+                message: 'Export data generated successfully',
+                data: exportData,
+                count: exportData.length
+            });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    // GET /api/clientmanagement/tracker/:userId - Get bulk tracker data for a specific user
+    getTrackerDataByUserId: async (req, res, next) => {
+        try {
+            const { userId } = req.params;
+
+            // Find all clients assigned to this user
+            const clients = await ClientManagementModel.find({
+                'assignedUsers.userId': userId,
+                status: 'active'
+            }).sort({ clientName: 1 });
+
+            if (clients.length === 0) {
+                return res.status(200).json({
+                    success: true,
+                    message: 'No clients found for this user',
+                    data: []
+                });
+            }
+
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+            const trackerData = clients.map(client => {
+                const monthlyStatus = {};
+
+                // Initialize all months as false
+                months.forEach(m => {
+                    monthlyStatus[m] = false;
+                });
+
+                // Mark months as true if they have at least one non-archived attachment
+                if (client.attachments && client.attachments.length > 0) {
+                    client.attachments.forEach(att => {
+                        if (!att.archived && months.includes(att.month)) {
+                            monthlyStatus[att.month] = true;
+                        }
+                    });
+                }
+
+                return {
+                    clientId: client._id,
+                    clientName: client.clientName,
+                    city: client.city,
+                    monthlyStatus: monthlyStatus
+                };
+            });
+
+            res.status(200).json({
+                success: true,
+                message: 'Tracker data retrieved successfully',
+                data: trackerData,
+                count: trackerData.length
+            });
+        } catch (error) {
+            next(error);
+        }
     }
+};
+
+// Helper function to calculate summary for a specific client and month
+const calculateClientSummary = (client, currentMonth) => {
+    // Find the deliverables for the specified month
+    const monthData = client.monthlyDeliverables.find(d => d.month === currentMonth);
+
+    let totalCompleted = 0;
+    let totalTarget = 0;
+
+    const categoriesSummary = client.deliverableConfigs.map(config => {
+        const categoryData = monthData ? monthData.categories.find(c => c.type === config.type) : null;
+
+        const target = config.targetCount || 0;
+        const status = categoryData
+            ? categoryData.items.map(item => item.status || false)
+            : Array(target).fill(false);
+
+        const completed = status.filter(s => s === true).length;
+
+        totalCompleted += completed;
+        totalTarget += target;
+
+        return {
+            type: config.type,
+            label: config.label,
+            completed,
+            total: target,
+            pending: target - completed,
+            status
+        };
+    });
+
+    return {
+        clientId: client._id,
+        clientName: client.clientName,
+        city: client.city,
+        assignedUsers: client.assignedUsers,
+        month: currentMonth,
+        deliverables: categoriesSummary,
+        overallProgress: {
+            totalItems: totalTarget,
+            completedItems: totalCompleted,
+            pendingItems: totalTarget - totalCompleted,
+            percentageComplete: totalTarget > 0 ? Math.round((totalCompleted / totalTarget) * 100) : 0
+        }
+    };
 };
 
 module.exports = clientManagementController;
