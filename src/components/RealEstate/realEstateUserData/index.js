@@ -14,4 +14,7 @@ router.put('/realEstate/update/:id', realEstateUserController.updateUser);
 // DELETE /api/realEstate/delete/:id - Archive User
 router.delete('/realEstate/delete/:id', realEstateUserController.deleteUser);
 
+// POST /api/realEstate/forgotPassword - Forgot Password
+router.post('/realEstate/forgotPassword', realEstateUserController.forgotPassword);
+
 module.exports = router;

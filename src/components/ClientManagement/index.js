@@ -58,4 +58,7 @@ router.get('/clientmanagement/deliverables/export', clientManagementController.g
 // PATCH /api/clientmanagement/:clientId/deliverables/update - Toggle any deliverable status dynamically
 router.patch('/clientmanagement/:clientId/deliverables/update', clientManagementController.updateDeliverableStatus);
 
+// GET /api/clientmanagement/attachment-link - Get attachment link by clientId, year and month
+router.get('/clientmanagement/attachment-link', clientManagementController.getAttachmentLink);
+
 module.exports = router;

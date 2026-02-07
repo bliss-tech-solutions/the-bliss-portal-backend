@@ -1250,6 +1250,62 @@ const clientManagementController = {
         } catch (error) {
             next(error);
         }
+    },
+
+    // GET /api/clientmanagement/attachment-link - Get attachment link by clientId, year and month
+    getAttachmentLink: async (req, res, next) => {
+        try {
+            const { clientId, year, month } = req.query;
+
+            // Validate required fields
+            if (!clientId || !year || !month) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Missing required query parameters: clientId, year, and month are required'
+                });
+            }
+
+            // Check if client exists
+            const client = await ClientManagementModel.findById(clientId);
+            if (!client) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Client not found'
+                });
+            }
+
+            // Filter attachments by month, year (from createdAt) and non-archived
+            let matchingAttachments = (client.attachments || []).filter(att => {
+                if (att.archived) return false;
+                if (att.month !== month) return false;
+
+                // Extract year from createdAt
+                const attYear = new Date(att.createdAt).getFullYear().toString();
+                return attYear === year.toString();
+            });
+
+            if (matchingAttachments.length === 0) {
+                return res.status(404).json({
+                    success: false,
+                    message: `No matching attachment found for year ${year} and month ${month}`
+                });
+            }
+
+            // Sort by createdAt (newest first) and get the first one
+            matchingAttachments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            const latestAttachment = matchingAttachments[0];
+
+            res.status(200).json({
+                success: true,
+                message: 'Attachment link retrieved successfully',
+                data: {
+                    link: latestAttachment.link,
+                    attachment: latestAttachment
+                }
+            });
+        } catch (error) {
+            next(error);
+        }
     }
 };
 

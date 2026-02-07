@@ -146,6 +146,45 @@ const realEstateUserController = {
         } catch (error) {
             next(error);
         }
+    },
+
+    // POST /api/realEstate/forgotPassword - Forgot Password
+    forgotPassword: async (req, res, next) => {
+        try {
+            const { email, newPassword } = req.body;
+
+            if (!email || !newPassword) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Email and newPassword are required'
+                });
+            }
+
+            // Find user by email
+            const user = await RealEstateUserModel.findOne({ email, isArchived: false });
+
+            if (!user) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'User not found with this email'
+                });
+            }
+
+            // Update password
+            user.password = newPassword;
+            await user.save();
+
+            res.status(200).json({
+                success: true,
+                message: 'Password updated successfully',
+                data: {
+                    email: user.email,
+                    fullName: user.fullName
+                }
+            });
+        } catch (error) {
+            next(error);
+        }
     }
 };
 
