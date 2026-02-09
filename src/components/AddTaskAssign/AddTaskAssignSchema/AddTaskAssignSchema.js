@@ -68,6 +68,15 @@ const AddTaskAssignSchema = new Schema(
             completedAt: { type: Date }
         },
         taskStatus: { type: String, enum: ['pending', 'in_progress', 'completed', 'cancelled'], default: 'pending' },
+        // Chat messages for task-specific conversations
+        chatMessages: [
+            {
+                userId: { type: String },
+                user: { type: String },
+                time: { type: Date },
+                message: { type: String }
+            }
+        ],
         // Archive controls
         isArchived: { type: Boolean, default: false },
         archivedAt: { type: Date },
