@@ -22,6 +22,7 @@ const dailyWorkingRoutes = require('../components/DailyWorking');
 const realEstateUserRoutes = require('../components/RealEstate/realEstateUserData');
 const realEstateProjectRoutes = require('../components/RealEstate/RealEstateProject');
 const projectsInroleUserDataRoutes = require('../components/RealEstate/ProjectsInroleUserData');
+const sendVerificationEmailRoutes = require('../components/RealEstate/SendVerificationEmailApi');
 
 // Register all routes
 // router.use('/testdummyapi', testDummyApiRoutes);
@@ -44,6 +45,7 @@ router.use('/', dailyWorkingRoutes);
 router.use('/', realEstateUserRoutes);
 router.use('/', realEstateProjectRoutes);
 router.use('/', projectsInroleUserDataRoutes);
+router.use('/', sendVerificationEmailRoutes);
 
 // API Info endpoint
 router.get('/', (req, res) => {
