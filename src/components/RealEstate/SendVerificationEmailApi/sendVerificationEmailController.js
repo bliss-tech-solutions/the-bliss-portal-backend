@@ -37,17 +37,30 @@ exports.sendVerificationEmail = async (req, res, next) => {
 
         // Create a transporter using SMTP configurations
         const port = parseInt(process.env.SMTP_PORT) || 587;
-        const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST || 'smtp.gmail.com',
-            port: port,
-            secure: port === 465, // true for 465, false for other ports (like 587)
+        const host = process.env.SMTP_HOST || 'smtp.gmail.com';
+
+        const transporterOptions = {
             auth: {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS
             },
-            // Force IPv4 because some cloud providers (like Render) have issues with Gmail and IPv6
-            family: 4 
-        });
+            // Force IPv4 because cloud providers (Render) have issues with IPv6
+            family: 4,
+            connectionTimeout: 10000, // 10 seconds timeout
+            greetingTimeout: 10000,
+            socketTimeout: 10000
+        };
+
+        // If using Gmail, use the 'service' shortcut for better reliability on Live servers
+        if (host.includes('gmail.com')) {
+            transporterOptions.service = 'gmail';
+        } else {
+            transporterOptions.host = host;
+            transporterOptions.port = port;
+            transporterOptions.secure = port === 465;
+        }
+
+        const transporter = nodemailer.createTransport(transporterOptions);
 
         // Email options
         const mailOptions = {
