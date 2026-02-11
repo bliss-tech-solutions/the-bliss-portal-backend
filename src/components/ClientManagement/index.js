@@ -58,6 +58,12 @@ router.get('/clientmanagement/deliverables/export', clientManagementController.g
 // PATCH /api/clientmanagement/:clientId/deliverables/update - Toggle any deliverable status dynamically
 router.patch('/clientmanagement/:clientId/deliverables/update', clientManagementController.updateDeliverableStatus);
 
+// POST /api/clientmanagement/:clientId/deliverables/schedule - Add or update a schedule
+router.post('/clientmanagement/:clientId/deliverables/schedule', clientManagementController.scheduleDeliverable);
+
+// DELETE /api/clientmanagement/:clientId/deliverables/schedule/:scheduleId - Delete a schedule
+router.delete('/clientmanagement/:clientId/deliverables/schedule/:scheduleId', clientManagementController.deleteDeliverableSchedule);
+
 // GET /api/clientmanagement/attachment-link - Get attachment link by clientId, year and month
 router.get('/clientmanagement/attachment-link', clientManagementController.getAttachmentLink);
 

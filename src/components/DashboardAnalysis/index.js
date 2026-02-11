@@ -6,4 +6,7 @@ const dashboardAnalysisController = require('./DashboardAnalysisController');
 // Supports ?userId=... for user-wise data
 router.get('/analysis', dashboardAnalysisController.getDashboardData);
 
+// DELETE /api/dashboard/cache - Clear dashboard cache (optional)
+router.delete('/cache', dashboardAnalysisController.clearCache);
+
 module.exports = router;

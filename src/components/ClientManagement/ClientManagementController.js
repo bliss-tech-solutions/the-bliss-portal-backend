@@ -1306,6 +1306,176 @@ const clientManagementController = {
         } catch (error) {
             next(error);
         }
+    },
+
+    scheduleDeliverable: async (req, res, next) => {
+        try {
+            const { clientId } = req.params;
+            const { month, date, type, count, platform, notes, status, scheduleId } = req.body;
+
+            if (!month) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Month is required.'
+                });
+            }
+
+            if (!scheduleId && (!date || !type)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Date and type are required for new schedules.'
+                });
+            }
+
+            const client = await ClientManagementModel.findById(clientId);
+            if (!client) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Client not found'
+                });
+            }
+
+            let entryIndex = client.monthlyDeliverables.findIndex(d => d.month === month);
+
+            if (entryIndex === -1) {
+                // Initialize month entry
+                const categories = client.deliverableConfigs.map(conf => ({
+                    type: conf.type,
+                    items: Array(conf.targetCount).fill(null).map(() => ({ status: false, updatedAt: new Date() }))
+                }));
+
+                client.monthlyDeliverables.push({
+                    month: month,
+                    categories: categories,
+                    schedules: [],
+                    updatedAt: new Date()
+                });
+                entryIndex = client.monthlyDeliverables.length - 1;
+            }
+
+            const monthEntry = client.monthlyDeliverables[entryIndex];
+            
+            if (scheduleId) {
+                // Update existing schedule
+                const schedule = monthEntry.schedules.id(scheduleId);
+                if (!schedule) {
+                    return res.status(404).json({
+                        success: false,
+                        message: 'Schedule not found'
+                    });
+                }
+                if (date) schedule.date = new Date(date);
+                if (type) schedule.type = type;
+                if (count !== undefined) schedule.count = count;
+                if (platform !== undefined) schedule.platform = platform;
+                if (notes !== undefined) schedule.notes = notes;
+                if (status) schedule.status = status;
+                schedule.updatedAt = new Date();
+            } else {
+                // Create new schedule
+                const newSchedule = {
+                    date: new Date(date),
+                    type,
+                    count: count || 1,
+                    platform: platform || '',
+                    notes: notes || '',
+                    status: status || 'scheduled',
+                    updatedAt: new Date()
+                };
+                monthEntry.schedules.push(newSchedule);
+            }
+
+            monthEntry.updatedAt = new Date();
+            await client.save();
+
+            // Emit socket event
+            try {
+                const io = getIO && getIO();
+                if (io) {
+                    io.emit('client:schedule:updated', { clientId, month });
+                    
+                    // Update full summary
+                    const summary = calculateClientSummary(client, month);
+                    io.emit('client:summary:updated', { clientId, month, summary });
+                }
+            } catch (e) {
+                console.warn('Socket emission failed:', e.message);
+            }
+
+            res.status(200).json({
+                success: true,
+                message: 'Schedule updated successfully',
+                data: client.monthlyDeliverables[entryIndex]
+            });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    // DELETE /api/clientmanagement/:clientId/deliverables/schedule/:scheduleId - Delete a schedule
+    deleteDeliverableSchedule: async (req, res, next) => {
+        try {
+            const { clientId, scheduleId } = req.params;
+            const { month } = req.query;
+
+            if (!month) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Month query parameter is required.'
+                });
+            }
+
+            const client = await ClientManagementModel.findById(clientId);
+            if (!client) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Client not found'
+                });
+            }
+
+            const entryIndex = client.monthlyDeliverables.findIndex(d => d.month === month);
+            if (entryIndex === -1) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Month entry not found'
+                });
+            }
+
+            const monthEntry = client.monthlyDeliverables[entryIndex];
+            const schedule = monthEntry.schedules.id(scheduleId);
+            
+            if (!schedule) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Schedule not found'
+                });
+            }
+
+            monthEntry.schedules.pull(scheduleId);
+            monthEntry.updatedAt = new Date();
+            await client.save();
+
+            // Emit socket event
+            try {
+                const io = getIO && getIO();
+                if (io) {
+                    io.emit('client:schedule:deleted', { clientId, month, scheduleId });
+                    
+                    // Update full summary
+                    const summary = calculateClientSummary(client, month);
+                    io.emit('client:summary:updated', { clientId, month, summary });
+                }
+            } catch (e) {
+                console.warn('Socket emission failed:', e.message);
+            }
+
+            res.status(200).json({
+                success: true,
+                message: 'Schedule deleted successfully'
+            });
+        } catch (error) {
+            next(error);
+        }
     }
 };
 
@@ -1347,6 +1517,7 @@ const calculateClientSummary = (client, currentMonth) => {
         assignedUsers: client.assignedUsers,
         month: currentMonth,
         deliverables: categoriesSummary,
+        schedules: monthData ? monthData.schedules : [],
         overallProgress: {
             totalItems: totalTarget,
             completedItems: totalCompleted,

@@ -81,6 +81,15 @@ const ClientManagementSchema = new Schema(
                     updatedAt: { type: Date, default: Date.now }
                 }]
             }],
+            schedules: [{
+                date: { type: Date, required: true },
+                type: { type: String, required: true }, // e.g. "reels", "combos"
+                count: { type: Number, default: 1 },    // e.g. 5 images for a combo
+                platform: { type: String, default: '' },
+                notes: { type: String, default: '' },
+                status: { type: String, enum: ['scheduled', 'posted'], default: 'scheduled' },
+                updatedAt: { type: Date, default: Date.now }
+            }],
             updatedAt: { type: Date, default: Date.now }
         }]
     },
