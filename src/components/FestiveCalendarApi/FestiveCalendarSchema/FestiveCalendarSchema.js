@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 // Festive Calendar Schema - stores multiple notes per date
 const FestiveCalendarSchema = new Schema(
     {
-        date: { type: String, required: true, index: true }, // YYYY-MM-DD
+        date: { type: String, required: true }, // YYYY-MM-DD
         notes: [
             {
                 note: { type: String, required: true }, // Corresponds to "Event Title"

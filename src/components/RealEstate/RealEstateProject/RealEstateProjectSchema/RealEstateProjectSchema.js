@@ -39,6 +39,12 @@ const realEstateProjectSchema = new Schema({
         type: String,
         required: false
     },
+    amenities: [
+        {
+            name: { type: String, required: true },
+            icon: { type: String, required: true }
+        }
+    ],
     status: {
         type: String,
         enum: ['active', 'inactive'],

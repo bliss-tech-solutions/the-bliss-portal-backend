@@ -17,4 +17,7 @@ router.put('/realEstate/project/update/:id', realEstateProjectController.updateP
 // DELETE /api/realEstate/project/delete/:id
 router.delete('/realEstate/project/delete/:id', realEstateProjectController.deleteProject);
 
+// GET /api/realEstate/amenities/getAll
+router.get('/realEstate/amenities/getAll', realEstateProjectController.getAllAmenities);
+
 module.exports = router;

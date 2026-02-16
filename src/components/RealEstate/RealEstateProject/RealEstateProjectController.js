@@ -13,7 +13,8 @@ const realEstateProjectController = {
                 projectDescriptionAndDetails,
                 tag,
                 latitude,
-                longitude
+                longitude,
+                amenities
             } = req.body;
 
             // Validate required fields
@@ -33,7 +34,8 @@ const realEstateProjectController = {
                 projectDescriptionAndDetails,
                 tag,
                 latitude,
-                longitude
+                longitude,
+                amenities
             });
 
             const savedProject = await newProject.save();
@@ -128,6 +130,32 @@ const realEstateProjectController = {
                 success: true,
                 message: 'Project deleted successfully',
                 data: deletedProject
+            });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    // GET /api/realEstate/amenities/getAll
+    getAllAmenities: async (req, res, next) => {
+        try {
+            const amenities = await RealEstateProjectModel.aggregate([
+                { $unwind: "$amenities" },
+                {
+                    $group: {
+                        _id: "$amenities.name",
+                        name: { $first: "$amenities.name" },
+                        icon: { $first: "$amenities.icon" }
+                    }
+                },
+                { $project: { _id: 0, name: 1, icon: 1 } },
+                { $sort: { name: 1 } }
+            ]);
+
+            res.status(200).json({
+                success: true,
+                message: 'Amenities fetched successfully',
+                data: amenities
             });
         } catch (error) {
             next(error);
