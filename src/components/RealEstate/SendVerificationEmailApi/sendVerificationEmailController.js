@@ -61,29 +61,91 @@ exports.sendVerificationEmail = async (req, res, next) => {
 
     const transporter = await getTransporter();
     const fromUser = process.env.SMTP_USER || 'noreply@example.com';
-
     const mailOptions = {
-      from: `"The Bliss Portal" <${fromUser}>`,
-      to: normalizedEmail,
-      subject: 'Email Verification Code - The Bliss Portal',
-      text: `Your verification code is: ${verificationCode}. Please enter this code to verify your account.`,
-      html: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e1e1e1; border-radius: 8px;">
-                    <h2 style="color: #333; text-align: center;">Account Verification</h2>
-                    <p>Hello,</p>
-                    <p>Thank you for using <strong>The Bliss Portal</strong>. Please use the following verification code to complete your action:</p>
-                    <div style="background-color: #f4f4f4; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; color: #ff9800; border-radius: 4px; margin: 20px 0;">
-                        ${verificationCode}
-                    </div>
-                    <p>This code will expire in 10 minutes.</p>
-                    <p>If you did not request this code, please ignore this email.</p>
-                    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-                    <p style="font-size: 12px; color: #888; text-align: center;">
-                        &copy; 2026 The Bliss Portal. All rights reserved.
-                    </p>
-                </div>
-            `,
-    };
+        from: `"Collective" <${fromUser}>`,
+        to: normalizedEmail,
+        subject: "Your verification code for Collective",
+        text: `Your Collective verification code is ${verificationCode}. This code expires in 10 minutes. If you didn’t request it, ignore this email.`,
+        html: `
+        <div style="margin:0;padding:0;background:#f6f8fb;">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f6f8fb;">
+            <tr>
+              <td align="center" style="padding:28px 12px;">
+                
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="width:600px;max-width:600px;background:#ffffff;border:1px solid #e8eef5;border-radius:14px;overflow:hidden;">
+                  
+                  <!-- Header -->
+                  <tr>
+                    <td style="padding:22px 24px;background:#0b1220;">
+                      <div style="font-family:Arial,Helvetica,sans-serif;font-size:18px;line-height:24px;color:#ffffff;font-weight:700;">
+                        Collective
+                      </div>
+                      <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#cbd5e1;margin-top:2px;">
+                        Account verification
+                      </div>
+                    </td>
+                  </tr>
+      
+                  <!-- Body -->
+                  <tr>
+                    <td style="padding:26px 24px 10px 24px;">
+                      <div style="font-family:Arial,Helvetica,sans-serif;font-size:18px;line-height:26px;color:#0f172a;font-weight:700;">
+                        Verify your email address
+                      </div>
+      
+                      <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:22px;color:#334155;margin-top:10px;">
+                        Hi there, <br/>
+                        Use the verification code below to complete your request on <strong>Collective</strong>.
+                      </div>
+      
+                      <!-- Code box -->
+                      <div style="margin:18px 0 14px 0;">
+                        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                          <tr>
+                            <td align="center" style="padding:16px;background:#f1f5f9;border:1px dashed #cbd5e1;border-radius:12px;">
+                              <div style="font-family:Arial,Helvetica,sans-serif;font-size:28px;letter-spacing:6px;line-height:34px;color:#0b1220;font-weight:800;">
+                                ${verificationCode}
+                              </div>
+                              <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#64748b;margin-top:6px;">
+                                This code expires in <strong>10 minutes</strong>.
+                              </div>
+                            </td>
+                          </tr>
+                        </table>
+                      </div>
+      
+                      <div style="font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:20px;color:#475569;">
+                        If you didn’t request this code, you can safely ignore this email.
+                      </div>
+      
+                      <div style="height:14px;"></div>
+      
+                      <!-- Tip -->
+                      <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#64748b;">
+                        For your security, please do not share this code with anyone.
+                      </div>
+                    </td>
+                  </tr>
+      
+                  <!-- Footer -->
+                  <tr>
+                    <td style="padding:16px 24px 22px 24px;">
+                      <hr style="border:0;border-top:1px solid #e8eef5;margin:0 0 14px 0;">
+                      <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#94a3b8;text-align:center;">
+                        © 2026 Collective. All rights reserved.
+                      </div>
+                    </td>
+                  </tr>
+      
+                </table>
+      
+              </td>
+            </tr>
+          </table>
+        </div>
+        `,
+      };
+      
 
     await transporter.sendMail(mailOptions);
 
