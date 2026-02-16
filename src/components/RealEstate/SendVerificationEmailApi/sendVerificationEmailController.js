@@ -59,7 +59,7 @@ exports.sendVerificationEmail = async (req, res, next) => {
 
     await newOTP.save();
 
-    const transporter = getTransporter();
+    const transporter = await getTransporter();
     const fromUser = process.env.SMTP_USER || 'noreply@example.com';
 
     const mailOptions = {
@@ -167,7 +167,7 @@ exports.verifyVerificationCode = async (req, res, next) => {
  */
 exports.emailTest = async (req, res) => {
   try {
-    const transporter = getTransporter();
+    const transporter = await getTransporter();
     const to = process.env.SMTP_USER || 'developer.bliss@gmail.com';
     const result = await transporter.sendMail({
       from: `"The Bliss Portal Test" <${process.env.SMTP_USER}>`,
