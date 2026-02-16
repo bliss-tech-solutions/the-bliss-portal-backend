@@ -1,6 +1,15 @@
 # Render – OTP Email (SMTP) Setup
 
-## 1. Environment variables
+## ⚠️ Render free tier: SMTP is blocked
+
+**Render blocks outbound SMTP (ports 25, 465, 587) on free web services.** You will see "Connection timeout" when sending email on a free instance. You have two options:
+
+1. **Upgrade to a paid Render plan** – Any paid instance allows outbound SMTP. Your current Gmail SMTP config will work without code changes.
+2. **Stay on free tier** – Use an HTTP-based email API (e.g. [Resend](https://resend.com), SendGrid, Mailgun) that sends over HTTPS (port 443). That requires adding a separate integration in the code (e.g. `RESEND_API_KEY` and a Resend transport).
+
+---
+
+## 1. Environment variables (for SMTP on paid Render)
 
 In **Render Dashboard → Your Service → Environment**, set:
 

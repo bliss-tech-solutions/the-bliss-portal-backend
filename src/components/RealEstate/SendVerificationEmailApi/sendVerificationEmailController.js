@@ -102,12 +102,14 @@ exports.sendVerificationEmail = async (req, res, next) => {
       command: error.command,
       stack: error.stack,
     });
-    sendError(
-      res,
-      500,
-      'Failed to send verification email',
-      process.env.NODE_ENV === 'production' ? undefined : error.message
-    );
+    const isTimeout = /timeout|ETIMEDOUT|ESOCKETTIMEDOUT/i.test(error.message || '');
+    const hint = isTimeout
+      ? ' (On Render free tier, outbound SMTP is blocked; upgrade to a paid instance or use an HTTP email API.)'
+      : '';
+    const clientError = process.env.NODE_ENV === 'production'
+      ? (isTimeout ? `Connection timeout${hint}` : undefined)
+      : error.message + hint;
+    sendError(res, 500, 'Failed to send verification email', clientError);
   }
 };
 
