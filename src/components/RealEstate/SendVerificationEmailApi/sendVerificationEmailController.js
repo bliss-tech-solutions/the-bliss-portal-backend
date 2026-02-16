@@ -5,16 +5,16 @@ const OTPVerificationModel = require('./OTPVerificationSchema');
  * Safely send JSON error response so the API never crashes with raw 500
  */
 function sendError(res, statusCode, message, errorDetail = null) {
-  try {
-    const body = { success: false, message };
-    if (errorDetail != null) body.error = errorDetail;
-    res.status(statusCode).json(body);
-  } catch (e) {
-    console.error('Failed to send error response:', e);
     try {
-      res.status(statusCode).type('json').end(JSON.stringify({ success: false, message }));
-    } catch (_) {}
-  }
+        const body = { success: false, message };
+        if (errorDetail != null) body.error = errorDetail;
+        res.status(statusCode).json(body);
+    } catch (e) {
+        console.error('Failed to send error response:', e);
+        try {
+            res.status(statusCode).type('json').end(JSON.stringify({ success: false, message }));
+        } catch (_) { }
+    }
 }
 
 /**
@@ -22,51 +22,51 @@ function sendError(res, statusCode, message, errorDetail = null) {
  * Always returns JSON; never throws or sends raw 500.
  */
 exports.sendVerificationEmail = async (req, res, next) => {
-  try {
-    let { email, verificationCode } = req.body || {};
+    try {
+        let { email, verificationCode } = req.body || {};
 
-    if (!email) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please provide an email address',
-      });
-    }
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please provide an email address',
+            });
+        }
 
-    const normalizedEmail = String(email).trim().toLowerCase();
-    if (!normalizedEmail) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please provide an email address',
-      });
-    }
+        const normalizedEmail = String(email).trim().toLowerCase();
+        if (!normalizedEmail) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please provide an email address',
+            });
+        }
 
-    // Automatically generate a 6-digit code if not provided
-    if (!verificationCode) {
-      verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-    } else {
-      verificationCode = String(verificationCode).trim();
-    }
+        // Automatically generate a 6-digit code if not provided
+        if (!verificationCode) {
+            verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+        } else {
+            verificationCode = String(verificationCode).trim();
+        }
 
-    // Save new OTP record
-    const newOTP = new OTPVerificationModel({
-      email: normalizedEmail,
-      otp: verificationCode,
-    });
+        // Save new OTP record
+        const newOTP = new OTPVerificationModel({
+            email: normalizedEmail,
+            otp: verificationCode,
+        });
 
-    console.log('--- Saving OTP to Collection ---');
-    console.log('Email:', normalizedEmail);
-    console.log('Code:', verificationCode);
+        console.log('--- Saving OTP to Collection ---');
+        console.log('Email:', normalizedEmail);
+        console.log('Code:', verificationCode);
 
-    await newOTP.save();
+        await newOTP.save();
 
-    const transporter = await getTransporter();
-    const fromUser = process.env.SMTP_USER || 'noreply@example.com';
-    const mailOptions = {
-        from: `"Collective" <${fromUser}>`,
-        to: normalizedEmail,
-        subject: "Your verification code for Collective",
-        text: `Your Collective verification code is ${verificationCode}. This code expires in 10 minutes. If you didn’t request it, ignore this email.`,
-        html: `
+        const transporter = await getTransporter();
+        const fromUser = process.env.SMTP_USER || 'noreply@example.com';
+        const mailOptions = {
+            from: `"Collective" <${fromUser}>`,
+            to: normalizedEmail,
+            subject: "Your verification code for Collective",
+            text: `Your Collective verification code is ${verificationCode}. This code expires in 10 minutes. If you didn’t request it, ignore this email.`,
+            html: `
         <div style="margin:0;padding:0;background:#f6f8fb;">
           <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f6f8fb;">
             <tr>
@@ -144,35 +144,35 @@ exports.sendVerificationEmail = async (req, res, next) => {
           </table>
         </div>
         `,
-      };
-      
+        };
 
-    await transporter.sendMail(mailOptions);
 
-    return res.status(200).json({
-      success: true,
-      message: 'Verification email sent successfully',
-      verificationCode: verificationCode,
-    });
-  } catch (error) {
-    // Log full SMTP error for Render logs (exact error from Nodemailer)
-    console.error('Error sending verification email:', {
-      message: error.message,
-      code: error.code,
-      response: error.response,
-      responseCode: error.responseCode,
-      command: error.command,
-      stack: error.stack,
-    });
-    const isTimeout = /timeout|ETIMEDOUT|ESOCKETTIMEDOUT/i.test(error.message || '');
-    const hint = isTimeout
-      ? ' (On Render free tier, outbound SMTP is blocked; upgrade to a paid instance or use an HTTP email API.)'
-      : '';
-    const clientError = process.env.NODE_ENV === 'production'
-      ? (isTimeout ? `Connection timeout${hint}` : undefined)
-      : error.message + hint;
-    sendError(res, 500, 'Failed to send verification email', clientError);
-  }
+        await transporter.sendMail(mailOptions);
+
+        return res.status(200).json({
+            success: true,
+            message: 'Verification email sent successfully',
+            verificationCode: verificationCode,
+        });
+    } catch (error) {
+        // Log full SMTP error for Render logs (exact error from Nodemailer)
+        console.error('Error sending verification email:', {
+            message: error.message,
+            code: error.code,
+            response: error.response,
+            responseCode: error.responseCode,
+            command: error.command,
+            stack: error.stack,
+        });
+        const isTimeout = /timeout|ETIMEDOUT|ESOCKETTIMEDOUT/i.test(error.message || '');
+        const hint = isTimeout
+            ? ' (On Render free tier, outbound SMTP is blocked; upgrade to a paid instance or use an HTTP email API.)'
+            : '';
+        const clientError = process.env.NODE_ENV === 'production'
+            ? (isTimeout ? `Connection timeout${hint}` : undefined)
+            : error.message + hint;
+        sendError(res, 500, 'Failed to send verification email', clientError);
+    }
 };
 
 /**
@@ -219,10 +219,10 @@ exports.verifyVerificationCode = async (req, res, next) => {
             success: true,
             message: 'Email verified successfully'
         });
-  } catch (error) {
-    console.error('Error verifying code:', error);
-    sendError(res, 500, 'Failed to verify code', error.message);
-  }
+    } catch (error) {
+        console.error('Error verifying code:', error);
+        sendError(res, 500, 'Failed to verify code', error.message);
+    }
 };
 
 /**
@@ -230,29 +230,29 @@ exports.verifyVerificationCode = async (req, res, next) => {
  * Use to verify SMTP on Render; check Render logs for full error details.
  */
 exports.emailTest = async (req, res) => {
-  try {
-    const transporter = await getTransporter();
-    const to = process.env.SMTP_USER || 'developer.bliss@gmail.com';
-    const result = await transporter.sendMail({
-      from: `"The Bliss Portal Test" <${process.env.SMTP_USER}>`,
-      to,
-      subject: 'SMTP Test - The Bliss Portal',
-      text: 'This is a test email from the backend. If you received this, SMTP is working.',
-    });
-    console.log('Email test result:', { messageId: result.messageId, accepted: result.accepted });
-    res.status(200).json({
-      success: true,
-      message: 'Test email sent',
-      messageId: result.messageId,
-      to,
-    });
-  } catch (error) {
-    console.error('Email test failed:', {
-      message: error.message,
-      code: error.code,
-      response: error.response,
-      responseCode: error.responseCode,
-    });
-    sendError(res, 500, 'Test email failed', error.message);
-  }
+    try {
+        const transporter = await getTransporter();
+        const to = process.env.SMTP_USER || 'developer.bliss@gmail.com';
+        const result = await transporter.sendMail({
+            from: `"The Bliss Portal Test" <${process.env.SMTP_USER}>`,
+            to,
+            subject: 'SMTP Test - The Bliss Portal',
+            text: 'This is a test email from the backend. If you received this, SMTP is working.',
+        });
+        console.log('Email test result:', { messageId: result.messageId, accepted: result.accepted });
+        res.status(200).json({
+            success: true,
+            message: 'Test email sent',
+            messageId: result.messageId,
+            to,
+        });
+    } catch (error) {
+        console.error('Email test failed:', {
+            message: error.message,
+            code: error.code,
+            response: error.response,
+            responseCode: error.responseCode,
+        });
+        sendError(res, 500, 'Test email failed', error.message);
+    }
 };
