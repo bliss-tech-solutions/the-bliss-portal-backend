@@ -18,6 +18,14 @@ const realEstateProjectSchema = new Schema({
         type: [String],
         default: []
     },
+    floorPlanImages: {
+        type: [String],
+        default: []
+    },
+    projectSlideHeroImages: {
+        type: [String],
+        default: []
+    },
     groupSize: {
         type: Number,
         required: true
