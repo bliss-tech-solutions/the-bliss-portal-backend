@@ -1,5 +1,19 @@
 const RealEstateProjectModel = require('./RealEstateProjectSchema/RealEstateProjectSchema');
 
+// Normalize array fields (support both array and JSON string from form data)
+const parseArrayField = (value) => {
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'string') {
+        try {
+            const parsed = JSON.parse(value);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch {
+            return value ? [value] : [];
+        }
+    }
+    return [];
+};
+
 const realEstateProjectController = {
     // POST /api/realEstate/project/create
     createProject: async (req, res, next) => {
@@ -31,9 +45,9 @@ const realEstateProjectController = {
                 projectName,
                 projectLocation,
                 projectPrice,
-                projectImages,
-                floorPlanImages: Array.isArray(floorPlanImages) ? floorPlanImages : [],
-                projectSlideHeroImages: Array.isArray(projectSlideHeroImages) ? projectSlideHeroImages : [],
+                projectImages: parseArrayField(projectImages),
+                floorPlanImages: parseArrayField(floorPlanImages),
+                projectSlideHeroImages: parseArrayField(projectSlideHeroImages),
                 groupSize,
                 projectDescriptionAndDetails,
                 tag,
@@ -96,7 +110,12 @@ const realEstateProjectController = {
     updateProject: async (req, res, next) => {
         try {
             const { id } = req.params;
-            const updates = req.body;
+            const updates = { ...req.body };
+
+            // Normalize array fields so they save correctly (array or JSON string from form)
+            if (updates.projectImages !== undefined) updates.projectImages = parseArrayField(updates.projectImages);
+            if (updates.floorPlanImages !== undefined) updates.floorPlanImages = parseArrayField(updates.floorPlanImages);
+            if (updates.projectSlideHeroImages !== undefined) updates.projectSlideHeroImages = parseArrayField(updates.projectSlideHeroImages);
 
             const updatedProject = await RealEstateProjectModel.findByIdAndUpdate(id, updates, { new: true });
 
