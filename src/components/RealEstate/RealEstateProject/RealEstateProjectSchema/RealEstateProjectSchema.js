@@ -14,6 +14,11 @@ const realEstateProjectSchema = new Schema({
         type: String,
         required: true
     },
+    projectSize: {
+        type: String,
+        required: false,
+        trim: true
+    },
     projectImages: {
         type: [String],
         default: []
