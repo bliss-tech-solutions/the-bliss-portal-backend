@@ -198,6 +198,7 @@ exports.getAllEnrollments = async (req, res) => {
                     projectLocation: 1,
                     projectPrice: 1,
                     projectSize: 1,
+                    possessionDate: 1,
                     projectImages: 1,
                     floorPlanImages: { $ifNull: ['$floorPlanImages', []] },
                     projectSlideHeroImages: { $ifNull: ['$projectSlideHeroImages', []] },

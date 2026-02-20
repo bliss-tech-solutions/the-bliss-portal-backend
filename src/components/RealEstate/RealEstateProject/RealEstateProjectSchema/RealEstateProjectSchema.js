@@ -19,6 +19,11 @@ const realEstateProjectSchema = new Schema({
         required: false,
         trim: true
     },
+    possessionDate: {
+        type: String,
+        required: false,
+        trim: true
+    },
     projectImages: {
         type: [String],
         default: []
