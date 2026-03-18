@@ -17,6 +17,12 @@ router.put('/realEstate/project/update/:id', realEstateProjectController.updateP
 // DELETE /api/realEstate/project/delete/:id
 router.delete('/realEstate/project/delete/:id', realEstateProjectController.deleteProject);
 
+// POST /api/realEstate/projectType/create - Create new project type/category
+router.post('/realEstate/projectType/create', realEstateProjectController.createProjectType);
+
+// GET /api/realEstate/projectType/getAll - Get all project types/categories
+router.get('/realEstate/projectType/getAll', realEstateProjectController.getAllProjectTypes);
+
 // GET /api/realEstate/amenities/getAll
 router.get('/realEstate/amenities/getAll', realEstateProjectController.getAllAmenities);
 

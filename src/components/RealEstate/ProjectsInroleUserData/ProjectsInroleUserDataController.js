@@ -17,7 +17,7 @@ exports.enrollInProject = async (req, res) => {
             });
         }
 
-        // 1. Verify project exists
+        // Verify project exists
         const project = await RealEstateProjectModel.findById(projectId);
         if (!project) {
             return res.status(404).json({
@@ -26,7 +26,7 @@ exports.enrollInProject = async (req, res) => {
             });
         }
 
-        // 2. Verify user exists
+        // Verify user exists
         const user = await RealEstateUserModel.findById(userId);
         if (!user) {
             return res.status(404).json({
@@ -35,9 +35,8 @@ exports.enrollInProject = async (req, res) => {
             });
         }
 
-        // 3. Find or create the project enrollment document
+        // Find or create enrollment doc for the project
         let enrollmentDoc = await ProjectsInroleUserDataModel.findOne({ projectId });
-
         if (!enrollmentDoc) {
             enrollmentDoc = new ProjectsInroleUserDataModel({
                 projectId,
@@ -47,7 +46,7 @@ exports.enrollInProject = async (req, res) => {
             });
         }
 
-        // 4. Check if user is already enrolled
+        // Already enrolled?
         const alreadyEnrolled = enrollmentDoc.users.some(u => u.userId.toString() === userId.toString());
         if (alreadyEnrolled) {
             return res.status(400).json({
@@ -56,7 +55,7 @@ exports.enrollInProject = async (req, res) => {
             });
         }
 
-        // 5. Check if group is full
+        // Group full?
         if (enrollmentDoc.users.length >= project.groupSize) {
             return res.status(400).json({
                 success: false,
@@ -64,10 +63,9 @@ exports.enrollInProject = async (req, res) => {
             });
         }
 
-        // 6. Add user and update remaining size
+        // Add user and update remaining size
         enrollmentDoc.users.push({ userId, enrolledAt: new Date() });
         enrollmentDoc.remainingGroupSize = project.groupSize - enrollmentDoc.users.length;
-
         await enrollmentDoc.save();
 
         res.status(201).json({
@@ -75,13 +73,12 @@ exports.enrollInProject = async (req, res) => {
             message: 'User enrolled successfully',
             data: {
                 projectId: enrollmentDoc.projectId,
-                userId: userId, // Current user enrolled
+                userId,
                 groupSize: enrollmentDoc.groupSize,
                 remainingGroupSize: enrollmentDoc.remainingGroupSize,
                 totalEnrolled: enrollmentDoc.users.length
             }
         });
-
     } catch (error) {
         console.error('Error in enrollInProject:', error);
         res.status(500).json({
@@ -107,9 +104,7 @@ exports.unenrollFromProject = async (req, res) => {
             });
         }
 
-        // 1. Find the project enrollment document
         const enrollmentDoc = await ProjectsInroleUserDataModel.findOne({ projectId });
-
         if (!enrollmentDoc) {
             return res.status(404).json({
                 success: false,
@@ -117,10 +112,7 @@ exports.unenrollFromProject = async (req, res) => {
             });
         }
 
-        // 2. Check if user is enrolled
-        const initialUserCount = enrollmentDoc.users.length;
         const userIndex = enrollmentDoc.users.findIndex(u => u.userId.toString() === userId.toString());
-
         if (userIndex === -1) {
             return res.status(400).json({
                 success: false,
@@ -128,23 +120,8 @@ exports.unenrollFromProject = async (req, res) => {
             });
         }
 
-        // 3. Remove User
         enrollmentDoc.users.splice(userIndex, 1);
-
-        // 4. Update remaining group size
-        // We get the project details to know the max group size (though we can assume existing logic maintained remaining properly)
-        // Alternatively, since we just removed one, we can increment remainingGroupSize if we trust it, or recalculate.
-        // Recalculating is safer if we know the total group size.
-        // But the model has `remainingGroupSize` and `groupSize`.
-
-        // Let's recalculate to be safe using the document's own groupSize field
-        if (enrollmentDoc.groupSize) {
-            enrollmentDoc.remainingGroupSize = enrollmentDoc.groupSize - enrollmentDoc.users.length;
-        } else {
-            // Fallback if groupSize missing (unlikely if created correctly), just increment
-            enrollmentDoc.remainingGroupSize = (enrollmentDoc.remainingGroupSize || 0) + 1;
-        }
-
+        enrollmentDoc.remainingGroupSize = enrollmentDoc.groupSize - enrollmentDoc.users.length;
         await enrollmentDoc.save();
 
         res.status(200).json({
@@ -152,12 +129,11 @@ exports.unenrollFromProject = async (req, res) => {
             message: 'User unenrolled successfully',
             data: {
                 projectId: enrollmentDoc.projectId,
-                userId: userId,
+                userId,
                 remainingGroupSize: enrollmentDoc.remainingGroupSize,
                 totalEnrolled: enrollmentDoc.users.length
             }
         });
-
     } catch (error) {
         console.error('Error in unenrollFromProject:', error);
         res.status(500).json({
@@ -169,7 +145,7 @@ exports.unenrollFromProject = async (req, res) => {
 };
 
 /**
- * Get all project enrollments (shows all projects with their status)
+ * Get all project enrollments (returns project data + enrollment status)
  * @route GET /api/realEstate/project/enroll/getAll
  */
 exports.getAllEnrollments = async (req, res) => {
@@ -197,6 +173,7 @@ exports.getAllEnrollments = async (req, res) => {
                     projectName: 1,
                     projectLocation: 1,
                     projectPrice: 1,
+                    projectType: 1,
                     projectSize: 1,
                     possessionDate: 1,
                     projectImages: 1,
@@ -224,7 +201,7 @@ exports.getAllEnrollments = async (req, res) => {
                             if: {
                                 $and: [
                                     { $ne: [userId, undefined] },
-                                    { $ne: [userId, ""] },
+                                    { $ne: [userId, ''] },
                                     { $in: [new mongoose.Types.ObjectId(userId), { $ifNull: ['$enrollmentInfo.users.userId', []] }] }
                                 ]
                             },
@@ -234,13 +211,10 @@ exports.getAllEnrollments = async (req, res) => {
                     }
                 }
             },
-            {
-                $sort: { createdAt: -1 }
-            }
+            { $sort: { createdAt: -1 } }
         ];
 
-        // If userId is not provided, we should skip the ObjectId conversion to avoid errors
-        if (!userId || userId === "") {
+        if (!userId || userId === '') {
             pipeline[2].$project.isEnrolled = { $literal: false };
         }
 
@@ -296,3 +270,4 @@ exports.getEnrollmentsByUserId = async (req, res) => {
         });
     }
 };
+

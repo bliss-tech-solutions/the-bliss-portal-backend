@@ -1,4 +1,5 @@
 const RealEstateProjectModel = require('./RealEstateProjectSchema/RealEstateProjectSchema');
+const RealEstateProjectTypeModel = require('./RealEstateProjectSchema/RealEstateProjectTypeSchema');
 
 // Normalize array fields (support both array and JSON string from form data)
 const parseArrayField = (value) => {
@@ -14,6 +15,35 @@ const parseArrayField = (value) => {
     return [];
 };
 
+const DEFAULT_PROJECT_TYPES = ['Plotted Development', 'Villa', 'Apartment'];
+
+async function ensureProjectTypesSeeded() {
+    // seed once per process; safe to call multiple times
+    if (ensureProjectTypesSeeded._done) return;
+    ensureProjectTypesSeeded._done = true;
+    try {
+        await Promise.all(
+            DEFAULT_PROJECT_TYPES.map((name) =>
+                RealEstateProjectTypeModel.updateOne({ name }, { $setOnInsert: { name } }, { upsert: true })
+            )
+        );
+    } catch (e) {
+        // don't block main flows if types collection is unavailable
+        console.warn('ProjectType seed warning:', e.message);
+    }
+}
+
+async function upsertProjectType(name) {
+    const trimmed = typeof name === 'string' ? name.trim() : '';
+    if (!trimmed) return;
+    await ensureProjectTypesSeeded();
+    await RealEstateProjectTypeModel.updateOne(
+        { name: trimmed },
+        { $setOnInsert: { name: trimmed } },
+        { upsert: true }
+    );
+}
+
 const realEstateProjectController = {
     // POST /api/realEstate/project/create
     createProject: async (req, res, next) => {
@@ -22,6 +52,7 @@ const realEstateProjectController = {
                 projectName,
                 projectLocation,
                 projectPrice,
+                projectType,
                 projectSize,
                 possessionDate,
                 projectImages,
@@ -43,10 +74,18 @@ const realEstateProjectController = {
                 });
             }
 
+            // Auto-add new project type to category list (if provided)
+            try {
+                await upsertProjectType(projectType);
+            } catch (e) {
+                console.warn('ProjectType upsert warning:', e.message);
+            }
+
             const newProject = new RealEstateProjectModel({
                 projectName,
                 projectLocation,
                 projectPrice,
+                projectType: projectType ? String(projectType).trim() : undefined,
                 projectSize: projectSize || undefined,
                 possessionDate: possessionDate ? String(possessionDate).trim() : undefined,
                 projectImages: parseArrayField(projectImages),
@@ -67,6 +106,40 @@ const realEstateProjectController = {
                 message: 'Project created successfully',
                 data: savedProject
             });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    // POST /api/realEstate/projectType/create - Add a new project type/category
+    createProjectType: async (req, res, next) => {
+        try {
+            const { name } = req.body || {};
+            const trimmed = typeof name === 'string' ? name.trim() : '';
+            if (!trimmed) {
+                return res.status(400).json({ success: false, message: 'name is required' });
+            }
+
+            await ensureProjectTypesSeeded();
+            await RealEstateProjectTypeModel.updateOne(
+                { name: trimmed },
+                { $setOnInsert: { name: trimmed } },
+                { upsert: true }
+            );
+
+            const all = await RealEstateProjectTypeModel.find().sort({ name: 1 }).select('-__v');
+            res.status(201).json({ success: true, message: 'Project type saved', data: all });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    // GET /api/realEstate/projectType/getAll - Get all project types/categories
+    getAllProjectTypes: async (req, res, next) => {
+        try {
+            await ensureProjectTypesSeeded();
+            const all = await RealEstateProjectTypeModel.find().sort({ name: 1 }).select('-__v');
+            res.status(200).json({ success: true, count: all.length, data: all });
         } catch (error) {
             next(error);
         }
@@ -120,6 +193,15 @@ const realEstateProjectController = {
             if (updates.projectImages !== undefined) updates.projectImages = parseArrayField(updates.projectImages);
             if (updates.floorPlanImages !== undefined) updates.floorPlanImages = parseArrayField(updates.floorPlanImages);
             if (updates.projectSlideHeroImages !== undefined) updates.projectSlideHeroImages = parseArrayField(updates.projectSlideHeroImages);
+
+            if (updates.projectType !== undefined) {
+                updates.projectType = updates.projectType ? String(updates.projectType).trim() : undefined;
+                try {
+                    await upsertProjectType(updates.projectType);
+                } catch (e) {
+                    console.warn('ProjectType upsert warning:', e.message);
+                }
+            }
 
             const updatedProject = await RealEstateProjectModel.findByIdAndUpdate(id, updates, { new: true });
 
