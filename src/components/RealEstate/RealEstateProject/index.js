@@ -23,6 +23,12 @@ router.post('/realEstate/projectType/create', realEstateProjectController.create
 // GET /api/realEstate/projectType/getAll - Get all project types/categories
 router.get('/realEstate/projectType/getAll', realEstateProjectController.getAllProjectTypes);
 
+// POST /api/realEstate/bhk/create - Create new BHK option
+router.post('/realEstate/bhk/create', realEstateProjectController.createBhkOption);
+
+// GET /api/realEstate/bhk/getAll - Get all BHK options
+router.get('/realEstate/bhk/getAll', realEstateProjectController.getAllBhkOptions);
+
 // GET /api/realEstate/amenities/getAll
 router.get('/realEstate/amenities/getAll', realEstateProjectController.getAllAmenities);
 

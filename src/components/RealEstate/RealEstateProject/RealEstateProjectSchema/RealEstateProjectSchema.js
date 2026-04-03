@@ -29,6 +29,11 @@ const realEstateProjectSchema = new Schema({
         required: false,
         trim: true
     },
+    bhk: {
+        type: String,
+        required: false,
+        trim: true
+    },
     projectImages: {
         type: [String],
         default: []
@@ -39,6 +44,16 @@ const realEstateProjectSchema = new Schema({
     },
     projectSlideHeroImages: {
         type: [String],
+        default: []
+    },
+    projectCards: {
+        type: [
+            {
+                title: { type: String, required: true, trim: true },
+                value: { type: String, required: true, trim: true },
+                icon: { type: String, required: true, trim: true }
+            }
+        ],
         default: []
     },
     groupSize: {

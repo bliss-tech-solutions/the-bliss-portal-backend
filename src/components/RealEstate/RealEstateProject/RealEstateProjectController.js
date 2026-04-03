@@ -1,5 +1,6 @@
 const RealEstateProjectModel = require('./RealEstateProjectSchema/RealEstateProjectSchema');
 const RealEstateProjectTypeModel = require('./RealEstateProjectSchema/RealEstateProjectTypeSchema');
+const RealEstateBhkOptionModel = require('./RealEstateProjectSchema/RealEstateBhkOptionSchema');
 
 // Normalize array fields (support both array and JSON string from form data)
 const parseArrayField = (value) => {
@@ -15,7 +16,30 @@ const parseArrayField = (value) => {
     return [];
 };
 
+// Array of { title, value, icon } — supports JSON string from form; accepts Title/Value/Icon keys
+const parseProjectCardsField = (value) => {
+    const raw = parseArrayField(value);
+    if (!Array.isArray(raw)) return [];
+    return raw
+        .map((item) => {
+            if (!item || typeof item !== 'object') return null;
+            const title =
+                item.title ?? item.Title ?? item.TITLE ?? '';
+            const val =
+                item.value ?? item.Value ?? item.VALUE ?? '';
+            const icon =
+                item.icon ?? item.Icon ?? item.ICON ?? '';
+            return {
+                title: String(title).trim(),
+                value: String(val).trim(),
+                icon: String(icon).trim()
+            };
+        })
+        .filter((c) => c && c.title && c.value && c.icon);
+};
+
 const DEFAULT_PROJECT_TYPES = ['Plotted Development', 'Villa', 'Apartment'];
+const DEFAULT_BHK_OPTIONS = ['Studio', '1 BHK', '2 BHK', '3 BHK', '4 BHK', '5 BHK'];
 
 async function ensureProjectTypesSeeded() {
     // seed once per process; safe to call multiple times
@@ -44,6 +68,31 @@ async function upsertProjectType(name) {
     );
 }
 
+async function ensureBhkOptionsSeeded() {
+    if (ensureBhkOptionsSeeded._done) return;
+    ensureBhkOptionsSeeded._done = true;
+    try {
+        await Promise.all(
+            DEFAULT_BHK_OPTIONS.map((name) =>
+                RealEstateBhkOptionModel.updateOne({ name }, { $setOnInsert: { name } }, { upsert: true })
+            )
+        );
+    } catch (e) {
+        console.warn('BHK seed warning:', e.message);
+    }
+}
+
+async function upsertBhkOption(name) {
+    const trimmed = typeof name === 'string' ? name.trim() : '';
+    if (!trimmed) return;
+    await ensureBhkOptionsSeeded();
+    await RealEstateBhkOptionModel.updateOne(
+        { name: trimmed },
+        { $setOnInsert: { name: trimmed } },
+        { upsert: true }
+    );
+}
+
 const realEstateProjectController = {
     // POST /api/realEstate/project/create
     createProject: async (req, res, next) => {
@@ -55,6 +104,7 @@ const realEstateProjectController = {
                 projectType,
                 projectSize,
                 possessionDate,
+                bhk,
                 projectImages,
                 floorPlanImages,
                 projectSlideHeroImages,
@@ -63,7 +113,8 @@ const realEstateProjectController = {
                 tag,
                 latitude,
                 longitude,
-                amenities
+                amenities,
+                projectCards
             } = req.body;
 
             // Validate required fields
@@ -81,6 +132,13 @@ const realEstateProjectController = {
                 console.warn('ProjectType upsert warning:', e.message);
             }
 
+            // Auto-add new BHK option (if provided)
+            try {
+                await upsertBhkOption(bhk);
+            } catch (e) {
+                console.warn('BHK upsert warning:', e.message);
+            }
+
             const newProject = new RealEstateProjectModel({
                 projectName,
                 projectLocation,
@@ -88,9 +146,11 @@ const realEstateProjectController = {
                 projectType: projectType ? String(projectType).trim() : undefined,
                 projectSize: projectSize || undefined,
                 possessionDate: possessionDate ? String(possessionDate).trim() : undefined,
+                bhk: bhk ? String(bhk).trim() : undefined,
                 projectImages: parseArrayField(projectImages),
                 floorPlanImages: parseArrayField(floorPlanImages),
                 projectSlideHeroImages: parseArrayField(projectSlideHeroImages),
+                projectCards: parseProjectCardsField(projectCards),
                 groupSize,
                 projectDescriptionAndDetails,
                 tag,
@@ -106,6 +166,40 @@ const realEstateProjectController = {
                 message: 'Project created successfully',
                 data: savedProject
             });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    // POST /api/realEstate/bhk/create - Add a new BHK option
+    createBhkOption: async (req, res, next) => {
+        try {
+            const { name } = req.body || {};
+            const trimmed = typeof name === 'string' ? name.trim() : '';
+            if (!trimmed) {
+                return res.status(400).json({ success: false, message: 'name is required' });
+            }
+
+            await ensureBhkOptionsSeeded();
+            await RealEstateBhkOptionModel.updateOne(
+                { name: trimmed },
+                { $setOnInsert: { name: trimmed } },
+                { upsert: true }
+            );
+
+            const all = await RealEstateBhkOptionModel.find().sort({ name: 1 }).select('-__v');
+            res.status(201).json({ success: true, message: 'BHK option saved', data: all });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    // GET /api/realEstate/bhk/getAll - Get all BHK options
+    getAllBhkOptions: async (req, res, next) => {
+        try {
+            await ensureBhkOptionsSeeded();
+            const all = await RealEstateBhkOptionModel.find().sort({ name: 1 }).select('-__v');
+            res.status(200).json({ success: true, count: all.length, data: all });
         } catch (error) {
             next(error);
         }
@@ -193,6 +287,7 @@ const realEstateProjectController = {
             if (updates.projectImages !== undefined) updates.projectImages = parseArrayField(updates.projectImages);
             if (updates.floorPlanImages !== undefined) updates.floorPlanImages = parseArrayField(updates.floorPlanImages);
             if (updates.projectSlideHeroImages !== undefined) updates.projectSlideHeroImages = parseArrayField(updates.projectSlideHeroImages);
+            if (updates.projectCards !== undefined) updates.projectCards = parseProjectCardsField(updates.projectCards);
 
             if (updates.projectType !== undefined) {
                 updates.projectType = updates.projectType ? String(updates.projectType).trim() : undefined;
@@ -200,6 +295,15 @@ const realEstateProjectController = {
                     await upsertProjectType(updates.projectType);
                 } catch (e) {
                     console.warn('ProjectType upsert warning:', e.message);
+                }
+            }
+
+            if (updates.bhk !== undefined) {
+                updates.bhk = updates.bhk ? String(updates.bhk).trim() : undefined;
+                try {
+                    await upsertBhkOption(updates.bhk);
+                } catch (e) {
+                    console.warn('BHK upsert warning:', e.message);
                 }
             }
 
