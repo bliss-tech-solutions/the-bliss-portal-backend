@@ -172,10 +172,7 @@ exports.getAllEnrollments = async (req, res) => {
                 $project: {
                     projectName: 1,
                     projectLocation: 1,
-                    projectPrice: 1,
                     projectType: 1,
-                    projectSize: 1,
-                    possessionDate: 1,
                     bhk: 1,
                     projectImages: 1,
                     floorPlanImages: { $ifNull: ['$floorPlanImages', []] },
@@ -184,7 +181,6 @@ exports.getAllEnrollments = async (req, res) => {
                     groupSize: 1,
                     lastDayToJoin: 1,
                     projectDescriptionAndDetails: 1,
-                    tag: 1,
                     latitude: 1,
                     longitude: 1,
                     amenities: { $ifNull: ['$amenities', []] },

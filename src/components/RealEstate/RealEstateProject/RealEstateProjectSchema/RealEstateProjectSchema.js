@@ -10,21 +10,7 @@ const realEstateProjectSchema = new Schema({
         type: String,
         required: true
     },
-    projectPrice: {
-        type: String,
-        required: true
-    },
     projectType: {
-        type: String,
-        required: false,
-        trim: true
-    },
-    projectSize: {
-        type: String,
-        required: false,
-        trim: true
-    },
-    possessionDate: {
         type: String,
         required: false,
         trim: true
@@ -62,11 +48,6 @@ const realEstateProjectSchema = new Schema({
     },
     projectDescriptionAndDetails: {
         type: String,
-        required: true
-    },
-    tag: {
-        type: String,
-        enum: ['Exclusive deal', 'Limited time offer'],
         required: true
     },
     latitude: {

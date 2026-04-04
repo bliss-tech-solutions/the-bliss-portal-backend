@@ -100,17 +100,13 @@ const realEstateProjectController = {
             const {
                 projectName,
                 projectLocation,
-                projectPrice,
                 projectType,
-                projectSize,
-                possessionDate,
                 bhk,
                 projectImages,
                 floorPlanImages,
                 projectSlideHeroImages,
                 groupSize,
                 projectDescriptionAndDetails,
-                tag,
                 latitude,
                 longitude,
                 amenities,
@@ -118,10 +114,10 @@ const realEstateProjectController = {
             } = req.body;
 
             // Validate required fields
-            if (!projectName || !projectLocation || !projectPrice || !groupSize || !projectDescriptionAndDetails || !tag) {
+            if (!projectName || !projectLocation || !groupSize || !projectDescriptionAndDetails) {
                 return res.status(400).json({
                     success: false,
-                    message: 'All fields are required'
+                    message: 'projectName, projectLocation, groupSize, and projectDescriptionAndDetails are required'
                 });
             }
 
@@ -142,10 +138,7 @@ const realEstateProjectController = {
             const newProject = new RealEstateProjectModel({
                 projectName,
                 projectLocation,
-                projectPrice,
                 projectType: projectType ? String(projectType).trim() : undefined,
-                projectSize: projectSize || undefined,
-                possessionDate: possessionDate ? String(possessionDate).trim() : undefined,
                 bhk: bhk ? String(bhk).trim() : undefined,
                 projectImages: parseArrayField(projectImages),
                 floorPlanImages: parseArrayField(floorPlanImages),
@@ -153,7 +146,6 @@ const realEstateProjectController = {
                 projectCards: parseProjectCardsField(projectCards),
                 groupSize,
                 projectDescriptionAndDetails,
-                tag,
                 latitude,
                 longitude,
                 amenities
@@ -283,6 +275,11 @@ const realEstateProjectController = {
             const { id } = req.params;
             const updates = { ...req.body };
 
+            const removedProjectFields = ['projectPrice', 'projectSize', 'possessionDate', 'tag'];
+            removedProjectFields.forEach((k) => {
+                delete updates[k];
+            });
+
             // Normalize array fields so they save correctly (array or JSON string from form)
             if (updates.projectImages !== undefined) updates.projectImages = parseArrayField(updates.projectImages);
             if (updates.floorPlanImages !== undefined) updates.floorPlanImages = parseArrayField(updates.floorPlanImages);
@@ -307,7 +304,14 @@ const realEstateProjectController = {
                 }
             }
 
-            const updatedProject = await RealEstateProjectModel.findByIdAndUpdate(id, updates, { new: true });
+            const mongoUpdate = {
+                $unset: Object.fromEntries(removedProjectFields.map((k) => [k, '']))
+            };
+            if (Object.keys(updates).length > 0) {
+                mongoUpdate.$set = updates;
+            }
+
+            const updatedProject = await RealEstateProjectModel.findByIdAndUpdate(id, mongoUpdate, { new: true });
 
             if (!updatedProject) {
                 return res.status(404).json({

@@ -11,10 +11,8 @@ async function testRealEstateAmenities() {
         const newProject = {
             projectName: "Luxury Villas with Amenities",
             projectLocation: "Palm Jumeirah",
-            projectPrice: "5000000",
             groupSize: 5,
             projectDescriptionAndDetails: "A luxurious villa with top-notch amenities.",
-            tag: "Exclusive deal",
             amenities: [
                 { name: "Swimming Pool", icon: "pool-icon-url" },
                 { name: "Gym", icon: "gym-icon-url" }
