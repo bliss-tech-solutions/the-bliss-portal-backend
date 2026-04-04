@@ -12,7 +12,6 @@ async function testRealEstateAmenities() {
             projectName: "Luxury Villas with Amenities",
             projectLocation: "Palm Jumeirah",
             groupSize: 5,
-            projectDescriptionAndDetails: "A luxurious villa with top-notch amenities.",
             amenities: [
                 { name: "Swimming Pool", icon: "pool-icon-url" },
                 { name: "Gym", icon: "gym-icon-url" }

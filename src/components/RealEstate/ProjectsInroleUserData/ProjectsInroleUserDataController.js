@@ -180,7 +180,6 @@ exports.getAllEnrollments = async (req, res) => {
                     projectCards: { $ifNull: ['$projectCards', []] },
                     groupSize: 1,
                     lastDayToJoin: 1,
-                    projectDescriptionAndDetails: 1,
                     latitude: 1,
                     longitude: 1,
                     amenities: { $ifNull: ['$amenities', []] },

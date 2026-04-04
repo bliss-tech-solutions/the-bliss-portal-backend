@@ -46,10 +46,6 @@ const realEstateProjectSchema = new Schema({
         type: Number,
         required: true
     },
-    projectDescriptionAndDetails: {
-        type: String,
-        required: true
-    },
     latitude: {
         type: String,
         required: false

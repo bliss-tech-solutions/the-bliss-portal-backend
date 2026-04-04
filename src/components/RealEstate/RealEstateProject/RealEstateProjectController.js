@@ -106,7 +106,6 @@ const realEstateProjectController = {
                 floorPlanImages,
                 projectSlideHeroImages,
                 groupSize,
-                projectDescriptionAndDetails,
                 latitude,
                 longitude,
                 amenities,
@@ -114,10 +113,10 @@ const realEstateProjectController = {
             } = req.body;
 
             // Validate required fields
-            if (!projectName || !projectLocation || !groupSize || !projectDescriptionAndDetails) {
+            if (!projectName || !projectLocation || !groupSize) {
                 return res.status(400).json({
                     success: false,
-                    message: 'projectName, projectLocation, groupSize, and projectDescriptionAndDetails are required'
+                    message: 'projectName, projectLocation, and groupSize are required'
                 });
             }
 
@@ -145,7 +144,6 @@ const realEstateProjectController = {
                 projectSlideHeroImages: parseArrayField(projectSlideHeroImages),
                 projectCards: parseProjectCardsField(projectCards),
                 groupSize,
-                projectDescriptionAndDetails,
                 latitude,
                 longitude,
                 amenities
@@ -275,7 +273,13 @@ const realEstateProjectController = {
             const { id } = req.params;
             const updates = { ...req.body };
 
-            const removedProjectFields = ['projectPrice', 'projectSize', 'possessionDate', 'tag'];
+            const removedProjectFields = [
+                'projectPrice',
+                'projectSize',
+                'possessionDate',
+                'tag',
+                'projectDescriptionAndDetails'
+            ];
             removedProjectFields.forEach((k) => {
                 delete updates[k];
             });
